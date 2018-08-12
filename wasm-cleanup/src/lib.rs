@@ -19,6 +19,40 @@ impl ImportPair {
     }
 }
 
+#[derive(Default)]
+pub struct Translations {
+   translations: HashMap<ImportPair, ImportPair>
+}
+
+impl Translations {
+    fn ewasm() -> Translations {
+        let trans: HashMap<ImportPair, ImportPair> =
+            [
+                (ImportPair::new("env", "ethereum_return"), ImportPair::new("ethereum", "finish")),
+                (ImportPair::new("env", "ethereum_getCallDataSize"), ImportPair::new("ethereum", "getCallDataSize")),
+                (ImportPair::new("env", "ethereum_callDataSize"), ImportPair::new("ethereum", "getCallDataSize")),
+                (ImportPair::new("env", "ethereum_callDataCopy"), ImportPair::new("ethereum", "callDataCopy"))
+            ].iter().cloned().collect();
+        Translations { translations: trans }
+    }
+
+    fn insert(&mut self, from_module: &str, from_field: &str, to_module: &str, to_field: &str) {
+        self.translations.insert(ImportPair::new(from_module, from_field), ImportPair::new(to_module, to_field));
+    }
+
+//    fn get_simple(&self, module: &str, field: &str) -> Option<&str, &str> {
+//        if let Some(translation) = self.translations.get(&ImportPair::new(module, field)) {
+//            Some(translation.module.clone(), translation.field.clone())
+//        } else {
+//            None
+//        }
+//    }
+
+    fn get(&self, pair: &ImportPair) -> Option<&ImportPair> {
+        self.translations.get(&pair)
+    }
+}
+
 // FIXME: There is no `Module::import_section_mut()`
 fn import_section_mut(module: &mut Module) -> Option<&mut ImportSection> {
     for section in module.sections_mut() {
@@ -27,7 +61,7 @@ fn import_section_mut(module: &mut Module) -> Option<&mut ImportSection> {
     None
 }
 
-pub fn rename_imports(module: &mut Module, translations: HashMap<ImportPair, ImportPair>) {
+pub fn rename_imports(module: &mut Module, translations: Translations) {
     if let Some(section) = import_section_mut(module) {
         for entry in section.entries_mut().iter_mut() {
             if let Some(replacement) = translations.get(&ImportPair::new(entry.module(), entry.field())) {
@@ -68,19 +102,12 @@ pub fn cleanup() {
 mod tests {
     use parity_wasm;
     use std::collections::HashMap;
-    use super::ImportPair;
+    use super::{ImportPair,Translations};
 
     #[test]
     fn smoke_test() {
         let mut module = parity_wasm::deserialize_file("src/test.wasm").expect("failed");
-        let trans: HashMap<ImportPair, ImportPair> =
-            [
-                (ImportPair::new("env", "ethereum_return"), ImportPair::new("ethereum", "finish")),
-                (ImportPair::new("env", "ethereum_getCallDataSize"), ImportPair::new("ethereum", "getCallDataSize")),
-                (ImportPair::new("env", "ethereum_callDataSize"), ImportPair::new("ethereum", "getCallDataSize")),
-                (ImportPair::new("env", "ethereum_callDataCopy"), ImportPair::new("ethereum", "callDataCopy"))
-            ].iter().cloned().collect();
-        ::rename_imports(&mut module, trans);
+        ::rename_imports(&mut module, Translations::ewasm());
         parity_wasm::serialize_to_file("src/test-out.wasm", module).expect("failed");
     }
 }
