@@ -2,5 +2,6 @@
 
 members = [
     "chisel",
-    "libchisel"
+    "libchisel",
+    "wasm-deployer"
 ]
