@@ -4,6 +4,7 @@ extern crate rustc_hex;
 
 use std::env;
 
+use parity_wasm::builder;
 use parity_wasm::elements::*;
 
 use byteorder::{LittleEndian, WriteBytesExt};
@@ -83,7 +84,59 @@ pub fn create_custom_deployer(payload: &[u8]) -> Module {
 
 /// Returns a module which contains the deployable bytecode as a data segment.
 pub fn create_memory_deployer(payload: &[u8]) -> Module {
-    panic!()
+    // Opcodes calling finish(0, payload_len)
+    let opcodes = vec![
+        parity_wasm::elements::Opcode::I32Const(0),
+        parity_wasm::elements::Opcode::I32Const(payload.len() as i32),
+        parity_wasm::elements::Opcode::Call(0),
+        parity_wasm::elements::Opcode::End,
+    ];
+
+    let module = builder::module()
+        // Create a func/type for the ethereum::finish
+        .function()
+            .signature()
+              .param().i32()
+              .param().i32()
+              .build()
+            .build()
+        .import()
+            .module("ethereum")
+            .field("finish")
+            .external()
+              .func(0)
+            .build()
+        // Create the "main fucntion"
+        .function()
+            // Empty signature `(func)`
+            .signature().build()
+            .body()
+              .with_opcodes(parity_wasm::elements::Opcodes::new(opcodes))
+              .build()
+            .build()
+        // Export the "main" function.
+        .export()
+            .field("main")
+            .internal()
+              .func(1)
+            .build()
+        // Add default memory section
+        .memory()
+            .build()
+        // Export memory
+        .export()
+            .field("memory")
+            .internal()
+              .memory(0)
+            .build()
+        // Add data section with payload
+        .data()
+            .offset(parity_wasm::elements::Opcode::I32Const(0))
+            .value(payload.to_vec())
+            .build()
+        .build();
+
+    module
 }
 
 pub fn main() {
@@ -98,13 +151,14 @@ pub fn main() {
     f.read_to_end(&mut payload).expect("Failed to read file");
 
     let module = create_custom_deployer(&payload);
+    //    let module = create_memory_deployer(&payload);
 
     parity_wasm::serialize_to_file(&args[2], module).expect("Failed to write module");
 }
 
 #[cfg(test)]
 mod tests {
-    use super::create_custom_deployer;
+    use super::{create_custom_deployer, create_memory_deployer};
     use parity_wasm;
     use rustc_hex::FromHex;
 
@@ -142,6 +196,37 @@ mod tests {
             020b
 
             0015086465706c6f79657280ff007faa55001108000000
+        ",
+        ).unwrap();
+        let output = parity_wasm::serialize(module).expect("Failed to serialize");
+        assert_eq!(output, expected);
+    }
+
+    #[test]
+    fn memory_zero_payload() {
+        let payload = vec![];
+        let module = create_memory_deployer(&payload);
+        let expected = FromHex::from_hex(
+            "
+            0061736d0100000001090260027f7f0060000002130108657468657265756d0666
+            696e697368000003030200010503010001071102046d61696e0001066d656d6f72
+            7902000a0d0202000b08004100410010000b0b06010041000b00
+        ",
+        ).unwrap();
+        let output = parity_wasm::serialize(module).expect("Failed to serialize");
+        assert_eq!(output, expected);
+    }
+
+    #[test]
+    fn memory_nonzero_payload() {
+        let payload = FromHex::from_hex("80ff007faa550011").unwrap();
+        let module = create_memory_deployer(&payload);
+        let expected = FromHex::from_hex(
+            "
+            0061736d0100000001090260027f7f0060000002130108657468657265756d0666
+            696e697368000003030200010503010001071102046d61696e0001066d656d6f72
+            7902000a0d0202000b08004100410810000b0b0e010041000b0880ff007faa5500
+            11
         ",
         ).unwrap();
         let output = parity_wasm::serialize(module).expect("Failed to serialize");
