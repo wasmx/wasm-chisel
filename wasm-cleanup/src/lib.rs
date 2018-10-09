@@ -1,4 +1,5 @@
 extern crate parity_wasm;
+extern crate rustc_hex;
 #[macro_use]
 extern crate log;
 
@@ -121,11 +122,21 @@ mod tests {
     use parity_wasm;
     use std::collections::HashMap;
     use super::{ImportPair,Translations};
+    use rustc_hex::FromHex;
 
     #[test]
     fn smoke_test() {
-        let mut module = parity_wasm::deserialize_file("src/test.wasm").expect("failed");
+        let input = FromHex::from_hex("
+            0061736d0100000001050160017e0002170103656e760f65746865726575
+            6d5f7573654761730000
+        ").unwrap();
+        let mut module = parity_wasm::deserialize_buffer(&input).expect("failed");
         ::rename_imports(&mut module, Translations::ewasm());
-        parity_wasm::serialize_to_file("src/test-out.wasm", module).expect("failed");
+        let output = parity_wasm::serialize(module).expect("failed");
+        let expected = FromHex::from_hex("
+            0061736d0100000001050160017e0002130108657468657265756d067573
+            654761730000
+        ").unwrap();
+        assert_eq!(output, expected);
     }
 }

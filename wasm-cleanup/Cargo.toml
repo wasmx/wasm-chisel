@@ -14,3 +14,4 @@ publish = false
 parity-wasm = "0.21"
 log = "0.3"
 rustc-demangle = "0.1.5"
+rustc-hex = "1.0"
