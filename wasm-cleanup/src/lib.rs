@@ -1,10 +1,7 @@
 extern crate parity_wasm;
 extern crate rustc_hex;
-#[macro_use]
-extern crate log;
 
 use std::collections::HashMap;
-use std::env;
 
 use parity_wasm::elements::*;
 
@@ -88,33 +85,6 @@ pub fn rename_imports(module: &mut Module, translations: Translations) {
             }
         }
     }
-}
-
-pub fn cleanup() {
-    let args = env::args().collect::<Vec<_>>();
-    if args.len() != 3 {
-        println!("Usage: {} in.wasm out.wasm", args[0]);
-        return;
-    }
-
-    let module = parity_wasm::deserialize_file(&args[1]).expect("Failed to load module");
-
-    if let Some(section) = module.function_section() {
-        for (i, entry) in section.entries().iter().enumerate() {
-            debug!("function {:?}", i);
-        }
-    }
-
-    if let Some(section) = module.code_section() {
-        for (i, entry) in section.bodies().iter().enumerate() {
-            for opcode in entry.code().elements() {
-              debug!("opcode {:?}", opcode)
-              // iterate opcodes..
-            }
-        }
-    }
-
-    parity_wasm::serialize_to_file(&args[2], module).expect("Failed to write module");
 }
 
 #[cfg(test)]
