@@ -1,9 +1,8 @@
-extern crate parity_wasm;
-extern crate rustc_hex;
-
 use std::collections::HashMap;
 
 use parity_wasm::elements::*;
+
+use super::*;
 
 #[derive(Hash, Eq, PartialEq, Debug, Clone)]
 pub struct ImportPair {
@@ -69,6 +68,17 @@ impl Translations {
     }
 }
 
+pub struct RemapImports {
+   translations: Translations
+}
+
+impl ModuleTranslator for RemapImports {
+    fn translate(self, module: &mut Module) -> Result<(), String> {
+        rename_imports(module, self.translations);
+        Ok(())
+    }
+}
+
 // FIXME: There is no `Module::import_section_mut()`
 fn import_section_mut(module: &mut Module) -> Option<&mut ImportSection> {
     for section in module.sections_mut() {
@@ -91,7 +101,7 @@ pub fn rename_imports(module: &mut Module, translations: Translations) {
 mod tests {
     use parity_wasm;
     use std::collections::HashMap;
-    use super::{ImportPair,Translations};
+    use super::{ImportPair,Translations,rename_imports};
     use rustc_hex::FromHex;
 
     #[test]
@@ -101,7 +111,7 @@ mod tests {
             6d5f7573654761730000
         ").unwrap();
         let mut module = parity_wasm::deserialize_buffer(&input).expect("failed");
-        ::rename_imports(&mut module, Translations::ewasm());
+        rename_imports(&mut module, Translations::ewasm());
         let output = parity_wasm::serialize(module).expect("failed");
         let expected = FromHex::from_hex("
             0061736d0100000001050160017e0002130108657468657265756d067573

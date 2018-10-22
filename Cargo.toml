@@ -1,6 +1,5 @@
 [workspace]
 
 members = [
-    "libchisel",
-    "wasm-cleanup"
+    "libchisel"
 ]

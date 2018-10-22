@@ -1,4 +1,7 @@
 extern crate parity_wasm;
+extern crate rustc_hex;
+
+pub mod remapimports;
 
 use parity_wasm::elements::*;
 
