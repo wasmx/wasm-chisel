@@ -10,7 +10,7 @@ pub trait ModuleCreator {
 }
 
 pub trait ModuleTranslator {
-    fn translate(self, module: &mut Module) -> Result<(), String>;
+    fn translate(self, module: &mut Module) -> Result<bool, String>;
 }
 
 pub trait ModuleValidator {
@@ -30,8 +30,8 @@ mod tests {
     }
 
     impl ModuleTranslator for SampleModule {
-        fn translate(self, module: &mut Module) -> Result<(), String> {
-            Ok(())
+        fn translate(self, module: &mut Module) -> Result<bool, String> {
+            Ok((true))
         }
     }
 

@@ -149,9 +149,8 @@ pub struct RemapImports {
 }
 
 impl ModuleTranslator for RemapImports {
-    fn translate(self, module: &mut Module) -> Result<(), String> {
-        rename_imports(module, self.translations);
-        Ok(())
+    fn translate(self, module: &mut Module) -> Result<bool, String> {
+        Ok(rename_imports(module, self.translations))
     }
 }
 
@@ -165,12 +164,14 @@ fn import_section_mut(module: &mut Module) -> Option<&mut ImportSection> {
     None
 }
 
-pub fn rename_imports(module: &mut Module, translations: Translations) {
+pub fn rename_imports(module: &mut Module, translations: Translations) -> bool {
+    let mut ret = false;
     if let Some(section) = import_section_mut(module) {
         for entry in section.entries_mut().iter_mut() {
             if let Some(replacement) =
                 translations.get(&ImportPair::new(entry.module(), entry.field()))
             {
+                ret = true;
                 *entry = ImportEntry::new(
                     replacement.module.clone(),
                     replacement.field.clone(),
@@ -179,6 +180,7 @@ pub fn rename_imports(module: &mut Module, translations: Translations) {
             }
         }
     }
+    ret
 }
 
 #[cfg(test)]
@@ -197,7 +199,7 @@ mod tests {
         ",
         ).unwrap();
         let mut module = parity_wasm::deserialize_buffer(&input).expect("failed");
-        rename_imports(&mut module, Translations::ewasm());
+        let did_change = rename_imports(&mut module, Translations::ewasm());
         let output = parity_wasm::serialize(module).expect("failed");
         let expected = FromHex::from_hex(
             "
@@ -206,5 +208,6 @@ mod tests {
         ",
         ).unwrap();
         assert_eq!(output, expected);
+        assert!(did_change);
     }
 }
