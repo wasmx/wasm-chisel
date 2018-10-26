@@ -3,6 +3,8 @@ extern crate rustc_hex;
 
 pub mod remapimports;
 
+pub mod trimexports;
+
 use parity_wasm::elements::*;
 
 pub trait ModuleCreator {
