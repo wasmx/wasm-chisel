@@ -19,16 +19,6 @@ fn cmp_internal_variant(a: &Internal, b: &Internal) -> bool {
     std::mem::discriminant(a) == std::mem::discriminant(b)
 }
 
-// FIXME: Use the real implementation once the parity-wasm version is bumped
-fn export_section_mut(module: &mut Module) -> Option<&mut ExportSection> {
-    for section in module.sections_mut() {
-        if let &mut Section::Export(ref mut export_section) = section {
-            return Some(export_section);
-        }
-    }
-    None
-}
-
 impl ExportWhitelist {
     /// Constructs an empty whitelist. Mostly useless.
     fn new() -> Self {
@@ -93,7 +83,7 @@ impl TrimExports {
     /// Iterates over the export section, if there is one, and removes
     /// unnecessary entries.
     fn trim_exports(&mut self, module: &mut Module) -> bool {
-        if let Some(section) = export_section_mut(module) {
+        if let Some(section) = module.export_section_mut() {
             let new_section = ExportSection::with_entries(
                 section
                     .entries()
