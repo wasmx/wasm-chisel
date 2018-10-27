@@ -1,9 +1,9 @@
 extern crate parity_wasm;
 extern crate rustc_hex;
 
-pub mod remapimports;
-
+pub mod checkfuncexport;
 pub mod checkstartfunc;
+pub mod remapimports;
 pub mod trimexports;
 
 use parity_wasm::elements::*;
