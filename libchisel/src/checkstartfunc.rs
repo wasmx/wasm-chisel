@@ -2,12 +2,12 @@ use super::ModuleValidator;
 use parity_wasm::elements::Module;
 
 /// Struct on which ModuleValidator is implemented.
-struct CheckStartFunc {
+pub struct CheckStartFunc {
     start_required: bool,
 }
 
 impl CheckStartFunc {
-    fn new(is_start_required: bool) -> Self {
+    pub fn new(is_start_required: bool) -> Self {
         CheckStartFunc {
             start_required: is_start_required,
         }
