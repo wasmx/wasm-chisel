@@ -148,6 +148,14 @@ pub struct RemapImports {
     translations: Translations,
 }
 
+impl RemapImports {
+    pub fn new() -> Self {
+        RemapImports {
+            translations: Translations::ewasm(),
+        }
+    }
+}
+
 impl ModuleTranslator for RemapImports {
     fn translate(self, module: &mut Module) -> Result<bool, String> {
         Ok(rename_imports(module, self.translations))
