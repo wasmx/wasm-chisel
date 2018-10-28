@@ -1,0 +1,11 @@
+[package]
+name = "chisel"
+version = "0.1.0"
+authors = ["Alex Beregszaszi <alex@rtfs.hu>"]
+license = "Apache-2.0"
+repository = "https://github.com/wasmx/wasm-chisel"
+homepage = "https://github.com/wasmx/wasm-chisel"
+
+[dependencies]
+libchisel = { path = "../libchisel" }
+parity-wasm = "0.21"
