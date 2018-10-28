@@ -1,0 +1,87 @@
+use super::ModuleValidator;
+use parity_wasm::elements::Module;
+
+/// Struct on which ModuleValidator is implemented.
+struct CheckStartFunc {
+    start_required: bool,
+}
+
+impl CheckStartFunc {
+    fn new(is_start_required: bool) -> Self {
+        CheckStartFunc {
+            start_required: is_start_required,
+        }
+    }
+}
+
+impl ModuleValidator for CheckStartFunc {
+    fn validate(self, module: &Module) -> Result<bool, String> {
+        Ok(module.start_section().is_some() == self.start_required)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use parity_wasm::elements::deserialize_buffer;
+
+    #[test]
+    fn start_required_good() {
+        let wasm: Vec<u8> = vec![
+            0x00, 0x61, 0x73, 0x6d, 0x01, 0x00, 0x00, 0x00, 0x01, 0x04, 0x01, 0x60, 0x00, 0x00,
+            0x03, 0x02, 0x01, 0x00, 0x07, 0x08, 0x01, 0x04, 0x6d, 0x61, 0x69, 0x6e, 0x00, 0x00,
+            0x08, 0x01, 0x00, 0x0a, 0x04, 0x01, 0x02, 0x00, 0x0b,
+        ];
+
+        let module = deserialize_buffer::<Module>(&wasm).unwrap();
+        let checker = CheckStartFunc::new(true);
+
+        let result = checker.validate(&module).unwrap();
+        assert_eq!(true, result);
+    }
+
+    #[test]
+    fn start_required_bad() {
+        let wasm: Vec<u8> = vec![
+            0x00, 0x61, 0x73, 0x6d, 0x01, 0x00, 0x00, 0x00, 0x01, 0x04, 0x01, 0x60, 0x00, 0x00,
+            0x03, 0x02, 0x01, 0x00, 0x07, 0x08, 0x01, 0x04, 0x6d, 0x61, 0x69, 0x6e, 0x00, 0x00,
+            0x08, 0x01, 0x00, 0x0a, 0x04, 0x01, 0x02, 0x00, 0x0b,
+        ];
+
+        let module = deserialize_buffer::<Module>(&wasm).unwrap();
+        let checker = CheckStartFunc::new(false);
+
+        let result = checker.validate(&module).unwrap();
+        assert_eq!(false, result);
+    }
+
+    #[test]
+    fn start_not_required_good() {
+        let wasm: Vec<u8> = vec![
+            0x00, 0x61, 0x73, 0x6d, 0x01, 0x00, 0x00, 0x00, 0x01, 0x04, 0x01, 0x60, 0x00, 0x00,
+            0x03, 0x02, 0x01, 0x00, 0x07, 0x08, 0x01, 0x04, 0x6d, 0x61, 0x69, 0x6e, 0x00, 0x00,
+            0x0a, 0x04, 0x01, 0x02, 0x00, 0x0b,
+        ];
+
+        let module = deserialize_buffer::<Module>(&wasm).unwrap();
+        let checker = CheckStartFunc::new(false);
+
+        let result = checker.validate(&module).unwrap();
+        assert_eq!(true, result);
+    }
+
+    #[test]
+    fn start_not_required_bad() {
+        let wasm: Vec<u8> = vec![
+            0x00, 0x61, 0x73, 0x6d, 0x01, 0x00, 0x00, 0x00, 0x01, 0x04, 0x01, 0x60, 0x00, 0x00,
+            0x03, 0x02, 0x01, 0x00, 0x07, 0x08, 0x01, 0x04, 0x6d, 0x61, 0x69, 0x6e, 0x00, 0x00,
+            0x0a, 0x04, 0x01, 0x02, 0x00, 0x0b,
+        ];
+
+        let module = deserialize_buffer::<Module>(&wasm).unwrap();
+        let checker = CheckStartFunc::new(true);
+
+        let result = checker.validate(&module).unwrap();
+        assert_eq!(false, result);
+    }
+}
