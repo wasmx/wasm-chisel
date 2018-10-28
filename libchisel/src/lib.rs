@@ -6,6 +6,8 @@ pub mod remapimports;
 pub mod checkstartfunc;
 pub mod trimexports;
 
+pub mod checkmemexport;
+
 use parity_wasm::elements::*;
 
 pub trait ModuleCreator {
