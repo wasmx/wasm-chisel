@@ -10,7 +10,7 @@ struct ExportWhitelist {
 
 /// Wrapper struct implementing ModuleTranslator.
 /// Removes any exports that are noncompliant with a specified interface.
-struct TrimExports {
+pub struct TrimExports {
     whitelist: ExportWhitelist,
 }
 
@@ -78,7 +78,7 @@ impl TrimExports {
 
     /// Takes a given preset string and constructs a context with the
     /// corresponding whitelist.
-    fn with_preset(preset: &str) -> Self {
+    pub fn with_preset(preset: &str) -> Self {
         match preset {
             "ewasm" => TrimExports {
                 whitelist: ExportWhitelist::ewasm(),
