@@ -3,6 +3,7 @@ extern crate rustc_hex;
 
 pub mod remapimports;
 
+pub mod checkstartfunc;
 pub mod trimexports;
 
 use parity_wasm::elements::*;
