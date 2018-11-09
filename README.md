@@ -20,14 +20,19 @@ This comes with some presets:
 - `ewasm`: keeps `main` and exported memory
 - `pwasm`: keeps `_call`
 
-### verifyimports (WIP)
+### verifyimports
 
-TBA
+Verifies that the module's imports are compliant with the provided import interface.
+Can be set to require the existence of the entire import set, or just the validity of existing imports with matching identifiers.
+Can be set to allow or prohibit unlisted additional imports.
+
+The following presets are provided:
+- `ewasm`: Verifies the ewasm [EEI](https://github.com/ewasm/design/blob/master/eth_interface.md). Disallows unlisted imports, and does not require that the entire interface be imported.
 
 ### verifyexports
 
-Validates that the module's exports are compliant with the given export interface.
-Can be set to allow or prohibit additional exports that are not listed.
+Verifies that the module's exports are compliant with the provided export interface.
+Can be set to allow or prohibit unlisted additional exports.
 
 The following presets are provided:
 - `ewasm`: Verifies that the `main` function and `memory` is exported. Disallows any unlisted exports.
