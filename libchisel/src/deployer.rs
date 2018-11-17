@@ -1,17 +1,9 @@
-extern crate byteorder;
-extern crate parity_wasm;
-extern crate rustc_hex;
-
-use std::env;
-
 use parity_wasm::builder;
-use parity_wasm::elements::*;
+
+use super::*;
 
 use byteorder::{LittleEndian, WriteBytesExt};
 use rustc_hex::FromHex;
-
-use std::fs::File;
-use std::io::Read;
 
 /*
 (module
@@ -83,6 +75,7 @@ pub fn create_custom_deployer(payload: &[u8]) -> Module {
 }
 
 /// Returns a module which contains the deployable bytecode as a data segment.
+#[cfg_attr(rustfmt, rustfmt_skip)]
 pub fn create_memory_deployer(payload: &[u8]) -> Module {
     // Opcodes calling finish(0, payload_len)
     let opcodes = vec![
@@ -137,23 +130,6 @@ pub fn create_memory_deployer(payload: &[u8]) -> Module {
         .build();
 
     module
-}
-
-pub fn main() {
-    let args = env::args().collect::<Vec<_>>();
-    if args.len() != 3 {
-        println!("Usage: {} in.wasm out.wasm", args[0]);
-        return;
-    }
-
-    let mut f = File::open(&args[1]).expect("Failed to open file");
-    let mut payload = Vec::new();
-    f.read_to_end(&mut payload).expect("Failed to read file");
-
-    let module = create_custom_deployer(&payload);
-    //    let module = create_memory_deployer(&payload);
-
-    parity_wasm::serialize_to_file(&args[2], module).expect("Failed to write module");
 }
 
 #[cfg(test)]

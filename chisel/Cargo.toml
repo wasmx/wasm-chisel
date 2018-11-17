@@ -9,4 +9,4 @@ homepage = "https://github.com/wasmx/wasm-chisel"
 
 [dependencies]
 libchisel = { path = "../libchisel" }
-parity-wasm = "0.21"
+parity-wasm = { git = "https://github.com/axic/parity-wasm", branch = "custom-section" }
