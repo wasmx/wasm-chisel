@@ -21,7 +21,7 @@ pub fn main() {
         .translate(&mut module)
         .expect("Failed to trim exports");
 
-    let remapimports = remapimports::RemapImports::new();
+    let remapimports = remapimports::RemapImports::ewasm();
     remapimports
         .translate(&mut module)
         .expect("Failed to remap imports");

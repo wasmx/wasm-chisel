@@ -149,7 +149,7 @@ pub struct RemapImports {
 }
 
 impl RemapImports {
-    pub fn new() -> Self {
+    pub fn ewasm() -> Self {
         RemapImports {
             translations: Translations::ewasm(),
         }
@@ -197,7 +197,7 @@ mod tests {
         ",
         ).unwrap();
         let mut module = parity_wasm::deserialize_buffer(&input).expect("failed");
-        let did_change = RemapImports::new().translate(&mut module).unwrap();
+        let did_change = RemapImports::ewasm().translate(&mut module).unwrap();
         let output = parity_wasm::serialize(module).expect("failed");
         let expected = FromHex::from_hex(
             "
