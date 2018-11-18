@@ -163,8 +163,8 @@ impl ModuleTranslator for RemapImports {
 }
 
 pub fn rename_imports(module: &mut Module, translations: Translations) -> bool {
-     let mut ret = false;
-     if let Some(section) = module.import_section_mut() {
+    let mut ret = false;
+    if let Some(section) = module.import_section_mut() {
         for entry in section.entries_mut().iter_mut() {
             if let Some(replacement) =
                 translations.get(&ImportPair::new(entry.module(), entry.field()))

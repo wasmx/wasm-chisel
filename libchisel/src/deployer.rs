@@ -77,12 +77,12 @@ pub fn create_custom_deployer(payload: &[u8]) -> Module {
 /// Returns a module which contains the deployable bytecode as a data segment.
 #[cfg_attr(rustfmt, rustfmt_skip)]
 pub fn create_memory_deployer(payload: &[u8]) -> Module {
-    // Opcodes calling finish(0, payload_len)
-    let opcodes = vec![
-        parity_wasm::elements::Opcode::I32Const(0),
-        parity_wasm::elements::Opcode::I32Const(payload.len() as i32),
-        parity_wasm::elements::Opcode::Call(0),
-        parity_wasm::elements::Opcode::End,
+    // Instructions calling finish(0, payload_len)
+    let instructions = vec![
+        parity_wasm::elements::Instruction::I32Const(0),
+        parity_wasm::elements::Instruction::I32Const(payload.len() as i32),
+        parity_wasm::elements::Instruction::Call(0),
+        parity_wasm::elements::Instruction::End,
     ];
 
     let module = builder::module()
@@ -104,7 +104,7 @@ pub fn create_memory_deployer(payload: &[u8]) -> Module {
             // Empty signature `(func)`
             .signature().build()
             .body()
-              .with_opcodes(parity_wasm::elements::Opcodes::new(opcodes))
+              .with_instructions(parity_wasm::elements::Instructions::new(instructions))
               .build()
             .build()
         // Export the "main" function.
@@ -124,7 +124,7 @@ pub fn create_memory_deployer(payload: &[u8]) -> Module {
             .build()
         // Add data section with payload
         .data()
-            .offset(parity_wasm::elements::Opcode::I32Const(0))
+            .offset(parity_wasm::elements::Instruction::I32Const(0))
             .value(payload.to_vec())
             .build()
         .build();
