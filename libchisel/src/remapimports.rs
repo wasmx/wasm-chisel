@@ -162,19 +162,9 @@ impl ModuleTranslator for RemapImports {
     }
 }
 
-// FIXME: There is no `Module::import_section_mut()`
-fn import_section_mut(module: &mut Module) -> Option<&mut ImportSection> {
-    for section in module.sections_mut() {
-        if let &mut Section::Import(ref mut import_section) = section {
-            return Some(import_section);
-        }
-    }
-    None
-}
-
 pub fn rename_imports(module: &mut Module, translations: Translations) -> bool {
     let mut ret = false;
-    if let Some(section) = import_section_mut(module) {
+    if let Some(section) = module.import_section_mut() {
         for entry in section.entries_mut().iter_mut() {
             if let Some(replacement) =
                 translations.get(&ImportPair::new(entry.module(), entry.field()))
