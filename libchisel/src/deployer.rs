@@ -5,6 +5,22 @@ use super::*;
 use byteorder::{LittleEndian, WriteBytesExt};
 use rustc_hex::FromHex;
 
+/// Enum on which ModuleCreator is implemented.
+pub enum Deployer<'a> {
+    Memory(&'a [u8]),
+    CustomSection(&'a [u8]),
+}
+
+impl<'a> Deployer<'a> {
+    fn memory_deployer(payload: &'a [u8]) -> Self {
+        Deployer::Memory(payload)
+    }
+
+    fn custom_deployer(payload: &'a [u8]) -> Self {
+        Deployer::CustomSection(payload)
+    }
+}
+
 /*
 (module
   (import "ethereum" "getCodeSize" (func $getCodeSize (result i32)))
@@ -48,7 +64,7 @@ fn deployer_code() -> Vec<u8> {
 }
 
 /// Returns a module which contains the deployable bytecode as a custom section.
-pub fn create_custom_deployer(payload: &[u8]) -> Module {
+fn create_custom_deployer(payload: &[u8]) -> Module {
     // The standard deployer code, which expects a 32 bit little endian as the trailing content
     // immediately following the payload, placed in a custom section.
     let code = deployer_code();
@@ -76,7 +92,7 @@ pub fn create_custom_deployer(payload: &[u8]) -> Module {
 
 /// Returns a module which contains the deployable bytecode as a data segment.
 #[cfg_attr(rustfmt, rustfmt_skip)]
-pub fn create_memory_deployer(payload: &[u8]) -> Module {
+fn create_memory_deployer(payload: &[u8]) -> Module {
     // Instructions calling finish(0, payload_len)
     let instructions = vec![
         parity_wasm::elements::Instruction::I32Const(0),
@@ -132,16 +148,27 @@ pub fn create_memory_deployer(payload: &[u8]) -> Module {
     module
 }
 
+impl<'a> ModuleCreator for Deployer<'a> {
+    fn create(self) -> Result<Module, String> {
+        let output = match self {
+            Deployer::Memory(payload) => create_memory_deployer(&payload),
+            Deployer::CustomSection(payload) => create_custom_deployer(&payload),
+        };
+
+        Ok(output)
+    }
+}
+
 #[cfg(test)]
 mod tests {
-    use super::{create_custom_deployer, create_memory_deployer};
+    use super::*;
     use parity_wasm;
     use rustc_hex::FromHex;
 
     #[test]
     fn zero_payload() {
         let payload = vec![];
-        let module = create_custom_deployer(&payload);
+        let module = Deployer::custom_deployer(&payload).create().unwrap();
         let expected = FromHex::from_hex(
             "
             0061736d010000000113046000017f60037f7f7f0060027f7f00600000023e0308
@@ -161,7 +188,7 @@ mod tests {
     #[test]
     fn nonzero_payload() {
         let payload = FromHex::from_hex("80ff007faa550011").unwrap();
-        let module = create_custom_deployer(&payload);
+        let module = Deployer::custom_deployer(&payload).create().unwrap();
         let expected = FromHex::from_hex(
             "
             0061736d010000000113046000017f60037f7f7f0060027f7f00600000023e0308
@@ -181,7 +208,7 @@ mod tests {
     #[test]
     fn memory_zero_payload() {
         let payload = vec![];
-        let module = create_memory_deployer(&payload);
+        let module = Deployer::memory_deployer(&payload).create().unwrap();
         let expected = FromHex::from_hex(
             "
             0061736d0100000001090260027f7f0060000002130108657468657265756d0666
@@ -196,7 +223,7 @@ mod tests {
     #[test]
     fn memory_nonzero_payload() {
         let payload = FromHex::from_hex("80ff007faa550011").unwrap();
-        let module = create_memory_deployer(&payload);
+        let module = Deployer::memory_deployer(&payload).create().unwrap();
         let expected = FromHex::from_hex(
             "
             0061736d0100000001090260027f7f0060000002130108657468657265756d0666

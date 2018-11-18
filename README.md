@@ -34,7 +34,9 @@ The following presets are provided:
 
 ### deployer
 
-TBA
+Wraps module into an ewasm-compatible constructor. It has two options:
+- memory deployer: wrap the module as a pre-defined memory section
+- custom section deployer: include the module as a custom section
 
 ## CLI (WIP)
 
