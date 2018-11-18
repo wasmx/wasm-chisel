@@ -8,5 +8,6 @@ repository = "https://github.com/wasmx/wasm-chisel"
 homepage = "https://github.com/wasmx/wasm-chisel"
 
 [dependencies]
-parity-wasm = "0.21"
+parity-wasm = { git = "https://github.com/axic/parity-wasm", branch = "custom-section" }
 rustc-hex = "1.0"
+byteorder = "1.2.4"
