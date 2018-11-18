@@ -162,7 +162,7 @@ impl ModuleTranslator for RemapImports {
     }
 }
 
-pub fn rename_imports(module: &mut Module, translations: Translations) -> bool {
+fn rename_imports(module: &mut Module, translations: Translations) -> bool {
     let mut ret = false;
     if let Some(section) = module.import_section_mut() {
         for entry in section.entries_mut().iter_mut() {
@@ -183,7 +183,7 @@ pub fn rename_imports(module: &mut Module, translations: Translations) -> bool {
 
 #[cfg(test)]
 mod tests {
-    use super::{rename_imports, ImportPair, Translations};
+    use super::*;
     use parity_wasm;
     use rustc_hex::FromHex;
     use std::collections::HashMap;
@@ -197,7 +197,7 @@ mod tests {
         ",
         ).unwrap();
         let mut module = parity_wasm::deserialize_buffer(&input).expect("failed");
-        let did_change = rename_imports(&mut module, Translations::ewasm());
+        let did_change = RemapImports::new().translate(&mut module).unwrap();
         let output = parity_wasm::serialize(module).expect("failed");
         let expected = FromHex::from_hex(
             "
