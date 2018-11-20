@@ -24,19 +24,16 @@ pub struct VerifyExports<'a> {
 }
 
 impl<'a> VerifyExports<'a> {
-    pub fn with_preset(preset: &str) -> Self {
+    pub fn with_preset(preset: &str) -> Result<Self, ()> {
         match preset {
-            "ewasm" => VerifyExports {
+            "ewasm" => Ok(VerifyExports {
                 entries: vec![
                     ExportType::Function("main", FunctionType::default()),
                     ExportType::Memory("memory"),
                 ],
                 allow_unlisted: false,
-            },
-            _ => VerifyExports {
-                entries: vec![],
-                allow_unlisted: false,
-            },
+            }),
+            _ => Err(()),
         }
     }
 }
@@ -212,7 +209,7 @@ mod tests {
         let wasm: Vec<u8> = vec![0x00, 0x61, 0x73, 0x6d, 0x01, 0x00, 0x00, 0x00];
 
         let module = deserialize_buffer::<Module>(&wasm).unwrap();
-        let checker = VerifyExports::with_preset("ewasm");
+        let checker = VerifyExports::with_preset("ewasm").unwrap();
         let result = checker.validate(&module).unwrap();
         assert_eq!(false, result);
     }
@@ -234,7 +231,7 @@ mod tests {
         ];
 
         let module = deserialize_buffer::<Module>(&wasm).unwrap();
-        let checker = VerifyExports::with_preset("ewasm");
+        let checker = VerifyExports::with_preset("ewasm").unwrap();
         let result = checker.validate(&module).unwrap();
         assert_eq!(true, result);
     }
@@ -258,7 +255,7 @@ mod tests {
         ];
 
         let module = deserialize_buffer::<Module>(&wasm).unwrap();
-        let checker = VerifyExports::with_preset("ewasm");
+        let checker = VerifyExports::with_preset("ewasm").unwrap();
         let result = checker.validate(&module).unwrap();
         assert_eq!(false, result);
     }
@@ -280,7 +277,7 @@ mod tests {
         ];
 
         let module = deserialize_buffer::<Module>(&wasm).unwrap();
-        let checker = VerifyExports::with_preset("ewasm");
+        let checker = VerifyExports::with_preset("ewasm").unwrap();
         let result = checker.validate(&module).unwrap();
         assert_eq!(false, result);
     }
@@ -300,7 +297,7 @@ mod tests {
         ];
 
         let module = deserialize_buffer::<Module>(&wasm).unwrap();
-        let checker = VerifyExports::with_preset("ewasm");
+        let checker = VerifyExports::with_preset("ewasm").unwrap();
         let result = checker.validate(&module).unwrap();
         assert_eq!(false, result);
     }
@@ -320,7 +317,7 @@ mod tests {
         ];
 
         let module = deserialize_buffer::<Module>(&wasm).unwrap();
-        let checker = VerifyExports::with_preset("ewasm");
+        let checker = VerifyExports::with_preset("ewasm").unwrap();
         let result = checker.validate(&module).unwrap();
         assert_eq!(false, result);
     }
@@ -342,7 +339,7 @@ mod tests {
         ];
 
         let module = deserialize_buffer::<Module>(&wasm).unwrap();
-        let checker = VerifyExports::with_preset("ewasm");
+        let checker = VerifyExports::with_preset("ewasm").unwrap();
         let result = checker.validate(&module).unwrap();
         assert_eq!(false, result);
     }
@@ -364,7 +361,7 @@ mod tests {
         ];
 
         let module = deserialize_buffer::<Module>(&wasm).unwrap();
-        let checker = VerifyExports::with_preset("ewasm");
+        let checker = VerifyExports::with_preset("ewasm").unwrap();
         let result = checker.validate(&module).unwrap();
         assert_eq!(false, result);
     }
@@ -386,7 +383,7 @@ mod tests {
         ];
 
         let module = deserialize_buffer::<Module>(&wasm).unwrap();
-        let checker = VerifyExports::with_preset("ewasm");
+        let checker = VerifyExports::with_preset("ewasm").unwrap();
         let result = checker.validate(&module).unwrap();
         assert_eq!(false, result);
     }
@@ -410,7 +407,7 @@ mod tests {
         ];
 
         let module = deserialize_buffer::<Module>(&wasm).unwrap();
-        let checker = VerifyExports::with_preset("ewasm");
+        let checker = VerifyExports::with_preset("ewasm").unwrap();
         let result = checker.validate(&module).unwrap();
         assert_eq!(false, result);
     }

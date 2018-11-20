@@ -25,7 +25,7 @@ pub struct Translations {
 }
 
 impl Translations {
-    pub fn with_preset(preset: &str) -> Self {
+    pub fn with_preset(preset: &str) -> Result<Self, ()> {
         match preset {
             "ewasm" => {
                 let trans: HashMap<ImportPair, ImportPair> = [
@@ -121,13 +121,11 @@ impl Translations {
                     .iter()
                     .cloned()
                     .collect();
-                Translations {
+                Ok(Translations {
                     translations: trans,
-                }
+                })
             }
-            _ => Translations {
-                translations: HashMap::new(),
-            },
+            _ => Err(()),
         }
     }
 
@@ -156,14 +154,12 @@ pub struct RemapImports {
 }
 
 impl RemapImports {
-    pub fn with_preset(preset: &str) -> Self {
+    pub fn with_preset(preset: &str) -> Result<Self, ()> {
         match preset {
-            "ewasm" => RemapImports {
-                translations: Translations::with_preset("ewasm"),
-            },
-            _ => RemapImports {
-                translations: Translations::with_preset("___nopreset"), // Just a placeholder string for empty translation set.
-            },
+            "ewasm" => Ok(RemapImports {
+                translations: Translations::with_preset("ewasm").unwrap(),
+            }),
+            _ => Err(()),
         }
     }
 }
@@ -210,6 +206,7 @@ mod tests {
         ).unwrap();
         let mut module = parity_wasm::deserialize_buffer(&input).expect("failed");
         let did_change = RemapImports::with_preset("ewasm")
+            .unwrap()
             .translate(&mut module)
             .unwrap();
         let output = parity_wasm::serialize(module).expect("failed");
