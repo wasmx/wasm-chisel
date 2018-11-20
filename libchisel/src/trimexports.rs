@@ -27,21 +27,19 @@ impl ExportWhitelist {
         }
     }
 
-    /// Constructs a whitelist with the ewasm export interface preset.
-    fn ewasm() -> Self {
-        ExportWhitelist {
-            entries: vec![
-                //NOTE: function signatures are not checked yet
-                ExportEntry::new("main".to_string(), Internal::Function(0)),
-                ExportEntry::new("memory".to_string(), Internal::Memory(0)),
-            ],
-        }
-    }
-
-    /// Constructs a whitelist with the parity wasm export interface preset.
-    fn pwasm() -> Self {
-        ExportWhitelist {
-            entries: vec![ExportEntry::new("_call".to_string(), Internal::Function(0))],
+    fn with_preset(preset: &str) -> Self {
+        match preset {
+            "ewasm" => ExportWhitelist {
+                entries: vec![
+                    //NOTE: function signatures are not checked yet
+                    ExportEntry::new("main".to_string(), Internal::Function(0)),
+                    ExportEntry::new("memory".to_string(), Internal::Memory(0)),
+                ],
+            },
+            "pwasm" => ExportWhitelist {
+                entries: vec![ExportEntry::new("_call".to_string(), Internal::Function(0))],
+            },
+            _ => ExportWhitelist { entries: vec![] },
         }
     }
 
@@ -71,10 +69,10 @@ impl TrimExports {
     pub fn with_preset(preset: &str) -> Self {
         match preset {
             "ewasm" => TrimExports {
-                whitelist: ExportWhitelist::ewasm(),
+                whitelist: ExportWhitelist::with_preset("ewasm"),
             },
             "pwasm" => TrimExports {
-                whitelist: ExportWhitelist::pwasm(),
+                whitelist: ExportWhitelist::with_preset("pwasm"),
             },
             _ => TrimExports::new(),
         }
