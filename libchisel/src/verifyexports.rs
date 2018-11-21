@@ -18,7 +18,7 @@ trait IsExported {
 }
 
 /// Struct on which ModuleValidator is implemented.
-struct VerifyExports<'a> {
+pub struct VerifyExports<'a> {
     entries: Vec<ExportType<'a>>,
     allow_unlisted: bool,
 }
