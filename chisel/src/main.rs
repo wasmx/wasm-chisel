@@ -16,12 +16,12 @@ pub fn main() {
 
     let mut module = parity_wasm::deserialize_buffer(&code).expect("Failed to load module");
 
-    let trimexports = trimexports::TrimExports::with_preset("ewasm");
+    let trimexports = trimexports::TrimExports::with_preset("ewasm").unwrap();
     trimexports
         .translate(&mut module)
         .expect("Failed to trim exports");
 
-    let remapimports = remapimports::RemapImports::ewasm();
+    let remapimports = remapimports::RemapImports::with_preset("ewasm").unwrap();
     remapimports
         .translate(&mut module)
         .expect("Failed to remap imports");

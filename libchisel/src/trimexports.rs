@@ -27,21 +27,19 @@ impl ExportWhitelist {
         }
     }
 
-    /// Constructs a whitelist with the ewasm export interface preset.
-    fn ewasm() -> Self {
-        ExportWhitelist {
-            entries: vec![
-                //NOTE: function signatures are not checked yet
-                ExportEntry::new("main".to_string(), Internal::Function(0)),
-                ExportEntry::new("memory".to_string(), Internal::Memory(0)),
-            ],
-        }
-    }
-
-    /// Constructs a whitelist with the parity wasm export interface preset.
-    fn pwasm() -> Self {
-        ExportWhitelist {
-            entries: vec![ExportEntry::new("_call".to_string(), Internal::Function(0))],
+    fn with_preset(preset: &str) -> Result<Self, ()> {
+        match preset {
+            "ewasm" => Ok(ExportWhitelist {
+                entries: vec![
+                    //NOTE: function signatures are not checked yet
+                    ExportEntry::new("main".to_string(), Internal::Function(0)),
+                    ExportEntry::new("memory".to_string(), Internal::Memory(0)),
+                ],
+            }),
+            "pwasm" => Ok(ExportWhitelist {
+                entries: vec![ExportEntry::new("_call".to_string(), Internal::Function(0))],
+            }),
+            _ => Err(()),
         }
     }
 
@@ -68,15 +66,15 @@ impl TrimExports {
 
     /// Takes a given preset string and constructs a context with the
     /// corresponding whitelist.
-    pub fn with_preset(preset: &str) -> Self {
+    pub fn with_preset(preset: &str) -> Result<Self, ()> {
         match preset {
-            "ewasm" => TrimExports {
-                whitelist: ExportWhitelist::ewasm(),
-            },
-            "pwasm" => TrimExports {
-                whitelist: ExportWhitelist::pwasm(),
-            },
-            _ => TrimExports::new(),
+            "ewasm" => Ok(TrimExports {
+                whitelist: ExportWhitelist::with_preset("ewasm").unwrap(),
+            }),
+            "pwasm" => Ok(TrimExports {
+                whitelist: ExportWhitelist::with_preset("pwasm").unwrap(),
+            }),
+            _ => Err(()),
         }
     }
 
@@ -138,7 +136,7 @@ mod tests {
             .build()
             .build();
 
-        let trimmer = TrimExports::with_preset("ewasm");
+        let trimmer = TrimExports::with_preset("ewasm").unwrap();
         let did_change = trimmer.translate(&mut module).unwrap();
         assert_eq!(false, did_change);
     }
@@ -169,7 +167,7 @@ mod tests {
             .build()
             .build();
 
-        let trimmer = TrimExports::with_preset("ewasm");
+        let trimmer = TrimExports::with_preset("ewasm").unwrap();
         let did_change = trimmer.translate(&mut module).unwrap();
         assert_eq!(true, did_change);
     }
@@ -185,7 +183,7 @@ mod tests {
             .build()
             .build();
 
-        let trimmer = TrimExports::with_preset("ewasm");
+        let trimmer = TrimExports::with_preset("ewasm").unwrap();
         let did_change = trimmer.translate(&mut module).unwrap();
         assert_eq!(false, did_change);
     }
@@ -206,7 +204,7 @@ mod tests {
             .build()
             .build();
 
-        let trimmer = TrimExports::with_preset("pwasm");
+        let trimmer = TrimExports::with_preset("pwasm").unwrap();
         let did_change = trimmer.translate(&mut module).unwrap();
         assert_eq!(false, did_change);
     }
