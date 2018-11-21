@@ -12,11 +12,11 @@ pub enum Deployer<'a> {
 }
 
 impl<'a> Deployer<'a> {
-    fn memory_deployer(payload: &'a [u8]) -> Self {
+    pub fn memory_deployer(payload: &'a [u8]) -> Self {
         Deployer::Memory(payload)
     }
 
-    fn custom_deployer(payload: &'a [u8]) -> Self {
+    pub fn custom_deployer(payload: &'a [u8]) -> Self {
         Deployer::CustomSection(payload)
     }
 }
