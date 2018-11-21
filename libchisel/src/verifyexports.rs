@@ -24,7 +24,7 @@ pub struct VerifyExports<'a> {
 }
 
 impl<'a> VerifyExports<'a> {
-    fn ewasm() -> Self {
+    pub fn ewasm() -> Self {
         VerifyExports {
             entries: vec![
                 ExportType::Function("main", FunctionType::default()),

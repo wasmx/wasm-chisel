@@ -60,7 +60,7 @@ impl ExportWhitelist {
 
 impl TrimExports {
     /// Constructs an empty `trimexports` context.
-    fn new() -> Self {
+    pub fn new() -> Self {
         TrimExports {
             whitelist: ExportWhitelist::new(),
         }
