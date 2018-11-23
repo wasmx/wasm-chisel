@@ -7,6 +7,7 @@ pub mod deployer;
 pub mod remapimports;
 pub mod trimexports;
 pub mod verifyexports;
+pub mod verifyimports;
 
 use parity_wasm::elements::*;
 
