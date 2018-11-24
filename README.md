@@ -39,9 +39,9 @@ The following presets are provided:
 
 ### deployer
 
-Wraps module into an ewasm-compatible constructor. It has two options:
-- memory deployer: wrap the module as a pre-defined memory section
-- custom section deployer: include the module as a custom section
+Wraps module into an ewasm-compatible constructor. It has two presets:
+- `memory`: wrap the module as a pre-defined memory section
+- `customsection`: include the module as a custom section
 
 ## CLI (WIP)
 
