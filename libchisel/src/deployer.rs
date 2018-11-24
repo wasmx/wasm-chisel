@@ -12,12 +12,12 @@ pub enum Deployer<'a> {
 }
 
 impl<'a> Deployer<'a> {
-    pub fn memory_deployer(payload: &'a [u8]) -> Self {
-        Deployer::Memory(payload)
-    }
-
-    pub fn custom_deployer(payload: &'a [u8]) -> Self {
-        Deployer::CustomSection(payload)
+    pub fn with_preset(preset: &str, payload: &'a [u8]) -> Result<Self, ()> {
+        match preset {
+            "memory" => Ok(Deployer::Memory(payload)),
+            "customsection" => Ok(Deployer::CustomSection(payload)),
+            _ => Err(()),
+        }
     }
 }
 
@@ -168,7 +168,10 @@ mod tests {
     #[test]
     fn zero_payload() {
         let payload = vec![];
-        let module = Deployer::custom_deployer(&payload).create().unwrap();
+        let module = Deployer::with_preset("customsection", &payload)
+            .unwrap()
+            .create()
+            .unwrap();
         let expected = FromHex::from_hex(
             "
             0061736d010000000113046000017f60037f7f7f0060027f7f00600000023e0308
@@ -188,7 +191,10 @@ mod tests {
     #[test]
     fn nonzero_payload() {
         let payload = FromHex::from_hex("80ff007faa550011").unwrap();
-        let module = Deployer::custom_deployer(&payload).create().unwrap();
+        let module = Deployer::with_preset("customsection", &payload)
+            .unwrap()
+            .create()
+            .unwrap();
         let expected = FromHex::from_hex(
             "
             0061736d010000000113046000017f60037f7f7f0060027f7f00600000023e0308
@@ -208,7 +214,10 @@ mod tests {
     #[test]
     fn memory_zero_payload() {
         let payload = vec![];
-        let module = Deployer::memory_deployer(&payload).create().unwrap();
+        let module = Deployer::with_preset("memory", &payload)
+            .unwrap()
+            .create()
+            .unwrap();
         let expected = FromHex::from_hex(
             "
             0061736d0100000001090260027f7f0060000002130108657468657265756d0666
@@ -223,7 +232,10 @@ mod tests {
     #[test]
     fn memory_nonzero_payload() {
         let payload = FromHex::from_hex("80ff007faa550011").unwrap();
-        let module = Deployer::memory_deployer(&payload).create().unwrap();
+        let module = Deployer::with_preset("memory", &payload)
+            .unwrap()
+            .create()
+            .unwrap();
         let expected = FromHex::from_hex(
             "
             0061736d0100000001090260027f7f0060000002130108657468657265756d0666
