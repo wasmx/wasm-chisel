@@ -2,12 +2,13 @@
 name = "libchisel"
 description = "Some useful utilities to transform WebAssembly binaries, most importantly for WebAssembly used in a deterministic / blockchain context"
 version = "0.1.0"
-authors = ["Alex Beregszaszi <alex@rtfs.hu>", "Jake Lang <jak3lang@gmail.com>"]
+authors = ["Alex Beregszaszi <alex@rtfs.hu>", "Jake Lang <jak3lang@gmail.com>", "Guillaume Ballet <gballet@gmail.com>"]
 license = "Apache-2.0"
 repository = "https://github.com/wasmx/wasm-chisel"
 homepage = "https://github.com/wasmx/wasm-chisel"
 
 [dependencies]
-parity-wasm = "0.35.2"
+parity-wasm = "0.35.3"
 rustc-hex = "1.0"
 byteorder = "1.2.4"
+wasm-gc-api = "0.1.11"

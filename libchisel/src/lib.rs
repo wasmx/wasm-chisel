@@ -4,6 +4,7 @@ extern crate rustc_hex;
 
 pub mod checkstartfunc;
 pub mod deployer;
+pub mod gc;
 pub mod remapimports;
 pub mod trimexports;
 pub mod verifyexports;
