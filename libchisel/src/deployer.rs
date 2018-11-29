@@ -79,9 +79,7 @@ fn create_custom_deployer(payload: &[u8]) -> Module {
         .unwrap();
 
     // Prepare and append custom section.
-    let mut custom = CustomSection::default();
-    custom.name_mut().insert_str(0, "deployer");
-    custom.payload_mut().extend_from_slice(&custom_payload);
+    let custom = CustomSection::new("deployer".to_string(), custom_payload);
 
     module
         .sections_mut()
