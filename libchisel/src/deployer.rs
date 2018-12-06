@@ -60,7 +60,8 @@ fn deployer_code() -> Vec<u8> {
         4100410020001001200041046b2802002102200041046b20026b21012001200210
         020b
     ",
-    ).unwrap()
+    )
+    .unwrap()
 }
 
 /// Returns a module which contains the deployable bytecode as a custom section.
@@ -181,7 +182,8 @@ mod tests {
 
             000d086465706c6f79657200000000
         ",
-        ).unwrap();
+        )
+        .unwrap();
         let output = parity_wasm::serialize(module).expect("Failed to serialize");
         assert_eq!(output, expected);
     }
@@ -204,7 +206,8 @@ mod tests {
 
             0015086465706c6f79657280ff007faa55001108000000
         ",
-        ).unwrap();
+        )
+        .unwrap();
         let output = parity_wasm::serialize(module).expect("Failed to serialize");
         assert_eq!(output, expected);
     }
@@ -222,7 +225,8 @@ mod tests {
             696e697368000003030200010503010001071102046d61696e0001066d656d6f72
             7902000a0d0202000b08004100410010000b0b06010041000b00
         ",
-        ).unwrap();
+        )
+        .unwrap();
         let output = parity_wasm::serialize(module).expect("Failed to serialize");
         assert_eq!(output, expected);
     }
@@ -241,7 +245,8 @@ mod tests {
             7902000a0d0202000b08004100410810000b0b0e010041000b0880ff007faa5500
             11
         ",
-        ).unwrap();
+        )
+        .unwrap();
         let output = parity_wasm::serialize(module).expect("Failed to serialize");
         assert_eq!(output, expected);
     }

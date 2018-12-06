@@ -104,8 +104,14 @@ impl TrimExports {
 }
 
 impl ModuleTranslator for TrimExports {
-    fn translate(mut self, module: &mut Module) -> Result<bool, String> {
+    fn translate_inplace(mut self, module: &mut Module) -> Result<bool, String> {
         Ok(self.trim_exports(module))
+    }
+
+    fn translate(mut self, module: &Module) -> Result<Module, String> {
+        let mut ret = module.clone();
+        self.trim_exports(&mut ret);
+        Ok(ret)
     }
 }
 
@@ -137,7 +143,7 @@ mod tests {
             .build();
 
         let trimmer = TrimExports::with_preset("ewasm").unwrap();
-        let did_change = trimmer.translate(&mut module).unwrap();
+        let did_change = trimmer.translate_inplace(&mut module).unwrap();
         assert_eq!(false, did_change);
     }
 
@@ -168,7 +174,7 @@ mod tests {
             .build();
 
         let trimmer = TrimExports::with_preset("ewasm").unwrap();
-        let did_change = trimmer.translate(&mut module).unwrap();
+        let did_change = trimmer.translate_inplace(&mut module).unwrap();
         assert_eq!(true, did_change);
     }
 
@@ -184,7 +190,7 @@ mod tests {
             .build();
 
         let trimmer = TrimExports::with_preset("ewasm").unwrap();
-        let did_change = trimmer.translate(&mut module).unwrap();
+        let did_change = trimmer.translate_inplace(&mut module).unwrap();
         assert_eq!(false, did_change);
     }
 
@@ -205,7 +211,7 @@ mod tests {
             .build();
 
         let trimmer = TrimExports::with_preset("pwasm").unwrap();
-        let did_change = trimmer.translate(&mut module).unwrap();
+        let did_change = trimmer.translate_inplace(&mut module).unwrap();
         assert_eq!(false, did_change);
     }
 }

@@ -118,9 +118,9 @@ impl Translations {
                         ImportPair::new("ethereum", "selfDestruct"),
                     ),
                 ]
-                    .iter()
-                    .cloned()
-                    .collect();
+                .iter()
+                .cloned()
+                .collect();
                 Ok(Translations {
                     translations: trans,
                 })
@@ -165,8 +165,14 @@ impl RemapImports {
 }
 
 impl ModuleTranslator for RemapImports {
-    fn translate(self, module: &mut Module) -> Result<bool, String> {
+    fn translate_inplace(self, module: &mut Module) -> Result<bool, String> {
         Ok(rename_imports(module, self.translations))
+    }
+
+    fn translate(self, module: &Module) -> Result<Module, String> {
+        let mut ret = module.clone();
+        rename_imports(&mut ret, self.translations);
+        Ok(ret)
     }
 }
 
@@ -203,11 +209,12 @@ mod tests {
             0061736d0100000001050160017e0002170103656e760f65746865726575
             6d5f7573654761730000
         ",
-        ).unwrap();
+        )
+        .unwrap();
         let mut module = parity_wasm::deserialize_buffer(&input).expect("failed");
         let did_change = RemapImports::with_preset("ewasm")
             .unwrap()
-            .translate(&mut module)
+            .translate_inplace(&mut module)
             .unwrap();
         let output = parity_wasm::serialize(module).expect("failed");
         let expected = FromHex::from_hex(
@@ -215,7 +222,8 @@ mod tests {
             0061736d0100000001050160017e0002130108657468657265756d067573
             654761730000
         ",
-        ).unwrap();
+        )
+        .unwrap();
         assert_eq!(output, expected);
         assert!(did_change);
     }
