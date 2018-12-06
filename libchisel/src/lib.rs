@@ -28,6 +28,10 @@ pub mod verifyimports;
 pub mod verifyinstructions;
 mod instructionerrors;
 
+use crate::instructionerrors::*;
+
+use parity_wasm::elements::*;
+
 mod depgraph;
 
 #[derive(Eq, PartialEq, Debug)]
