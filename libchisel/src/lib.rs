@@ -25,6 +25,8 @@ pub mod trimexports;
 pub mod trimstartfunc;
 pub mod verifyexports;
 pub mod verifyimports;
+pub mod verifyinstructions;
+mod instructionerrors;
 
 mod depgraph;
 
@@ -70,6 +72,10 @@ pub trait ModuleTranslator {
 pub trait ModuleValidator {
     /// Validates module. Returns true if it is valid or false if invalid.
     fn validate(&self, module: &Module) -> Result<bool, ModuleError>;
+}
+
+pub trait InstructionValidator {
+    fn validate(&mut self, module: &Module) -> Result<bool, InstructionError>;
 }
 
 pub trait ModulePreset {
