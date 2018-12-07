@@ -42,6 +42,59 @@ impl<'a> ModulePreset for VerifyImports<'a> {
                 require_all: false,
                 allow_unlisted: false,
             }),
+            "pwasm" => Ok(VerifyImports {
+                // From https://github.com/paritytech/parity-ethereum/blob/5ed25276635f66450925cba3081028a36de5150d/ethcore/wasm/src/env.rs
+                entries: vec![
+                    ImportType::Function(
+                        "env",
+                        "storage_read",
+                        FunctionType::new(vec![ValueType::I32, ValueType:I32], None),
+                    ),
+                    ImportType::Function(
+                        "env",
+                        "storage_write",
+                        FunctionType::new(vec![ValueType::I32, ValueType:I32], None),
+                    ),
+                    ImportType::Function(
+                        "env",
+                        "ret",
+                        FunctionType::new(vec![ValueType::I32, ValueType:I32], None),
+                    ),
+                    ImportType::Function(
+                        "env",
+                        "gas",
+                        FunctionType::new(vec![ValueType::I32], None),
+                    ),
+    "balance",
+    "sender",
+    "origin",
+    "fetch_input",
+    "input_length",
+    "ccall",
+    "dcall",
+    "scall",
+    "create",
+    "balance",
+    "blockhash",
+    "blocknumber",
+    "coinbase",
+    "timestamp",
+    "difficulty",
+    "gaslimit",
+    "address",
+    "value",
+    "suicide",
+    "panic",
+    "elog",
+"abort"
+
+                //FIXME: It is messy to inline all the function signatures in the constructor.
+                entries: vec![
+                    ImportType::Function(
+                        "ethereum",
+                        "useGas",
+                        FunctionType::new(vec![ValueType::I64], None),
+                    ),
             _ => Err(()),
         }
     }
