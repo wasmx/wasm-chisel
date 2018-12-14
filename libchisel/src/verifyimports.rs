@@ -272,7 +272,8 @@ impl<'a> VerifyImports<'a> {
                         "selfDestruct",
                         FunctionType::new(vec![ValueType::I32], None),
                     ),
-                ].iter()
+                ]
+                .iter()
                 .cloned()
                 .collect(),
                 require_all: false,
@@ -389,32 +390,40 @@ impl<'a> ImportCheck for ImportType<'a> {
             {
                 match entry.external() {
                     // TODO: Wrap this in a helper.
-                    External::Function(idx) => if let Some(sig) = func_sig {
-                        if *sig == imported_func_sig_by_index(module, *idx as usize) {
+                    External::Function(idx) => {
+                        if let Some(sig) = func_sig {
+                            if *sig == imported_func_sig_by_index(module, *idx as usize) {
+                                ImportStatus::Good
+                            } else {
+                                ImportStatus::Malformed
+                            }
+                        } else {
+                            ImportStatus::Malformed
+                        }
+                    }
+                    // NOTE: There may be a better way to do mappings between enum variants.
+                    // Just check import variant here.
+                    External::Global(_idx) => {
+                        if let ImportType::Global(_n, _f) = self {
                             ImportStatus::Good
                         } else {
                             ImportStatus::Malformed
                         }
-                    } else {
-                        ImportStatus::Malformed
-                    },
-                    // NOTE: There may be a better way to do mappings between enum variants.
-                    // Just check import variant here.
-                    External::Global(_idx) => if let ImportType::Global(_n, _f) = self {
-                        ImportStatus::Good
-                    } else {
-                        ImportStatus::Malformed
-                    },
-                    External::Memory(_idx) => if let ImportType::Memory(_n, _f) = self {
-                        ImportStatus::Good
-                    } else {
-                        ImportStatus::Malformed
-                    },
-                    External::Table(_idx) => if let ImportType::Table(_n, _f) = self {
-                        ImportStatus::Good
-                    } else {
-                        ImportStatus::Malformed
-                    },
+                    }
+                    External::Memory(_idx) => {
+                        if let ImportType::Memory(_n, _f) = self {
+                            ImportStatus::Good
+                        } else {
+                            ImportStatus::Malformed
+                        }
+                    }
+                    External::Table(_idx) => {
+                        if let ImportType::Table(_n, _f) = self {
+                            ImportStatus::Good
+                        } else {
+                            ImportStatus::Malformed
+                        }
+                    }
                 }
             } else {
                 ImportStatus::NotFound
@@ -777,7 +786,8 @@ mod tests {
                 "ethereum",
                 "storageStore",
                 FunctionType::new(vec![ValueType::I32, ValueType::I32], None),
-            )].iter()
+            )]
+            .iter()
             .cloned()
             .collect(),
             allow_unlisted: false,
@@ -814,7 +824,8 @@ mod tests {
                 "ethereum",
                 "storageStore",
                 FunctionType::new(vec![ValueType::I32, ValueType::I32], None),
-            )].iter()
+            )]
+            .iter()
             .cloned()
             .collect(),
             allow_unlisted: true,
@@ -851,7 +862,8 @@ mod tests {
                 "ethereum",
                 "storageStore",
                 FunctionType::new(vec![ValueType::I32, ValueType::I32], None),
-            )].iter()
+            )]
+            .iter()
             .cloned()
             .collect(),
             allow_unlisted: false,
@@ -888,7 +900,8 @@ mod tests {
                 "ethereum",
                 "storageStore",
                 FunctionType::new(vec![ValueType::I32, ValueType::I32], None),
-            )].iter()
+            )]
+            .iter()
             .cloned()
             .collect(),
             allow_unlisted: false,

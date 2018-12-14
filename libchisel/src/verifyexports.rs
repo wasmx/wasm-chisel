@@ -128,11 +128,13 @@ fn has_table_export(section: &ExportSection, field: &str) -> bool {
 fn has_func_export(module: &Module, field: &str, sig: &FunctionType) -> bool {
     if let Some(section) = module.export_section() {
         match func_export_index_by_name(section, field) {
-            Some(index) => if let Some(resolved) = func_sig_by_index(module, index) {
-                *sig == *resolved
-            } else {
-                false
-            },
+            Some(index) => {
+                if let Some(resolved) = func_sig_by_index(module, index) {
+                    *sig == *resolved
+                } else {
+                    false
+                }
+            }
             None => false,
         }
     } else {
@@ -181,7 +183,8 @@ fn func_import_section_len(imports: &ImportSection) -> u32 {
         .filter(|e| match e.external() {
             &External::Function(_) => true,
             _ => false,
-        }).count() as u32
+        })
+        .count() as u32
 }
 
 /// Resolves a function export's index by name. Can be trivially adjusted for
