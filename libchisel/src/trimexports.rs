@@ -44,7 +44,7 @@ impl ExportWhitelist {
     }
 
     /// Looks up a given export entry in the whitelist and returns true if it is valid.
-    fn lookup(&mut self, export: &ExportEntry) -> bool {
+    fn lookup(&self, export: &ExportEntry) -> bool {
         if let Some(thing) = self.entries.iter().find(|matched_export| {
             export.field() == matched_export.field()
                 && cmp_internal_variant(export.internal(), matched_export.internal())
@@ -80,7 +80,7 @@ impl TrimExports {
 
     /// Iterates over the export section, if there is one, and removes
     /// unnecessary entries.
-    fn trim_exports(&mut self, module: &mut Module) -> bool {
+    fn trim_exports(&self, module: &mut Module) -> bool {
         if let Some(section) = module.export_section_mut() {
             let new_section = ExportSection::with_entries(
                 section
@@ -104,11 +104,11 @@ impl TrimExports {
 }
 
 impl ModuleTranslator for TrimExports {
-    fn translate_inplace(mut self, module: &mut Module) -> Result<bool, String> {
+    fn translate_inplace(&self, module: &mut Module) -> Result<bool, String> {
         Ok(self.trim_exports(module))
     }
 
-    fn translate(mut self, module: &Module) -> Result<Module, String> {
+    fn translate(&self, module: &Module) -> Result<Module, String> {
         let mut ret = module.clone();
         self.trim_exports(&mut ret);
         Ok(ret)

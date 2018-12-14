@@ -165,18 +165,18 @@ impl RemapImports {
 }
 
 impl ModuleTranslator for RemapImports {
-    fn translate_inplace(self, module: &mut Module) -> Result<bool, String> {
-        Ok(rename_imports(module, self.translations))
+    fn translate_inplace(&self, module: &mut Module) -> Result<bool, String> {
+        Ok(rename_imports(module, &self.translations))
     }
 
-    fn translate(self, module: &Module) -> Result<Module, String> {
+    fn translate(&self, module: &Module) -> Result<Module, String> {
         let mut ret = module.clone();
-        rename_imports(&mut ret, self.translations);
+        rename_imports(&mut ret, &self.translations);
         Ok(ret)
     }
 }
 
-fn rename_imports(module: &mut Module, translations: Translations) -> bool {
+fn rename_imports(module: &mut Module, translations: &Translations) -> bool {
     let mut ret = false;
     if let Some(section) = module.import_section_mut() {
         for entry in section.entries_mut().iter_mut() {

@@ -15,7 +15,7 @@ impl CheckStartFunc {
 }
 
 impl ModuleValidator for CheckStartFunc {
-    fn validate(self, module: &Module) -> Result<bool, String> {
+    fn validate(&self, module: &Module) -> Result<bool, String> {
         Ok(module.start_section().is_some() == self.start_required)
     }
 }

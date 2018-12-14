@@ -296,7 +296,7 @@ impl<'a> VerifyImports<'a> {
 }
 
 impl<'a> ModuleValidator for VerifyImports<'a> {
-    fn validate(self, module: &Module) -> Result<bool, String> {
+    fn validate(&self, module: &Module) -> Result<bool, String> {
         let import_section_len = if let Some(section) = module.import_section() {
             section.entries().len()
         } else {
