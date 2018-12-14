@@ -12,16 +12,16 @@ pub mod verifyimports;
 use parity_wasm::elements::*;
 
 pub trait ModuleCreator {
-    fn create(self) -> Result<Module, String>;
+    fn create(&self) -> Result<Module, String>;
 }
 
 pub trait ModuleTranslator {
-    fn translate(self, module: &Module) -> Result<Module, String>;
-    fn translate_inplace(self, module: &mut Module) -> Result<bool, String>;
+    fn translate(&self, module: &Module) -> Result<Module, String>;
+    fn translate_inplace(&self, module: &mut Module) -> Result<bool, String>;
 }
 
 pub trait ModuleValidator {
-    fn validate(self, module: &Module) -> Result<bool, String>;
+    fn validate(&self, module: &Module) -> Result<bool, String>;
 }
 
 #[cfg(test)]
@@ -31,22 +31,22 @@ mod tests {
     struct SampleModule {}
 
     impl ModuleCreator for SampleModule {
-        fn create(self) -> Result<Module, String> {
+        fn create(&self) -> Result<Module, String> {
             Ok(Module::default())
         }
     }
 
     impl ModuleTranslator for SampleModule {
-        fn translate(self, module: &Module) -> Result<Module, String> {
+        fn translate(&self, module: &Module) -> Result<Module, String> {
             Ok(Module::default())
         }
-        fn translate_inplace(self, module: &mut Module) -> Result<bool, String> {
+        fn translate_inplace(&self, module: &mut Module) -> Result<bool, String> {
             Ok((true))
         }
     }
 
     impl ModuleValidator for SampleModule {
-        fn validate(self, module: &Module) -> Result<bool, String> {
+        fn validate(&self, module: &Module) -> Result<bool, String> {
             Ok(true)
         }
     }
