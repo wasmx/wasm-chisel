@@ -42,8 +42,32 @@ impl Translations {
                         ImportPair::new("ethereum", "getAddress"),
                     ),
                     (
-                        ImportPair::new("env", "ethereum_getBalance"),
-                        ImportPair::new("ethereum", "getBalance"),
+                        ImportPair::new("env", "ethereum_getBlockHash"),
+                        ImportPair::new("ethereum", "getBlockHash"),
+                    ),
+                    (
+                        ImportPair::new("env", "ethereum_getBlockCoinbase"),
+                        ImportPair::new("ethereum", "getBlockCoinbase"),
+                    ),
+                    (
+                        ImportPair::new("env", "ethereum_getBlockDifficulty"),
+                        ImportPair::new("ethereum", "getBlockDifficulty"),
+                    ),
+                    (
+                        ImportPair::new("env", "ethereum_getBlockGasLimit"),
+                        ImportPair::new("ethereum", "getBlockGasLimit"),
+                    ),
+                    (
+                        ImportPair::new("env", "ethereum_getBlockNumber"),
+                        ImportPair::new("ethereum", "getBlockNumber"),
+                    ),
+                    (
+                        ImportPair::new("env", "ethereum_getBlockTimestamp"),
+                        ImportPair::new("ethereum", "getBlockTimestamp"),
+                    ),
+                    (
+                        ImportPair::new("env", "ethereum_getExternalBalance"),
+                        ImportPair::new("ethereum", "getExternalBalance"),
                     ),
                     (
                         ImportPair::new("env", "ethereum_getTxGasPrice"),
@@ -62,12 +86,20 @@ impl Translations {
                         ImportPair::new("ethereum", "getCallDataSize"),
                     ),
                     (
+                        ImportPair::new("env", "ethereum_getCallValue"),
+                        ImportPair::new("ethereum", "getCallValue"),
+                    ),
+                    (
                         ImportPair::new("env", "ethereum_callDataCopy"),
                         ImportPair::new("ethereum", "callDataCopy"),
                     ),
                     (
                         ImportPair::new("env", "ethereum_getCodeSize"),
                         ImportPair::new("ethereum", "getCodeSize"),
+                    ),
+                    (
+                        ImportPair::new("env", "ethereum_getExternalCodeSize"),
+                        ImportPair::new("ethereum", "getExternalCodeSize"),
                     ),
                     (
                         ImportPair::new("env", "ethereum_codeCopy"),
@@ -80,6 +112,10 @@ impl Translations {
                     (
                         ImportPair::new("env", "ethereum_returnDataCopy"),
                         ImportPair::new("ethereum", "returnDataCopy"),
+                    ),
+                    (
+                        ImportPair::new("env", "ethereum_create"),
+                        ImportPair::new("ethereum", "create"),
                     ),
                     (
                         ImportPair::new("env", "ethereum_call"),
@@ -100,6 +136,10 @@ impl Translations {
                     (
                         ImportPair::new("env", "ethereum_storageLoad"),
                         ImportPair::new("ethereum", "storageLoad"),
+                    ),
+                    (
+                        ImportPair::new("env", "ethereum_log"),
+                        ImportPair::new("ethereum", "log"),
                     ),
                     (
                         ImportPair::new("env", "ethereum_storageStore"),
