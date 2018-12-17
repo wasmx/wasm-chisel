@@ -1,5 +1,4 @@
 use super::ModuleValidator;
-
 use parity_wasm::elements::{
     ExportSection, External, FunctionSection, FunctionType, ImportSection, Internal, Module, Type,
 };

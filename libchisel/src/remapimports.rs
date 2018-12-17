@@ -1,8 +1,7 @@
 use std::collections::HashMap;
 
+use super::ModuleTranslator;
 use parity_wasm::elements::*;
-
-use super::*;
 
 #[derive(Hash, Eq, PartialEq, Debug, Clone)]
 pub struct ImportPair {

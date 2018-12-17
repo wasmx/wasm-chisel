@@ -1,6 +1,4 @@
-use super::*;
-
-use parity_wasm::builder::*;
+use super::ModuleTranslator;
 use parity_wasm::elements::*;
 
 /// Struct containing a list of valid exports.
