@@ -11,22 +11,27 @@ pub mod trimexports;
 pub mod verifyexports;
 pub mod verifyimports;
 
+#[derive(Eq, PartialEq, Debug)]
+pub enum ModuleError {
+    Custom(String),
+}
+
 pub trait ModuleCreator {
     /// Returns new module.
-    fn create(&self) -> Result<Module, String>;
+    fn create(&self) -> Result<Module, ModuleError>;
 }
 
 pub trait ModuleTranslator {
     /// Translates module. Returns new module.
-    fn translate(&self, module: &Module) -> Result<Module, String>;
+    fn translate(&self, module: &Module) -> Result<Module, ModuleError>;
 
     /// Translates module in-place. Returns true if the module was modified.
-    fn translate_inplace(&self, module: &mut Module) -> Result<bool, String>;
+    fn translate_inplace(&self, module: &mut Module) -> Result<bool, ModuleError>;
 }
 
 pub trait ModuleValidator {
     /// Validates module. Returns true if it is valid or false if invalid.
-    fn validate(&self, module: &Module) -> Result<bool, String>;
+    fn validate(&self, module: &Module) -> Result<bool, ModuleError>;
 }
 
 #[cfg(test)]
@@ -36,22 +41,22 @@ mod tests {
     struct SampleModule {}
 
     impl ModuleCreator for SampleModule {
-        fn create(&self) -> Result<Module, String> {
+        fn create(&self) -> Result<Module, ModuleError> {
             Ok(Module::default())
         }
     }
 
     impl ModuleTranslator for SampleModule {
-        fn translate(&self, module: &Module) -> Result<Module, String> {
+        fn translate(&self, module: &Module) -> Result<Module, ModuleError> {
             Ok(Module::default())
         }
-        fn translate_inplace(&self, module: &mut Module) -> Result<bool, String> {
+        fn translate_inplace(&self, module: &mut Module) -> Result<bool, ModuleError> {
             Ok((true))
         }
     }
 
     impl ModuleValidator for SampleModule {
-        fn validate(&self, module: &Module) -> Result<bool, String> {
+        fn validate(&self, module: &Module) -> Result<bool, ModuleError> {
             Ok(true)
         }
     }

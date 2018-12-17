@@ -1,4 +1,4 @@
-use super::ModuleValidator;
+use super::{ModuleError, ModuleValidator};
 use parity_wasm::elements::Module;
 
 /// Struct on which ModuleValidator is implemented.
@@ -15,7 +15,7 @@ impl CheckStartFunc {
 }
 
 impl ModuleValidator for CheckStartFunc {
-    fn validate(&self, module: &Module) -> Result<bool, String> {
+    fn validate(&self, module: &Module) -> Result<bool, ModuleError> {
         Ok(module.start_section().is_some() == self.start_required)
     }
 }

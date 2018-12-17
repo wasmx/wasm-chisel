@@ -1,4 +1,4 @@
-use super::ModuleValidator;
+use super::{ModuleError, ModuleValidator};
 use parity_wasm::elements::{
     ExportSection, External, FunctionSection, FunctionType, ImportSection, Internal, Module, Type,
 };
@@ -38,7 +38,7 @@ impl<'a> VerifyExports<'a> {
 }
 
 impl<'a> ModuleValidator for VerifyExports<'a> {
-    fn validate(&self, module: &Module) -> Result<bool, String> {
+    fn validate(&self, module: &Module) -> Result<bool, ModuleError> {
         // FIXME: This validating algorithm runs in O(n^2). Needs to be optimized
         let required_exports_not_found = self
             .entries

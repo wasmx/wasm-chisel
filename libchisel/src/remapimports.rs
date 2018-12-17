@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use super::ModuleTranslator;
+use super::{ModuleError, ModuleTranslator};
 use parity_wasm::elements::*;
 
 #[derive(Hash, Eq, PartialEq, Debug, Clone)]
@@ -204,11 +204,11 @@ impl RemapImports {
 }
 
 impl ModuleTranslator for RemapImports {
-    fn translate_inplace(&self, module: &mut Module) -> Result<bool, String> {
+    fn translate_inplace(&self, module: &mut Module) -> Result<bool, ModuleError> {
         Ok(rename_imports(module, &self.translations))
     }
 
-    fn translate(&self, module: &Module) -> Result<Module, String> {
+    fn translate(&self, module: &Module) -> Result<Module, ModuleError> {
         let mut ret = module.clone();
         rename_imports(&mut ret, &self.translations);
         Ok(ret)

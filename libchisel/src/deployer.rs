@@ -1,4 +1,4 @@
-use super::ModuleCreator;
+use super::{ModuleCreator, ModuleError};
 use parity_wasm::builder;
 use parity_wasm::elements::{CustomSection, Module};
 
@@ -148,7 +148,7 @@ fn create_memory_deployer(payload: &[u8]) -> Module {
 }
 
 impl<'a> ModuleCreator for Deployer<'a> {
-    fn create(&self) -> Result<Module, String> {
+    fn create(&self) -> Result<Module, ModuleError> {
         let output = match self {
             Deployer::Memory(payload) => create_memory_deployer(&payload),
             Deployer::CustomSection(payload) => create_custom_deployer(&payload),

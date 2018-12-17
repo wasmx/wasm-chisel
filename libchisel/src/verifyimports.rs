@@ -1,4 +1,4 @@
-use super::ModuleValidator;
+use super::{ModuleError, ModuleValidator};
 use parity_wasm::elements::{External, FunctionType, ImportSection, Module, Type, ValueType};
 
 /// Enum representing a type of import and any extra data to check.
@@ -295,7 +295,7 @@ impl<'a> VerifyImports<'a> {
 }
 
 impl<'a> ModuleValidator for VerifyImports<'a> {
-    fn validate(&self, module: &Module) -> Result<bool, String> {
+    fn validate(&self, module: &Module) -> Result<bool, ModuleError> {
         let import_section_len = if let Some(section) = module.import_section() {
             section.entries().len()
         } else {
