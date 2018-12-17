@@ -13,6 +13,7 @@ pub mod verifyimports;
 
 #[derive(Eq, PartialEq, Debug)]
 pub enum ModuleError {
+    NotSupported,
     Custom(String),
 }
 
@@ -22,10 +23,10 @@ pub trait ModuleCreator {
 }
 
 pub trait ModuleTranslator {
-    /// Translates module. Returns new module.
+    /// Translates module. Returns new module. Can fail with ModuleError::NotSupported.
     fn translate(&self, module: &Module) -> Result<Module, ModuleError>;
 
-    /// Translates module in-place. Returns true if the module was modified.
+    /// Translates module in-place. Returns true if the module was modified. Can fail with ModuleError::NotSupported.
     fn translate_inplace(&self, module: &mut Module) -> Result<bool, ModuleError>;
 }
 
