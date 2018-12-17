@@ -12,15 +12,20 @@ pub mod verifyimports;
 use parity_wasm::elements::*;
 
 pub trait ModuleCreator {
+    /// Returns new module.
     fn create(&self) -> Result<Module, String>;
 }
 
 pub trait ModuleTranslator {
+    /// Translates module. Returns new module.
     fn translate(&self, module: &Module) -> Result<Module, String>;
+
+    /// Translates module in-place. Returns true if the module was modified.
     fn translate_inplace(&self, module: &mut Module) -> Result<bool, String>;
 }
 
 pub trait ModuleValidator {
+    /// Validates module. Returns true if it is valid or false if invalid.
     fn validate(&self, module: &Module) -> Result<bool, String>;
 }
 
