@@ -1,5 +1,4 @@
 use super::ModuleValidator;
-
 use parity_wasm::elements::{External, FunctionType, ImportSection, Module, Type, ValueType};
 
 /// Enum representing a type of import and any extra data to check.

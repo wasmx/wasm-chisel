@@ -2,14 +2,14 @@ extern crate byteorder;
 extern crate parity_wasm;
 extern crate rustc_hex;
 
+use parity_wasm::elements::Module;
+
 pub mod checkstartfunc;
 pub mod deployer;
 pub mod remapimports;
 pub mod trimexports;
 pub mod verifyexports;
 pub mod verifyimports;
-
-use parity_wasm::elements::*;
 
 pub trait ModuleCreator {
     fn create(&self) -> Result<Module, String>;

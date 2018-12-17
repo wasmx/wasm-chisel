@@ -1,6 +1,6 @@
+use super::ModuleCreator;
 use parity_wasm::builder;
-
-use super::*;
+use parity_wasm::elements::{CustomSection, Module};
 
 use byteorder::{LittleEndian, WriteBytesExt};
 use rustc_hex::FromHex;
