@@ -61,7 +61,14 @@ mod tests {
     #[test]
     fn translator_succeeds() {
         let translator = SampleModule {};
-        let result = translator.translate(&mut Module::default());
+        let result = translator.translate(&Module::default());
+        assert!(result.is_ok());
+    }
+
+    #[test]
+    fn translator_inplace_succeeds() {
+        let translator = SampleModule {};
+        let result = translator.translate_inplace(&mut Module::default());
         assert!(result.is_ok());
     }
 
