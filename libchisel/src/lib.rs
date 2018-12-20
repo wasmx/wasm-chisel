@@ -4,6 +4,8 @@ extern crate rustc_hex;
 
 use parity_wasm::elements::Module;
 
+pub mod imports;
+
 pub mod checkstartfunc;
 pub mod deployer;
 pub mod remapimports;
