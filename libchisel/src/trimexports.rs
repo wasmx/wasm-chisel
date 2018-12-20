@@ -1,4 +1,4 @@
-use super::ModuleTranslator;
+use super::{ModuleError, ModuleTranslator};
 use parity_wasm::elements::*;
 
 /// Struct containing a list of valid exports.
@@ -102,11 +102,11 @@ impl TrimExports {
 }
 
 impl ModuleTranslator for TrimExports {
-    fn translate_inplace(&self, module: &mut Module) -> Result<bool, String> {
+    fn translate_inplace(&self, module: &mut Module) -> Result<bool, ModuleError> {
         Ok(self.trim_exports(module))
     }
 
-    fn translate(&self, module: &Module) -> Result<Module, String> {
+    fn translate(&self, module: &Module) -> Result<Module, ModuleError> {
         let mut ret = module.clone();
         self.trim_exports(&mut ret);
         Ok(ret)
