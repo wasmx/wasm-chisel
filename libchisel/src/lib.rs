@@ -37,6 +37,12 @@ pub trait ModuleValidator {
     fn validate(&self, module: &Module) -> Result<bool, ModuleError>;
 }
 
+pub trait ModulePreset {
+    fn with_preset(&str) -> Result<Self, ()>
+    where
+        Self: std::marker::Sized;
+}
+
 impl fmt::Display for ModuleError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(

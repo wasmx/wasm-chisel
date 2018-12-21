@@ -1,4 +1,4 @@
-use super::{ModuleError, ModuleTranslator};
+use super::{ModuleError, ModulePreset, ModuleTranslator};
 use parity_wasm::elements::*;
 
 /// Struct containing a list of valid exports.
@@ -17,14 +17,7 @@ fn cmp_internal_variant(a: &Internal, b: &Internal) -> bool {
     std::mem::discriminant(a) == std::mem::discriminant(b)
 }
 
-impl ExportWhitelist {
-    /// Constructs an empty whitelist. Mostly useless.
-    fn new() -> Self {
-        ExportWhitelist {
-            entries: Vec::new(),
-        }
-    }
-
+impl ModulePreset for ExportWhitelist {
     fn with_preset(preset: &str) -> Result<Self, ()> {
         match preset {
             "ewasm" => Ok(ExportWhitelist {
@@ -38,6 +31,15 @@ impl ExportWhitelist {
                 entries: vec![ExportEntry::new("_call".to_string(), Internal::Function(0))],
             }),
             _ => Err(()),
+        }
+    }
+}
+
+impl ExportWhitelist {
+    /// Constructs an empty whitelist. Mostly useless.
+    fn new() -> Self {
+        ExportWhitelist {
+            entries: Vec::new(),
         }
     }
 

@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use super::{ModuleError, ModuleTranslator};
+use super::{ModuleError, ModulePreset, ModuleTranslator};
 use parity_wasm::elements::*;
 
 #[derive(Hash, Eq, PartialEq, Debug, Clone)]
@@ -23,8 +23,8 @@ pub struct Translations {
     translations: HashMap<ImportPair, ImportPair>,
 }
 
-impl Translations {
-    pub fn with_preset(preset: &str) -> Result<Self, ()> {
+impl ModulePreset for Translations {
+    fn with_preset(preset: &str) -> Result<Self, ()> {
         match preset {
             "ewasm" => {
                 let trans: HashMap<ImportPair, ImportPair> = [
@@ -167,7 +167,9 @@ impl Translations {
             _ => Err(()),
         }
     }
+}
 
+impl Translations {
     fn insert(&mut self, from_module: &str, from_field: &str, to_module: &str, to_field: &str) {
         self.translations.insert(
             ImportPair::new(from_module, from_field),
@@ -192,8 +194,8 @@ pub struct RemapImports {
     translations: Translations,
 }
 
-impl RemapImports {
-    pub fn with_preset(preset: &str) -> Result<Self, ()> {
+impl ModulePreset for RemapImports {
+    fn with_preset(preset: &str) -> Result<Self, ()> {
         match preset {
             "ewasm" => Ok(RemapImports {
                 translations: Translations::with_preset("ewasm").unwrap(),

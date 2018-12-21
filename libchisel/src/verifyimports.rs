@@ -1,4 +1,4 @@
-use super::{ModuleError, ModuleValidator};
+use super::{ModuleError, ModulePreset, ModuleValidator};
 use parity_wasm::elements::{External, FunctionType, ImportSection, Module, Type, ValueType};
 
 /// Enum representing a type of import and any extra data to check.
@@ -40,8 +40,8 @@ pub struct VerifyImports<'a> {
     allow_unlisted: bool,
 }
 
-impl<'a> VerifyImports<'a> {
-    pub fn with_preset(preset: &str) -> Result<Self, ()> {
+impl<'a> ModulePreset for VerifyImports<'a> {
+    fn with_preset(preset: &str) -> Result<Self, ()> {
         match preset {
             "ewasm" => Ok(VerifyImports {
                 //FIXME: It is messy to inline all the function signatures in the constructor.
@@ -281,7 +281,9 @@ impl<'a> VerifyImports<'a> {
             _ => Err(()),
         }
     }
+}
 
+impl<'a> VerifyImports<'a> {
     // Utility functions used in tests to get more coverage
     #[cfg(test)]
     fn set_require_all(&mut self, arg: bool) {
