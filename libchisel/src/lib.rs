@@ -11,6 +11,8 @@ pub mod trimexports;
 pub mod verifyexports;
 pub mod verifyimports;
 
+use std::{error, fmt};
+
 #[derive(Eq, PartialEq, Debug)]
 pub enum ModuleError {
     NotSupported,
@@ -35,9 +37,37 @@ pub trait ModuleValidator {
     fn validate(&self, module: &Module) -> Result<bool, ModuleError>;
 }
 
+impl fmt::Display for ModuleError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(
+            f,
+            "{}",
+            match self {
+                ModuleError::NotSupported => "Method unsupported",
+                ModuleError::Custom(msg) => msg,
+            }
+        )
+    }
+}
+
+impl error::Error for ModuleError {
+    fn description(&self) -> &str {
+        match self {
+            ModuleError::NotSupported => "Method unsupported",
+            ModuleError::Custom(msg) => msg,
+        }
+    }
+
+    fn cause(&self) -> Option<&error::Error> {
+        None
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    use std::error::Error;
 
     struct SampleModule {}
 
@@ -88,5 +118,27 @@ mod tests {
         let validator = SampleModule {};
         let result = validator.validate(&Module::default());
         assert!(result.is_ok());
+    }
+
+    #[test]
+    fn fmt_good() {
+        // Add new tests for each enum variant here as they are implemented.
+        let fmt_result_unsupported = format!("{}", ModuleError::NotSupported);
+        assert_eq!("Method unsupported", fmt_result_unsupported);
+
+        let fmt_result_custom = format!("{}", ModuleError::Custom("foo".to_string()));
+        assert_eq!("foo", fmt_result_custom);
+    }
+
+    #[test]
+    fn error_good() {
+        // Add new tests for each enum variant here as they are implemented.
+        let err_unsupported = ModuleError::NotSupported;
+        let err_description_unsupported = err_unsupported.description();
+        assert_eq!("Method unsupported", err_description_unsupported);
+
+        let err_custom = ModuleError::Custom("bar".to_string());
+        let err_description_custom = err_custom.description();
+        assert_eq!("bar", err_description_custom);
     }
 }
