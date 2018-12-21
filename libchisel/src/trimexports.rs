@@ -43,14 +43,13 @@ impl ExportWhitelist {
 
     /// Looks up a given export entry in the whitelist and returns true if it is valid.
     fn lookup(&self, export: &ExportEntry) -> bool {
-        if let Some(thing) = self.entries.iter().find(|matched_export| {
-            export.field() == matched_export.field()
-                && cmp_internal_variant(export.internal(), matched_export.internal())
-        }) {
-            true
-        } else {
-            false
-        }
+        self.entries
+            .iter()
+            .find(|matched_export| {
+                export.field() == matched_export.field()
+                    && cmp_internal_variant(export.internal(), matched_export.internal())
+            })
+            .is_some()
     }
 }
 
