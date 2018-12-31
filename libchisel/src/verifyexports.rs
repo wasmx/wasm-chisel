@@ -1,4 +1,4 @@
-use super::{ModuleError, ModuleValidator};
+use super::{ModuleError, ModulePreset, ModuleValidator};
 use parity_wasm::elements::{
     ExportSection, External, FunctionSection, FunctionType, ImportSection, Internal, Module, Type,
 };
@@ -22,8 +22,8 @@ pub struct VerifyExports<'a> {
     allow_unlisted: bool,
 }
 
-impl<'a> VerifyExports<'a> {
-    pub fn with_preset(preset: &str) -> Result<Self, ()> {
+impl<'a> ModulePreset for VerifyExports<'a> {
+    fn with_preset(preset: &str) -> Result<Self, ()> {
         match preset {
             "ewasm" => Ok(VerifyExports {
                 entries: vec![

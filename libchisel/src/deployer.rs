@@ -11,6 +11,8 @@ pub enum Deployer<'a> {
     CustomSection(&'a [u8]),
 }
 
+// FIXME: Bring ModulePreset API in line with the other with_preset methods so a ModulePreset impl
+// can be written
 impl<'a> Deployer<'a> {
     pub fn with_preset(preset: &str, payload: &'a [u8]) -> Result<Self, ()> {
         match preset {
