@@ -283,14 +283,13 @@ impl<'a> ModulePreset for VerifyImports<'a> {
     }
 }
 
+// Utility functions used in tests to get more coverage
+#[cfg(test)]
 impl<'a> VerifyImports<'a> {
-    // Utility functions used in tests to get more coverage
-    #[cfg(test)]
     fn set_require_all(&mut self, arg: bool) {
         self.require_all = arg;
     }
 
-    #[cfg(test)]
     fn set_allow_unlisted(&mut self, arg: bool) {
         self.allow_unlisted = arg;
     }
