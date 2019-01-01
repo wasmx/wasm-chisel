@@ -11,6 +11,7 @@ keywords = ["webassembly", "wasm", "blockchain", "ethereum"]
 edition = "2018"
 
 [dependencies]
+binaryen = "0.8"
 parity-wasm = "^0.40.1"
 rustc-hex = "1.0"
 failure = "0.1.5"
