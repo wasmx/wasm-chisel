@@ -1,14 +1,8 @@
-use super::{ModuleError, ModulePreset, ModuleValidator};
+use super::{
+    imports::{ImportList, ImportType},
+    ModuleError, ModulePreset, ModuleValidator,
+};
 use parity_wasm::elements::{External, FunctionType, ImportSection, Module, Type, ValueType};
-
-/// Enum representing a type of import and any extra data to check.
-#[derive(Clone)]
-pub enum ImportType<'a> {
-    Function(&'a str, &'a str, FunctionType),
-    Global(&'a str, &'a str),
-    Memory(&'a str, &'a str),
-    Table(&'a str, &'a str),
-}
 
 /// Enum representing the state of an import in a module.
 #[derive(PartialEq)]
@@ -32,7 +26,7 @@ trait ImportCheck {
 /// Struct on which ModuleValidator is implemented.
 pub struct VerifyImports<'a> {
     /// List of function signatures to check.
-    entries: Vec<ImportType<'a>>,
+    list: ImportList<'a>,
     /// Option to require the presence of all listed imports in the module. When false, only the
     /// validity of existing imports on the list is checked.
     require_all: bool,
@@ -44,237 +38,7 @@ impl<'a> ModulePreset for VerifyImports<'a> {
     fn with_preset(preset: &str) -> Result<Self, ()> {
         match preset {
             "ewasm" => Ok(VerifyImports {
-                //FIXME: It is messy to inline all the function signatures in the constructor.
-                entries: vec![
-                    ImportType::Function(
-                        "ethereum",
-                        "useGas",
-                        FunctionType::new(vec![ValueType::I64], None),
-                    ),
-                    ImportType::Function(
-                        "ethereum",
-                        "getGasLeft",
-                        FunctionType::new(vec![], Some(ValueType::I64)),
-                    ),
-                    ImportType::Function(
-                        "ethereum",
-                        "getAddress",
-                        FunctionType::new(vec![ValueType::I32], None),
-                    ),
-                    ImportType::Function(
-                        "ethereum",
-                        "getExternalBalance",
-                        FunctionType::new(vec![ValueType::I32, ValueType::I32], None),
-                    ),
-                    ImportType::Function(
-                        "ethereum",
-                        "getBlockHash",
-                        FunctionType::new(
-                            vec![ValueType::I64, ValueType::I32],
-                            Some(ValueType::I32),
-                        ),
-                    ),
-                    ImportType::Function(
-                        "ethereum",
-                        "call",
-                        FunctionType::new(
-                            vec![
-                                ValueType::I64,
-                                ValueType::I32,
-                                ValueType::I32,
-                                ValueType::I32,
-                                ValueType::I32,
-                            ],
-                            Some(ValueType::I32),
-                        ),
-                    ),
-                    ImportType::Function(
-                        "ethereum",
-                        "callCode",
-                        FunctionType::new(
-                            vec![
-                                ValueType::I64,
-                                ValueType::I32,
-                                ValueType::I32,
-                                ValueType::I32,
-                                ValueType::I32,
-                            ],
-                            Some(ValueType::I32),
-                        ),
-                    ),
-                    ImportType::Function(
-                        "ethereum",
-                        "callDelegate",
-                        FunctionType::new(
-                            vec![
-                                ValueType::I64,
-                                ValueType::I32,
-                                ValueType::I32,
-                                ValueType::I32,
-                            ],
-                            Some(ValueType::I32),
-                        ),
-                    ),
-                    ImportType::Function(
-                        "ethereum",
-                        "callStatic",
-                        FunctionType::new(
-                            vec![
-                                ValueType::I64,
-                                ValueType::I32,
-                                ValueType::I32,
-                                ValueType::I32,
-                            ],
-                            Some(ValueType::I32),
-                        ),
-                    ),
-                    ImportType::Function(
-                        "ethereum",
-                        "create",
-                        FunctionType::new(
-                            vec![
-                                ValueType::I64,
-                                ValueType::I32,
-                                ValueType::I32,
-                                ValueType::I32,
-                            ],
-                            Some(ValueType::I32),
-                        ),
-                    ),
-                    ImportType::Function(
-                        "ethereum",
-                        "callDataCopy",
-                        FunctionType::new(
-                            vec![ValueType::I32, ValueType::I32, ValueType::I32],
-                            None,
-                        ),
-                    ),
-                    ImportType::Function(
-                        "ethereum",
-                        "getCallDataSize",
-                        FunctionType::new(vec![], Some(ValueType::I32)),
-                    ),
-                    ImportType::Function(
-                        "ethereum",
-                        "getCodeSize",
-                        FunctionType::new(vec![], Some(ValueType::I32)),
-                    ),
-                    ImportType::Function(
-                        "ethereum",
-                        "externalCodeCopy",
-                        FunctionType::new(
-                            vec![
-                                ValueType::I32,
-                                ValueType::I32,
-                                ValueType::I32,
-                                ValueType::I32,
-                            ],
-                            None,
-                        ),
-                    ),
-                    ImportType::Function(
-                        "ethereum",
-                        "getCaller",
-                        FunctionType::new(vec![ValueType::I32], None),
-                    ),
-                    ImportType::Function(
-                        "ethereum",
-                        "getCallValue",
-                        FunctionType::new(vec![ValueType::I32], None),
-                    ),
-                    ImportType::Function(
-                        "ethereum",
-                        "getBlockDifficulty",
-                        FunctionType::new(vec![ValueType::I32], None),
-                    ),
-                    ImportType::Function(
-                        "ethereum",
-                        "getBlockCoinbase",
-                        FunctionType::new(vec![ValueType::I32], None),
-                    ),
-                    ImportType::Function(
-                        "ethereum",
-                        "getBlockNumber",
-                        FunctionType::new(vec![], Some(ValueType::I64)),
-                    ),
-                    ImportType::Function(
-                        "ethereum",
-                        "getBlockGasLimit",
-                        FunctionType::new(vec![], Some(ValueType::I64)),
-                    ),
-                    ImportType::Function(
-                        "ethereum",
-                        "getBlockTimestamp",
-                        FunctionType::new(vec![], Some(ValueType::I64)),
-                    ),
-                    ImportType::Function(
-                        "ethereum",
-                        "getTxGasPrice",
-                        FunctionType::new(vec![ValueType::I32], None),
-                    ),
-                    ImportType::Function(
-                        "ethereum",
-                        "getTxOrigin",
-                        FunctionType::new(vec![ValueType::I32], None),
-                    ),
-                    ImportType::Function(
-                        "ethereum",
-                        "storageStore",
-                        FunctionType::new(vec![ValueType::I32, ValueType::I32], None),
-                    ),
-                    ImportType::Function(
-                        "ethereum",
-                        "storageLoad",
-                        FunctionType::new(vec![ValueType::I32, ValueType::I32], None),
-                    ),
-                    ImportType::Function(
-                        "ethereum",
-                        "log",
-                        FunctionType::new(
-                            vec![
-                                ValueType::I32,
-                                ValueType::I32,
-                                ValueType::I32,
-                                ValueType::I32,
-                                ValueType::I32,
-                                ValueType::I32,
-                                ValueType::I32,
-                            ],
-                            None,
-                        ),
-                    ),
-                    ImportType::Function(
-                        "ethereum",
-                        "getReturnDataSize",
-                        FunctionType::new(vec![], Some(ValueType::I32)),
-                    ),
-                    ImportType::Function(
-                        "ethereum",
-                        "returnDataCopy",
-                        FunctionType::new(
-                            vec![ValueType::I32, ValueType::I32, ValueType::I32],
-                            None,
-                        ),
-                    ),
-                    ImportType::Function(
-                        "ethereum",
-                        "finish",
-                        FunctionType::new(vec![ValueType::I32, ValueType::I32], None),
-                    ),
-                    ImportType::Function(
-                        "ethereum",
-                        "revert",
-                        FunctionType::new(vec![ValueType::I32, ValueType::I32], None),
-                    ),
-                    ImportType::Function(
-                        "ethereum",
-                        "selfDestruct",
-                        FunctionType::new(vec![ValueType::I32], None),
-                    ),
-                ]
-                .iter()
-                .cloned()
-                .collect(),
+                list: ImportList::with_preset("ewasm").unwrap(),
                 require_all: false,
                 allow_unlisted: false,
             }),
@@ -306,7 +70,8 @@ impl<'a> ModuleValidator for VerifyImports<'a> {
         Ok(match (self.require_all, self.allow_unlisted) {
             // Check that all listed imports exist and are correct.
             (true, true) => self
-                .entries
+                .list
+                .entries()
                 .iter()
                 .map(|e| e.is_imported(module))
                 .find(|e| *e == false)
@@ -314,24 +79,30 @@ impl<'a> ModuleValidator for VerifyImports<'a> {
             // Check that all listed imports exist, are correct, and are the only imports in the
             // module.
             (true, false) => {
-                self.entries
+                self.list
+                    .entries()
                     .iter()
                     .map(|e| e.is_imported(module))
                     .find(|e| *e == false)
                     .is_none()
-                    && (self.entries.len() == import_section_len)
+                    && (self.list.entries().len() == import_section_len)
             }
             // Check that the imports which are both listed and imported are of correct type.
             (false, true) => self
-                .entries
+                .list
+                .entries()
                 .iter()
                 .map(|e| e.check(module))
                 .find(|e| *e == ImportStatus::Malformed)
                 .is_none(),
             (false, false) => {
                 // Check that all existent imports are listed and correct.
-                let mut checklist: Vec<ImportStatus> =
-                    self.entries.iter().map(|e| e.check(module)).collect();
+                let mut checklist: Vec<ImportStatus> = self
+                    .list
+                    .entries()
+                    .iter()
+                    .map(|e| e.check(module))
+                    .collect();
                 let valid_entries_count = checklist
                     .iter()
                     .filter(|e| **e == ImportStatus::Good)
@@ -782,16 +553,13 @@ mod tests {
 
         let module = deserialize_buffer::<Module>(&wasm).unwrap();
         let checker = VerifyImports {
-            entries: vec![ImportType::Function(
+            list: ImportList::with_entries(vec![ImportType::Function(
                 "ethereum",
                 "storageStore",
                 FunctionType::new(vec![ValueType::I32, ValueType::I32], None),
-            )]
-            .iter()
-            .cloned()
-            .collect(),
-            allow_unlisted: false,
+            )]),
             require_all: true,
+            allow_unlisted: false,
         };
         let result = checker.validate(&module).unwrap();
         assert_eq!(true, result);
@@ -820,14 +588,11 @@ mod tests {
 
         let module = deserialize_buffer::<Module>(&wasm).unwrap();
         let checker = VerifyImports {
-            entries: vec![ImportType::Function(
+            list: ImportList::with_entries(vec![ImportType::Function(
                 "ethereum",
                 "storageStore",
                 FunctionType::new(vec![ValueType::I32, ValueType::I32], None),
-            )]
-            .iter()
-            .cloned()
-            .collect(),
+            )]),
             allow_unlisted: true,
             require_all: true,
         };
@@ -858,14 +623,7 @@ mod tests {
 
         let module = deserialize_buffer::<Module>(&wasm).unwrap();
         let checker = VerifyImports {
-            entries: vec![ImportType::Function(
-                "ethereum",
-                "storageStore",
-                FunctionType::new(vec![ValueType::I32, ValueType::I32], None),
-            )]
-            .iter()
-            .cloned()
-            .collect(),
+            list: ImportList::with_preset("ewasm").unwrap(),
             allow_unlisted: false,
             require_all: true,
         };
@@ -896,14 +654,7 @@ mod tests {
 
         let module = deserialize_buffer::<Module>(&wasm).unwrap();
         let checker = VerifyImports {
-            entries: vec![ImportType::Function(
-                "ethereum",
-                "storageStore",
-                FunctionType::new(vec![ValueType::I32, ValueType::I32], None),
-            )]
-            .iter()
-            .cloned()
-            .collect(),
+            list: ImportList::with_preset("ewasm").unwrap(),
             allow_unlisted: false,
             require_all: true,
         };
