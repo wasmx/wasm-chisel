@@ -13,6 +13,35 @@ pub enum ImportType<'a> {
     Table(&'a str, &'a str),
 }
 
+impl<'a> ImportType<'a> {
+    pub fn module(&self) -> &'a str {
+        // FIXME: Is there a way to shorten this expression?
+        match self {
+            ImportType::Function(module, _, _) => module,
+            ImportType::Global(module, _)
+            | ImportType::Memory(module, _)
+            | ImportType::Table(module, _) => module,
+        }
+    }
+
+    pub fn field(&self) -> &'a str {
+        // FIXME: Is there a way to shorten this expression?
+        match self {
+            ImportType::Function(_, field, _) => field,
+            ImportType::Global(_, field)
+            | ImportType::Memory(_, field)
+            | ImportType::Table(_, field) => field,
+        }
+    }
+
+    pub fn signature(&self) -> Result<&FunctionType, ()> {
+        match self {
+            ImportType::Function(_, _, sig) => Ok(&sig),
+            _ => Err(()),
+        }
+    }
+}
+
 impl<'a> ImportList<'a> {
     pub fn new() -> Self {
         ImportList(Vec::new())
@@ -37,6 +66,17 @@ impl<'a> ImportList<'a> {
 
     pub fn with_entries(entries: Vec<ImportType<'a>>) -> Self {
         ImportList(entries)
+    }
+
+    pub fn lookup_by_field(&self, name: &str) -> Option<&ImportType> {
+        let entries = self.entries();
+
+        for import in entries {
+            if import.field() == name {
+                return Some(&import);
+            }
+        }
+        None
     }
 }
 
@@ -328,5 +368,22 @@ impl<'a> ModulePreset for ImportList<'a> {
             ])),
             _ => Err(()),
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn lookup_by_field_ewasm_good() {
+        let list = ImportList::with_preset("ewasm").unwrap();
+        assert!(list.lookup_by_field("useGas").is_some());
+    }
+
+    #[test]
+    fn lookup_by_field_ewasm_not_found() {
+        let list = ImportList::with_preset("ewasm").unwrap();
+        assert!(list.lookup_by_field("foo").is_none());
     }
 }
