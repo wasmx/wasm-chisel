@@ -177,10 +177,8 @@ where
     if let Ok(ret) = translator.translate_inplace(module) {
         Ok(ret)
     } else if let Ok(new_module) = translator.translate(module) {
-        // FIXME: hacky expensive comparator
-        // Need to find a better way of passing whether the module was translated or not.
-        if new_module != *module {
-            *module = new_module;
+        if new_module.is_some() {
+            *module = new_module.unwrap();
             Ok(true)
         } else {
             Ok(false)
