@@ -16,9 +16,9 @@ pub mod verifyimports;
 use std::{error, fmt};
 
 #[derive(Eq, PartialEq, Debug)]
-pub enum ModuleError {
+pub enum ModuleError<'a> {
     NotSupported,
-    Custom(String),
+    Custom(&'a str),
 }
 
 pub trait ModuleCreator {
@@ -45,7 +45,7 @@ pub trait ModulePreset {
         Self: std::marker::Sized;
 }
 
-impl fmt::Display for ModuleError {
+impl<'a> fmt::Display for ModuleError<'a> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(
             f,
@@ -58,7 +58,7 @@ impl fmt::Display for ModuleError {
     }
 }
 
-impl error::Error for ModuleError {
+impl<'a> error::Error for ModuleError<'a> {
     fn description(&self) -> &str {
         match self {
             ModuleError::NotSupported => "Method unsupported",
@@ -134,7 +134,7 @@ mod tests {
         let fmt_result_unsupported = format!("{}", ModuleError::NotSupported);
         assert_eq!("Method unsupported", fmt_result_unsupported);
 
-        let fmt_result_custom = format!("{}", ModuleError::Custom("foo".to_string()));
+        let fmt_result_custom = format!("{}", ModuleError::Custom(&"foo"));
         assert_eq!("foo", fmt_result_custom);
     }
 
@@ -145,7 +145,7 @@ mod tests {
         let err_description_unsupported = err_unsupported.description();
         assert_eq!("Method unsupported", err_description_unsupported);
 
-        let err_custom = ModuleError::Custom("bar".to_string());
+        let err_custom = ModuleError::Custom(&"bar");
         let err_description_custom = err_custom.description();
         assert_eq!("bar", err_description_custom);
     }
