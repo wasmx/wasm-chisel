@@ -107,10 +107,13 @@ impl ModuleTranslator for TrimExports {
         Ok(self.trim_exports(module))
     }
 
-    fn translate(&self, module: &Module) -> Result<Module, ModuleError> {
+    fn translate(&self, module: &Module) -> Result<Option<Module>, ModuleError> {
         let mut ret = module.clone();
-        self.trim_exports(&mut ret);
-        Ok(ret)
+        let modified = self.trim_exports(&mut ret);
+        if modified {
+            return Ok(Some(ret));
+        }
+        Ok(None)
     }
 }
 

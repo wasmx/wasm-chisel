@@ -27,8 +27,8 @@ pub trait ModuleCreator {
 }
 
 pub trait ModuleTranslator {
-    /// Translates module. Returns new module. Can fail with ModuleError::NotSupported.
-    fn translate(&self, module: &Module) -> Result<Module, ModuleError>;
+    /// Translates module. Returns new module or none if nothing was modified. Can fail with ModuleError::NotSupported.
+    fn translate(&self, module: &Module) -> Result<Option<Module>, ModuleError>;
 
     /// Translates module in-place. Returns true if the module was modified. Can fail with ModuleError::NotSupported.
     fn translate_inplace(&self, module: &mut Module) -> Result<bool, ModuleError>;
@@ -86,8 +86,8 @@ mod tests {
     }
 
     impl ModuleTranslator for SampleModule {
-        fn translate(&self, module: &Module) -> Result<Module, ModuleError> {
-            Ok(Module::default())
+        fn translate(&self, module: &Module) -> Result<Option<Module>, ModuleError> {
+            Ok(Some(Module::default()))
         }
         fn translate_inplace(&self, module: &mut Module) -> Result<bool, ModuleError> {
             Ok((true))

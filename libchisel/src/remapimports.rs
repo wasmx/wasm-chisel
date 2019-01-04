@@ -210,10 +210,13 @@ impl ModuleTranslator for RemapImports {
         Ok(rename_imports(module, &self.translations))
     }
 
-    fn translate(&self, module: &Module) -> Result<Module, ModuleError> {
+    fn translate(&self, module: &Module) -> Result<Option<Module>, ModuleError> {
         let mut ret = module.clone();
-        rename_imports(&mut ret, &self.translations);
-        Ok(ret)
+        let modified = rename_imports(&mut ret, &self.translations);
+        if modified {
+            return Ok(Some(ret));
+        }
+        Ok(None)
     }
 }
 
