@@ -160,14 +160,10 @@ impl<'a> ImportCheck for ImportType<'a> {
                 .find(|e| e.field() == *field_str && *module_str == e.module())
             {
                 match entry.external() {
-                    // TODO: Wrap this in a helper.
                     External::Function(idx) => {
-                        if let Some(sig) = func_sig {
-                            if *sig == imported_func_sig_by_index(module, *idx as usize) {
-                                ImportStatus::Good
-                            } else {
-                                ImportStatus::Malformed
-                            }
+                        let sig = func_sig.expect("Function entry missing signature!");
+                        if *sig == imported_func_sig_by_index(module, *idx as usize) {
+                            ImportStatus::Good
                         } else {
                             ImportStatus::Malformed
                         }
@@ -276,12 +272,7 @@ pub fn imported_func_sig_by_index(module: &Module, index: usize) -> FunctionType
     let import_section = module.import_section().expect("No function section found");
     let type_section = module.type_section().expect("No type section found");
 
-    let func_type_ref: usize = match import_section.entries()[index].external() {
-        &External::Function(idx) => idx as usize,
-        _ => usize::max_value(),
-    };
-
-    match type_section.types()[func_type_ref] {
+    match type_section.types()[index] {
         Type::Function(ref func_type) => func_type.clone(),
     }
 }
@@ -662,4 +653,38 @@ mod tests {
         assert_eq!(false, result);
     }
 
+    #[test]
+    fn verify_with_dynamic_dispatch_before_imports_good() {
+        // NOTE: This is important for binaries utilizing dynamic dispatch.
+        // For example, rustc will place a type for vtable lookups before the imports in the type
+        // section, causing OOB.
+        // wast:
+        // (module
+        //   (type (;0;) (func (param i32 i32 i32) (result i32))) ; this is the problem
+        //   (type (;1;) (func (param i64)))
+        //
+        //   (import "ethereum" "useGas" (func $useGas (type 1)))
+        //
+        //   (memory 1)
+        //   (export "memory" (memory 0))
+        //   (export "main" (func $main))
+        //
+        //   (func $main)
+        // )
+        let wasm: Vec<u8> = vec![
+            0x00, 0x61, 0x73, 0x6d, 0x01, 0x00, 0x00, 0x00, 0x01, 0x0f, 0x03, 0x60, 0x03, 0x7f,
+            0x7f, 0x7f, 0x01, 0x7f, 0x60, 0x01, 0x7e, 0x00, 0x60, 0x00, 0x00, 0x02, 0x13, 0x01,
+            0x08, 0x65, 0x74, 0x68, 0x65, 0x72, 0x65, 0x75, 0x6d, 0x06, 0x75, 0x73, 0x65, 0x47,
+            0x61, 0x73, 0x00, 0x01, 0x03, 0x02, 0x01, 0x02, 0x05, 0x03, 0x01, 0x00, 0x01, 0x07,
+            0x11, 0x02, 0x06, 0x6d, 0x65, 0x6d, 0x6f, 0x72, 0x79, 0x02, 0x00, 0x04, 0x6d, 0x61,
+            0x69, 0x6e, 0x00, 0x01, 0x0a, 0x04, 0x01, 0x02, 0x00, 0x0b,
+        ];
+
+        let module = deserialize_buffer::<Module>(&wasm).unwrap();
+        let checker = VerifyImports::with_preset("ewasm").unwrap();
+
+        let result = checker.validate(&module).unwrap();
+
+        assert_eq!(true, result);
+    }
 }
