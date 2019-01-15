@@ -45,6 +45,12 @@ pub trait ModulePreset {
         Self: std::marker::Sized;
 }
 
+impl From<String> for ModuleError {
+    fn from(error: String) -> Self {
+        ModuleError::Custom(error)
+    }
+}
+
 impl fmt::Display for ModuleError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(
@@ -126,6 +132,12 @@ mod tests {
         let validator = SampleModule {};
         let result = validator.validate(&Module::default());
         assert!(result.is_ok());
+    }
+
+    #[test]
+    fn from_error() {
+        let err: ModuleError = "custom message".to_string().into();
+        assert_eq!(err, ModuleError::Custom("custom message".to_string()));
     }
 
     #[test]
