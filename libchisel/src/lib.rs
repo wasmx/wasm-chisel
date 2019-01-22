@@ -18,6 +18,7 @@ use std::{error, fmt};
 #[derive(Eq, PartialEq, Debug)]
 pub enum ModuleError {
     NotSupported,
+    NotFound,
     Custom(String),
 }
 
@@ -58,6 +59,7 @@ impl fmt::Display for ModuleError {
             "{}",
             match self {
                 ModuleError::NotSupported => "Method unsupported",
+                ModuleError::NotFound => "Not found",
                 ModuleError::Custom(msg) => msg,
             }
         )
@@ -68,6 +70,7 @@ impl error::Error for ModuleError {
     fn description(&self) -> &str {
         match self {
             ModuleError::NotSupported => "Method unsupported",
+            ModuleError::NotFound => "Not found",
             ModuleError::Custom(msg) => msg,
         }
     }
