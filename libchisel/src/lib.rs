@@ -13,6 +13,8 @@ pub mod trimexports;
 pub mod verifyexports;
 pub mod verifyimports;
 
+mod depgraph;
+
 use std::{error, fmt};
 
 #[derive(Eq, PartialEq, Debug)]
