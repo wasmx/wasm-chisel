@@ -17,12 +17,15 @@ pub struct DepGraph {
 
 /// Private interface for managing the function dependency graph
 trait DepGraphManager {
-    fn probe(&mut self, idx: u32, bodies: &[FuncBody]);
+    /// Recursive graph builder. Requires import section length in order to resolve the correct
+    /// function body.
+    fn probe(&mut self, idx: u32, imports_len: u32, bodies: &[FuncBody]);
     fn add_edge(&mut self, dep: Edge) -> bool;
 }
 
 /// Public interface for building function dependency graphs.
 pub trait DepGraphBuilder: DepGraphManager {
+    /// Builds the dependency graph.
     fn build(module: &Module, entry_idx: u32) -> Result<Self, ()>
     where
         Self: std::marker::Sized;
@@ -38,27 +41,34 @@ impl DepGraph {
     pub fn edgecount(&self) -> usize {
         self.edges.len()
     }
+    // TODO: better access methods
 }
 
 impl DepGraphManager for DepGraph {
     /// Recursively searches function bodies for calls to other functions and adds edges
     /// accordingly.
-    fn probe(&mut self, idx: u32, bodies: &[FuncBody]) {
-        assert!((idx as usize) < bodies.len());
+    fn probe(&mut self, idx: u32, imports_len: u32, bodies: &[FuncBody]) {
+        // If the function is an import, then just backtrack.
+        if idx < imports_len {
+            return;
+        }
 
-        let func_body = &bodies[idx as usize];
+        // Overflow case handled by the previous early return condition.
+        let code_idx: usize = (idx - imports_len) as usize;
+
+        assert!((code_idx) < bodies.len());
+        let func_body = &bodies[code_idx];
 
         for instr in func_body.code().elements().iter() {
             if let Instruction::Call(call_idx) = instr {
-                //TODO: Handle all cases of recursion
                 if self.add_edge(Edge::from((idx, *call_idx))) {
-                    self.probe(*call_idx, bodies);
+                    self.probe(*call_idx, imports_len, bodies);
                 } else {
+                    // If the edge already exists then begin backtracking.
                     return;
                 }
             }
             // TODO: Support for call_indirect
-            // TODO: Does the case of function imports need to be handled specially?
         }
     }
 
@@ -73,7 +83,13 @@ impl DepGraphBuilder for DepGraph {
         if let Some(code_section) = module.code_section() {
             let mut ret = DepGraph::new();
 
-            ret.probe(entry_idx, &code_section.bodies());
+            let imports_len: u32 = if let Some(section) = module.import_section() {
+                section.entries().len() as u32
+            } else {
+                0
+            };
+
+            ret.probe(entry_idx, imports_len, &code_section.bodies());
 
             Ok(ret)
         } else {
