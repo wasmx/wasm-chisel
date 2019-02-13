@@ -39,6 +39,7 @@ static DEFAULT_CONFIG_PATH: &'static str = "chisel.yml";
 
 /// Chisel configuration structure. Contains a file to chisel and a list of modules configurations.
 struct ChiselContext {
+    ruleset_name: String,
     file: String,
     // Output file. If a ModuleTranslator or ModuleCreator is invoked, resorts to a default.
     outfile: Option<String>,
@@ -68,23 +69,17 @@ fn get_field(yaml: &Value, key: &str) -> Result<String, &'static str> {
 }
 
 impl ChiselContext {
-    fn from_ruleset(ruleset: &Value) -> Result<Self, &'static str> {
+    fn from_ruleset(ruleset: &Value) -> Result<Vec<Self>, &'static str> {
         if let Value::Mapping(rules) = ruleset {
-            let mut filepath = String::new();
-            let mut outfilepath = Some(String::new());
-            let mut module_confs: Vec<ModuleContext> = vec![];
-            // If we have more than one ruleset, only use the first valid one.
-            // TODO: allow selecting a ruleset
-            if let Some((_name, mut config)) =
-                rules.iter().find(|(left, right)| match (left, right) {
-                    (Value::String(_s), Value::Mapping(_m)) => true,
-                    _ => false,
-                })
-            {
-                // First, set the filename.
-                filepath = get_field(config, "file")?;
+            let mut ret: Vec<ChiselContext> = vec![];
 
-                outfilepath = if let Ok(out) = get_field(config, "output") {
+            for (name, mut config) in rules.iter().filter(|(left, right)| match (left, right) {
+                (Value::String(_s), Value::Mapping(_m)) => true,
+                _ => false,
+            }) {
+                let filepath = get_field(config, "file")?;
+
+                let outfilepath = if let Ok(out) = get_field(config, "output") {
                     Some(out)
                 } else {
                     None
@@ -98,23 +93,29 @@ impl ChiselContext {
                 config_clone.remove(&Value::String(String::from("file")));
                 config_clone.remove(&Value::String(String::from("output")));
 
+                let mut module_confs: Vec<ModuleContext> = vec![];
                 let mut config_itr = config_clone.iter();
                 // Read modules while there are still modules left.
                 while let Some(module) = config_itr.next() {
                     module_confs.push(ModuleContext::from_yaml(module)?);
                 }
-            } else {
-                return Err(ERR_CONFIG_INVALID);
+
+                ret.push(ChiselContext {
+                    ruleset_name: name.as_str().unwrap().into(),
+                    file: filepath,
+                    outfile: outfilepath,
+                    modules: module_confs,
+                });
             }
 
-            Ok(ChiselContext {
-                file: filepath,
-                outfile: outfilepath,
-                modules: module_confs,
-            })
+            Ok(ret)
         } else {
             Err(ERR_CONFIG_INVALID)
         }
+    }
+
+    fn name(&self) -> &String {
+        &self.ruleset_name
     }
 
     fn file(&self) -> &String {
@@ -160,9 +161,9 @@ fn err_exit(msg: &str) -> ! {
     process::exit(-1);
 }
 
-fn yaml_configure(yaml: &String) -> Result<ChiselContext, &'static str> {
-    if let Ok(ruleset) = serde_yaml::from_str::<Value>(yaml.as_str()) {
-        ChiselContext::from_ruleset(&ruleset)
+fn yaml_configure(yaml: &String) -> Result<Vec<ChiselContext>, &'static str> {
+    if let Ok(rulesets) = serde_yaml::from_str::<Value>(yaml.as_str()) {
+        ChiselContext::from_ruleset(&rulesets)
     } else {
         Err(ERR_FAILED_PARSE_CONFIG)
     }
@@ -257,7 +258,7 @@ fn execute_module(context: &ModuleContext, module: &mut Module) -> bool {
     } else {
         ret.unwrap_err()
     };
-    println!("{}: {}", name, module_status_msg);
+    println!("\t{}: {}", name, module_status_msg);
 
     if let Ok(result) = ret {
         result
@@ -270,7 +271,7 @@ fn chisel_execute(context: &ChiselContext) -> Result<bool, &'static str> {
     if let Ok(buffer) = read(context.file()) {
         if let Ok(mut module) = deserialize_buffer::<Module>(&buffer) {
             let original = module.clone();
-            println!("========== RESULTS ==========");
+            println!("Ruleset {}:", context.name());
             let chisel_results = context
                 .get_modules()
                 .iter()
@@ -301,12 +302,13 @@ fn chisel_subcommand_run(args: &ArgMatches) -> i32 {
 
     if let Ok(conf) = read_to_string(config_path) {
         match yaml_configure(&conf) {
-            Ok(ctx) => match chisel_execute(&ctx) {
-                Ok(result) => {
-                    return if result { 0 } else { 1 };
-                }
-                Err(msg) => err_exit(msg),
-            },
+            Ok(ctxs) => {
+                let result_final = ctxs.iter().fold(0, |acc, ctx| match chisel_execute(&ctx) {
+                    Ok(result) => acc + if result { 0 } else { 1 }, // Add the number of module failures to exit code.
+                    Err(msg) => err_exit(msg),
+                });
+                return result_final;
+            }
             Err(msg) => err_exit(msg),
         };
     } else {
