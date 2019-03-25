@@ -8,6 +8,7 @@ repository = "https://github.com/wasmx/wasm-chisel"
 homepage = "https://github.com/wasmx/wasm-chisel"
 categories = ["webassembly", "development tools"]
 keywords = ["webassembly", "wasm", "blockchain", "ethereum"]
+edition = "2018"
 
 [dependencies]
 parity-wasm = "0.35.2"

@@ -242,11 +242,11 @@ fn rename_imports(module: &mut Module, translations: &Translations) -> bool {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::verifyimports::*;
+    use crate::{ModulePreset, ModuleTranslator, ModuleValidator};
     use parity_wasm;
     use rustc_hex::FromHex;
     use std::collections::HashMap;
-    use verifyimports::*;
-    use {ModulePreset, ModuleTranslator, ModuleValidator};
 
     #[test]
     fn smoke_test() {
