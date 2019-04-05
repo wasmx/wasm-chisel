@@ -101,6 +101,10 @@ impl ModulePreset for Translations {
                         ImportPair::new("ethereum", "getExternalCodeSize"),
                     ),
                     (
+                        ImportPair::new("env", "ethereum_externalCodeCopy"),
+                        ImportPair::new("ethereum", "externalCodeCopy"),
+                    ),
+                    (
                         ImportPair::new("env", "ethereum_codeCopy"),
                         ImportPair::new("ethereum", "codeCopy"),
                     ),
