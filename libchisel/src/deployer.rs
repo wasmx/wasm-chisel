@@ -75,6 +75,11 @@ fn create_custom_deployer(payload: &[u8]) -> Module {
     // This is the pre-written deployer code.
     let mut module: Module = parity_wasm::deserialize_buffer(&code).expect("Failed to load module");
 
+    // Re-write memory to pre-allocate enough for code size
+    let memory_initial = (payload.len() as u32 / 65536) + 1;
+    let mem_type = parity_wasm::elements::MemoryType::new(memory_initial, None, false);
+    module.memory_section_mut().unwrap().entries_mut()[0] = mem_type;
+
     // Prepare payload (append length).
     let mut custom_payload = payload.to_vec();
     custom_payload
@@ -101,6 +106,8 @@ fn create_memory_deployer(payload: &[u8]) -> Module {
         parity_wasm::elements::Instruction::Call(0),
         parity_wasm::elements::Instruction::End,
     ];
+
+    let memory_initial = (payload.len() as u32 / 65536) + 1;
 
     let module = builder::module()
         // Create a func/type for the ethereum::finish
@@ -132,6 +139,7 @@ fn create_memory_deployer(payload: &[u8]) -> Module {
             .build()
         // Add default memory section
         .memory()
+            .with_min(memory_initial)
             .build()
         // Export memory
         .export()
@@ -215,6 +223,19 @@ mod tests {
     }
 
     #[test]
+    fn big_payload() {
+        let payload = [0; 632232];
+        let module = Deployer::with_preset("customsection", &payload)
+            .unwrap()
+            .create()
+            .unwrap();
+        let memory_initial = module.memory_section().unwrap().entries()[0]
+            .limits()
+            .initial();
+        assert_eq!(memory_initial, 10);
+    }
+
+    #[test]
     fn memory_zero_payload() {
         let payload = vec![];
         let module = Deployer::with_preset("memory", &payload)
@@ -251,5 +272,18 @@ mod tests {
         .unwrap();
         let output = parity_wasm::serialize(module).expect("Failed to serialize");
         assert_eq!(output, expected);
+    }
+
+    #[test]
+    fn memory_big_payload() {
+        let payload = [0; 632232];
+        let module = Deployer::with_preset("memory", &payload)
+            .unwrap()
+            .create()
+            .unwrap();
+        let memory_initial = module.memory_section().unwrap().entries()[0]
+            .limits()
+            .initial();
+        assert_eq!(memory_initial, 10);
     }
 }
