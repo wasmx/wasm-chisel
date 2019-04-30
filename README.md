@@ -20,6 +20,14 @@ This comes with some presets:
 - `ewasm`: keeps `main` and exported memory
 - `pwasm`: keeps `_call`
 
+### trimstartfunc
+
+Remove start function.
+
+This comes with the following preset:
+- `ewasm`: removes `start` function if present
+
+
 ### verifyimports
 
 Verifies that the module's imports are compliant with the provided import interface.
