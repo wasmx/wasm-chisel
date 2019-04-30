@@ -27,143 +27,55 @@ impl ModulePreset for Translations {
     fn with_preset(preset: &str) -> Result<Self, ()> {
         match preset {
             "ewasm" => {
-                let trans: HashMap<ImportPair, ImportPair> = [
-                    (
-                        ImportPair::new("env", "ethereum_useGas"),
-                        ImportPair::new("ethereum", "useGas"),
-                    ),
-                    (
-                        ImportPair::new("env", "ethereum_getGasLeft"),
-                        ImportPair::new("ethereum", "getGasLeft"),
-                    ),
-                    (
-                        ImportPair::new("env", "ethereum_getAddress"),
-                        ImportPair::new("ethereum", "getAddress"),
-                    ),
-                    (
-                        ImportPair::new("env", "ethereum_getBlockHash"),
-                        ImportPair::new("ethereum", "getBlockHash"),
-                    ),
-                    (
-                        ImportPair::new("env", "ethereum_getBlockCoinbase"),
-                        ImportPair::new("ethereum", "getBlockCoinbase"),
-                    ),
-                    (
-                        ImportPair::new("env", "ethereum_getBlockDifficulty"),
-                        ImportPair::new("ethereum", "getBlockDifficulty"),
-                    ),
-                    (
-                        ImportPair::new("env", "ethereum_getBlockGasLimit"),
-                        ImportPair::new("ethereum", "getBlockGasLimit"),
-                    ),
-                    (
-                        ImportPair::new("env", "ethereum_getBlockNumber"),
-                        ImportPair::new("ethereum", "getBlockNumber"),
-                    ),
-                    (
-                        ImportPair::new("env", "ethereum_getBlockTimestamp"),
-                        ImportPair::new("ethereum", "getBlockTimestamp"),
-                    ),
-                    (
-                        ImportPair::new("env", "ethereum_getExternalBalance"),
-                        ImportPair::new("ethereum", "getExternalBalance"),
-                    ),
-                    (
-                        ImportPair::new("env", "ethereum_getTxGasPrice"),
-                        ImportPair::new("ethereum", "getTxGasPrice"),
-                    ),
-                    (
-                        ImportPair::new("env", "ethereum_getTxOrigin"),
-                        ImportPair::new("ethereum", "getTxOrigin"),
-                    ),
-                    (
-                        ImportPair::new("env", "ethereum_getCaller"),
-                        ImportPair::new("ethereum", "getCaller"),
-                    ),
-                    (
-                        ImportPair::new("env", "ethereum_getCallDataSize"),
-                        ImportPair::new("ethereum", "getCallDataSize"),
-                    ),
-                    (
-                        ImportPair::new("env", "ethereum_getCallValue"),
-                        ImportPair::new("ethereum", "getCallValue"),
-                    ),
-                    (
-                        ImportPair::new("env", "ethereum_callDataCopy"),
-                        ImportPair::new("ethereum", "callDataCopy"),
-                    ),
-                    (
-                        ImportPair::new("env", "ethereum_getCodeSize"),
-                        ImportPair::new("ethereum", "getCodeSize"),
-                    ),
-                    (
-                        ImportPair::new("env", "ethereum_getExternalCodeSize"),
-                        ImportPair::new("ethereum", "getExternalCodeSize"),
-                    ),
-                    (
-                        ImportPair::new("env", "ethereum_externalCodeCopy"),
-                        ImportPair::new("ethereum", "externalCodeCopy"),
-                    ),
-                    (
-                        ImportPair::new("env", "ethereum_codeCopy"),
-                        ImportPair::new("ethereum", "codeCopy"),
-                    ),
-                    (
-                        ImportPair::new("env", "ethereum_getReturnDataSize"),
-                        ImportPair::new("ethereum", "getReturnDataSize"),
-                    ),
-                    (
-                        ImportPair::new("env", "ethereum_returnDataCopy"),
-                        ImportPair::new("ethereum", "returnDataCopy"),
-                    ),
-                    (
-                        ImportPair::new("env", "ethereum_create"),
-                        ImportPair::new("ethereum", "create"),
-                    ),
-                    (
-                        ImportPair::new("env", "ethereum_call"),
-                        ImportPair::new("ethereum", "call"),
-                    ),
-                    (
-                        ImportPair::new("env", "ethereum_callCode"),
-                        ImportPair::new("ethereum", "callCode"),
-                    ),
-                    (
-                        ImportPair::new("env", "ethereum_callDelegate"),
-                        ImportPair::new("ethereum", "callDelegate"),
-                    ),
-                    (
-                        ImportPair::new("env", "ethereum_callStatic"),
-                        ImportPair::new("ethereum", "callStatic"),
-                    ),
-                    (
-                        ImportPair::new("env", "ethereum_storageLoad"),
-                        ImportPair::new("ethereum", "storageLoad"),
-                    ),
-                    (
-                        ImportPair::new("env", "ethereum_log"),
-                        ImportPair::new("ethereum", "log"),
-                    ),
-                    (
-                        ImportPair::new("env", "ethereum_storageStore"),
-                        ImportPair::new("ethereum", "storageStore"),
-                    ),
-                    (
-                        ImportPair::new("env", "ethereum_revert"),
-                        ImportPair::new("ethereum", "revert"),
-                    ),
-                    (
-                        ImportPair::new("env", "ethereum_finish"),
-                        ImportPair::new("ethereum", "finish"),
-                    ),
-                    (
-                        ImportPair::new("env", "ethereum_selfDestruct"),
-                        ImportPair::new("ethereum", "selfDestruct"),
-                    ),
-                ]
-                .iter()
-                .cloned()
-                .collect();
+                let namespaces = vec!["env", "index"];
+                let methods = vec!["useGas",
+                                   "getGasLeft",
+                                   "getAddress",
+                                   "getBlockHash",
+                                   "getBlockCoinbase",
+                                   "getBlockDifficulty",
+                                   "getBlockGasLimit",
+                                   "getBlockNumber",
+                                   "getBlockTimestamp",
+                                   "getExternalBalance",
+                                   "getTxGasPrice",
+                                   "getTxOrigin",
+                                   "getCaller",
+                                   "getCallDataSize",
+                                   "getCallValue",
+                                   "callDataCopy",
+                                   "getCodeSize",
+                                   "getExternalCodeSize",
+                                   "externalCodeCopy",
+                                   "codeCopy",
+                                   "getReturnDataSize",
+                                   "returnDataCopy",
+                                   "create",
+                                   "call",
+                                   "callCode",
+                                   "callDelegate",
+                                   "callStatic",
+                                   "storageLoad",
+                                   "log",
+                                   "storageStore",
+                                   "revert",
+                                   "finish",
+                                   "selfDestruct"];
+
+                let mut pairs = Vec::new();
+                for method in methods.iter() {
+                    for ns in &namespaces {
+                        let external_method_name = format!("ethereum_{}", method);
+                        let import_pair = (
+                            ImportPair::new(ns, external_method_name.as_str()),
+                            ImportPair::new("ethereum", method));
+                        pairs.push(import_pair);
+                    }
+                }
+
+                let trans: HashMap<ImportPair, ImportPair> = pairs.iter()
+                    .cloned()
+                    .collect();
                 Ok(Translations {
                     translations: trans,
                 })
