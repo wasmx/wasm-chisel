@@ -28,39 +28,41 @@ impl ModulePreset for Translations {
         match preset {
             "ewasm" => {
                 let namespaces = vec!["env", "index"];
-                let methods = vec!["useGas",
-                                   "getGasLeft",
-                                   "getAddress",
-                                   "getBlockHash",
-                                   "getBlockCoinbase",
-                                   "getBlockDifficulty",
-                                   "getBlockGasLimit",
-                                   "getBlockNumber",
-                                   "getBlockTimestamp",
-                                   "getExternalBalance",
-                                   "getTxGasPrice",
-                                   "getTxOrigin",
-                                   "getCaller",
-                                   "getCallDataSize",
-                                   "getCallValue",
-                                   "callDataCopy",
-                                   "getCodeSize",
-                                   "getExternalCodeSize",
-                                   "externalCodeCopy",
-                                   "codeCopy",
-                                   "getReturnDataSize",
-                                   "returnDataCopy",
-                                   "create",
-                                   "call",
-                                   "callCode",
-                                   "callDelegate",
-                                   "callStatic",
-                                   "storageLoad",
-                                   "log",
-                                   "storageStore",
-                                   "revert",
-                                   "finish",
-                                   "selfDestruct"];
+                let methods = vec![
+                    "useGas",
+                    "getGasLeft",
+                    "getAddress",
+                    "getBlockHash",
+                    "getBlockCoinbase",
+                    "getBlockDifficulty",
+                    "getBlockGasLimit",
+                    "getBlockNumber",
+                    "getBlockTimestamp",
+                    "getExternalBalance",
+                    "getTxGasPrice",
+                    "getTxOrigin",
+                    "getCaller",
+                    "getCallDataSize",
+                    "getCallValue",
+                    "callDataCopy",
+                    "getCodeSize",
+                    "getExternalCodeSize",
+                    "externalCodeCopy",
+                    "codeCopy",
+                    "getReturnDataSize",
+                    "returnDataCopy",
+                    "create",
+                    "call",
+                    "callCode",
+                    "callDelegate",
+                    "callStatic",
+                    "storageLoad",
+                    "log",
+                    "storageStore",
+                    "revert",
+                    "finish",
+                    "selfDestruct",
+                ];
 
                 let mut pairs = Vec::new();
                 for method in methods.iter() {
@@ -68,14 +70,13 @@ impl ModulePreset for Translations {
                         let external_method_name = format!("ethereum_{}", method);
                         let import_pair = (
                             ImportPair::new(ns, external_method_name.as_str()),
-                            ImportPair::new("ethereum", method));
+                            ImportPair::new("ethereum", method),
+                        );
                         pairs.push(import_pair);
                     }
                 }
 
-                let trans: HashMap<ImportPair, ImportPair> = pairs.iter()
-                    .cloned()
-                    .collect();
+                let trans: HashMap<ImportPair, ImportPair> = pairs.iter().cloned().collect();
                 Ok(Translations {
                     translations: trans,
                 })
