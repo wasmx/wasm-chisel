@@ -69,6 +69,14 @@ ewasm:
     preset: "ewasm"
 ```
 
+## Docker
+
+Chisel can be invoked through Docker using `ewasm/chisel`:
+
+```
+docker run -v /path/to/host_workspace:/workspace -v /path/to/host/chisel.yml:/chisel.yml -t ewasm/wasm-chisel run
+```
+
 ## sentinel.rs
 
 TBA
