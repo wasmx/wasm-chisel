@@ -51,6 +51,10 @@ Wraps module into an ewasm-compatible constructor. It has two presets:
 - `memory`: wrap the module as a pre-defined memory section
 - `customsection`: include the module as a custom section
 
+### repack
+
+Re-serializes the module. It will drop any unknown (custom) sections.
+
 ## CLI
 
 `chisel` is available as a command line tool.

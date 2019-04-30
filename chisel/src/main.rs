@@ -10,7 +10,7 @@ use std::fs::{read, read_to_string};
 use std::process;
 
 use libchisel::{
-    checkstartfunc::*, deployer::*, remapimports::*, trimexports::*, trimstartfunc::*,
+    checkstartfunc::*, deployer::*, remapimports::*, repack::*, trimexports::*, trimstartfunc::*,
     verifyexports::*, verifyimports::*,
 };
 
@@ -254,6 +254,7 @@ fn execute_module(context: &ModuleContext, module: &mut Module) -> bool {
                 Err("deployer: Invalid preset")
             }
         }
+        "repack" => translate_module(module, Repack::new()),
         _ => Err("Module Not Found"),
     };
 
