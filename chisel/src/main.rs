@@ -261,7 +261,11 @@ fn execute_module(context: &ModuleContext, module: &mut Module) -> bool {
     println!("\t{}: {}", name, module_status_msg);
 
     if let Ok(result) = ret {
-        result
+        if !result && is_translator {
+            true
+        } else {
+            result
+        }
     } else {
         false
     }
