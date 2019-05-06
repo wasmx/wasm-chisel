@@ -139,6 +139,11 @@ impl<'a> ModulePreset for ImportList<'a> {
                 ),
                 ImportType::Function(
                     "ethereum",
+                    "getExternalCodeSize",
+                    FunctionType::new(vec![ValueType::I32], Some(ValueType::I32)),
+                ),
+                ImportType::Function(
+                    "ethereum",
                     "externalCodeCopy",
                     FunctionType::new(
                         vec![
@@ -149,6 +154,11 @@ impl<'a> ModulePreset for ImportList<'a> {
                         ],
                         None,
                     ),
+                ),
+                ImportType::Function(
+                    "ethereum",
+                    "codeCopy",
+                    FunctionType::new(vec![ValueType::I32, ValueType::I32, ValueType::I32], None),
                 ),
                 ImportType::Function(
                     "ethereum",
