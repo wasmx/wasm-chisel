@@ -167,7 +167,149 @@ impl ModulePreset for Translations {
                 Ok(Translations {
                     translations: trans,
                 })
-            }
+            },
+            "ewasm_clang" => {
+                let trans: HashMap<ImportPair, ImportPair> = [
+                    (
+                        ImportPair::new("env", "useGas"),
+                        ImportPair::new("ethereum", "useGas"),
+                    ),
+                    (
+                        ImportPair::new("env", "getGasLeft"),
+                        ImportPair::new("ethereum", "getGasLeft"),
+                    ),
+                    (
+                        ImportPair::new("env", "getAddress"),
+                        ImportPair::new("ethereum", "getAddress"),
+                    ),
+                    (
+                        ImportPair::new("env", "getBlockHash"),
+                        ImportPair::new("ethereum", "getBlockHash"),
+                    ),
+                    (
+                        ImportPair::new("env", "getBlockCoinbase"),
+                        ImportPair::new("ethereum", "getBlockCoinbase"),
+                    ),
+                    (
+                        ImportPair::new("env", "getBlockDifficulty"),
+                        ImportPair::new("ethereum", "getBlockDifficulty"),
+                    ),
+                    (
+                        ImportPair::new("env", "getBlockGasLimit"),
+                        ImportPair::new("ethereum", "getBlockGasLimit"),
+                    ),
+                    (
+                        ImportPair::new("env", "getBlockNumber"),
+                        ImportPair::new("ethereum", "getBlockNumber"),
+                    ),
+                    (
+                        ImportPair::new("env", "getBlockTimestamp"),
+                        ImportPair::new("ethereum", "getBlockTimestamp"),
+                    ),
+                    (
+                        ImportPair::new("env", "getExternalBalance"),
+                        ImportPair::new("ethereum", "getExternalBalance"),
+                    ),
+                    (
+                        ImportPair::new("env", "getTxGasPrice"),
+                        ImportPair::new("ethereum", "getTxGasPrice"),
+                    ),
+                    (
+                        ImportPair::new("env", "getTxOrigin"),
+                        ImportPair::new("ethereum", "getTxOrigin"),
+                    ),
+                    (
+                        ImportPair::new("env", "getCaller"),
+                        ImportPair::new("ethereum", "getCaller"),
+                    ),
+                    (
+                        ImportPair::new("env", "getCallDataSize"),
+                        ImportPair::new("ethereum", "getCallDataSize"),
+                    ),
+                    (
+                        ImportPair::new("env", "getCallValue"),
+                        ImportPair::new("ethereum", "getCallValue"),
+                    ),
+                    (
+                        ImportPair::new("env", "callDataCopy"),
+                        ImportPair::new("ethereum", "callDataCopy"),
+                    ),
+                    (
+                        ImportPair::new("env", "getCodeSize"),
+                        ImportPair::new("ethereum", "getCodeSize"),
+                    ),
+                    (
+                        ImportPair::new("env", "getExternalCodeSize"),
+                        ImportPair::new("ethereum", "getExternalCodeSize"),
+                    ),
+                    (
+                        ImportPair::new("env", "externalCodeCopy"),
+                        ImportPair::new("ethereum", "externalCodeCopy"),
+                    ),
+                    (
+                        ImportPair::new("env", "codeCopy"),
+                        ImportPair::new("ethereum", "codeCopy"),
+                    ),
+                    (
+                        ImportPair::new("env", "getReturnDataSize"),
+                        ImportPair::new("ethereum", "getReturnDataSize"),
+                    ),
+                    (
+                        ImportPair::new("env", "returnDataCopy"),
+                        ImportPair::new("ethereum", "returnDataCopy"),
+                    ),
+                    (
+                        ImportPair::new("env", "create"),
+                        ImportPair::new("ethereum", "create"),
+                    ),
+                    (
+                        ImportPair::new("env", "call"),
+                        ImportPair::new("ethereum", "call"),
+                    ),
+                    (
+                        ImportPair::new("env", "callCode"),
+                        ImportPair::new("ethereum", "callCode"),
+                    ),
+                    (
+                        ImportPair::new("env", "callDelegate"),
+                        ImportPair::new("ethereum", "callDelegate"),
+                    ),
+                    (
+                        ImportPair::new("env", "callStatic"),
+                        ImportPair::new("ethereum", "callStatic"),
+                    ),
+                    (
+                        ImportPair::new("env", "storageLoad"),
+                        ImportPair::new("ethereum", "storageLoad"),
+                    ),
+                    (
+                        ImportPair::new("env", "log"),
+                        ImportPair::new("ethereum", "log"),
+                    ),
+                    (
+                        ImportPair::new("env", "storageStore"),
+                        ImportPair::new("ethereum", "storageStore"),
+                    ),
+                    (
+                        ImportPair::new("env", "revert"),
+                        ImportPair::new("ethereum", "revert"),
+                    ),
+                    (
+                        ImportPair::new("env", "finish"),
+                        ImportPair::new("ethereum", "finish"),
+                    ),
+                    (
+                        ImportPair::new("env", "selfDestruct"),
+                        ImportPair::new("ethereum", "selfDestruct"),
+                    ),
+                ]
+                .iter()
+                .cloned()
+                .collect();
+                Ok(Translations {
+                    translations: trans,
+                })
+            },
             _ => Err(()),
         }
     }
@@ -203,6 +345,9 @@ impl ModulePreset for RemapImports {
         match preset {
             "ewasm" => Ok(RemapImports {
                 translations: Translations::with_preset("ewasm").unwrap(),
+            }),
+            "ewasm_clang" => Ok(RemapImports {
+                translations: Translations::with_preset("ewasm_clang").unwrap(),
             }),
             _ => Err(()),
         }
