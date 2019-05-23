@@ -1,7 +1,7 @@
 [package]
 name = "libchisel"
 description = "Some useful utilities to transform WebAssembly binaries, most importantly for WebAssembly used in a deterministic / blockchain context"
-version = "0.2.0"
+version = "0.3.0"
 authors = ["Alex Beregszaszi <alex@rtfs.hu>", "Jake Lang <jak3lang@gmail.com>"]
 license = "Apache-2.0"
 repository = "https://github.com/wasmx/wasm-chisel"
