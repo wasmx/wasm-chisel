@@ -1,3 +1,6 @@
+//! Crude logging utility for chisel.
+
+/// The global log level. And probably one of the few acceptable uses of mutable globals.
 static mut LOG_LEVEL: i32 = 0;
 
 #[macro_export]

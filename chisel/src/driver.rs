@@ -263,6 +263,123 @@ impl ChiselDriver {
                 let dropsection = DropSection::NamesSection;
                 ModuleResult::Translator(name, dropsection.translate_inplace(wasm))
             }
+            "dropsection" => {
+                match (module.options().get("mode"), module.options().get("key")) {
+                    (Some(mode), Some(key)) => {
+                        let dropsections = match mode.as_str() {
+                            "names" => {
+                                // Ignore key here.
+                                vec![DropSection::NamesSection]
+                            }
+                            // TODO: Split into a batch
+                            "custom_by_name" => key
+                                .split(',')
+                                .filter(|val| *val != "" && *val != " ")
+                                .map(|val| {
+                                    chisel_debug!(1, "Loading dropsection for name: '{}'", val);
+                                    DropSection::CustomSectionByName(val.to_string())
+                                })
+                                .collect(),
+                            m @ "custom_by_index" | m @ "unknown_by_index" => {
+                                chisel_debug!(1, "Running dropsection in mode {}", m);
+                                // TODO: Split into a helper
+                                // First generate a set of section indices to drop from the
+                                // comma-separated list we produced during config parsing.
+                                let (indices, mut errs): (
+                                    Vec<Result<u64, Box<dyn Error>>>,
+                                    Vec<Result<u64, Box<dyn Error>>>,
+                                ) = key
+                                    .split(',')
+                                    .filter(|val| *val != "" && *val != " ")
+                                    .map(|val| match str::parse::<u64>(val) {
+                                        Ok(index) => {
+                                            chisel_debug!(
+                                                1,
+                                                "Loading dropsection for index: {}",
+                                                index
+                                            );
+                                            Ok(index)
+                                        }
+                                        Err(e) => {
+                                            chisel_debug!(
+                                                1,
+                                                "dropsection failed to parse integer value: {}",
+                                                e
+                                            );
+                                            Err(e.into())
+                                        }
+                                    })
+                                    .partition(|i| i.is_ok());
+                                // If the right-hand partition contains any errors,
+                                // propagate the last one.
+                                if let Some(e) = errs.pop() {
+                                    // For now, just use the last error as we only have
+                                    // one error case.
+                                    return Err(DriverError::Internal(
+                                        name.clone(),
+                                        "Expected integer value".to_string(),
+                                        e.unwrap_err(),
+                                    ));
+                                }
+                                // Collect the indices into a vec of initialized
+                                // DropSection modules.
+                                indices
+                                    .into_iter()
+                                    .map(|idx| match m {
+                                        "custom_by_index" => DropSection::CustomSectionByIndex(
+                                            idx.expect("Already handled errors") as usize,
+                                        ),
+                                        "unknown_by_index" => DropSection::UnknownSectionByIndex(
+                                            idx.expect("Already handled errors") as usize,
+                                        ),
+                                        _ => panic!("Parent match ensures this cannot be reached"),
+                                    })
+                                    .collect()
+                            }
+                            _ => {
+                                chisel_debug!(1, "dropsection given invalid mode");
+                                return Err(DriverError::InvalidField(
+                                    name.clone(),
+                                    "mode".to_string(),
+                                ));
+                            }
+                        };
+                        let module_result = dropsections
+                            .iter()
+                            .map(|i| i.translate_inplace(wasm))
+                            .fold(Ok(false), |acc, result| match result {
+                                Ok(true) => result,
+                                Ok(false) => acc,
+                                Err(e) => Err(e),
+                            });
+                        ModuleResult::Translator(name.clone(), module_result)
+                    }
+                    (Some(mode), None) => {
+                        if mode.as_str() == "names" {
+                            let dropsection = DropSection::NamesSection;
+                            let module_result = dropsection.translate_inplace(wasm);
+                            ModuleResult::Translator(name.clone(), module_result)
+                        } else {
+                            chisel_debug!(
+                                1,
+                                "dropsection missing field 'key' and not in names section mode"
+                            );
+                            return Err(DriverError::MissingRequiredField(
+                                name.clone(),
+                                "key".to_string(),
+                            ));
+                        }
+                    }
+                    (None, _) => {
+                        chisel_debug!(1, "dropsection missing field 'mode'");
+                        return Err(DriverError::MissingRequiredField(
+                            name.clone(),
+                            "mode".to_string(),
+                        ));
+                    }
+                }
+            }
+            "fromwat" => unimplemented!("Creator modules are not supported yet."),
             "remapimports" => {
                 if let Some(preset) = module.options().get("preset") {
                     let remapimports = RemapImports::with_preset(preset.as_str());

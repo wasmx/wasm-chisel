@@ -11,7 +11,7 @@
 use std::error::Error;
 use std::fmt::{self, Display};
 use std::fs::write;
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 
 use ansi_term::Colour::{Green, Red, Yellow};
 
@@ -54,6 +54,10 @@ impl ChiselResult {
     pub fn rulesets(&self) -> &Vec<RulesetResult> {
         &self.0
     }
+
+    pub fn unwrap(self) -> Vec<RulesetResult> {
+        self.0
+    }
 }
 
 impl RulesetResult {
@@ -67,7 +71,7 @@ impl RulesetResult {
     }
 
     pub fn name(&self) -> &str {
-        self.ruleset_name.as_str()
+        &self.ruleset_name.as_str()
     }
 
     pub fn results_mut(&mut self) -> &mut Vec<ModuleResult> {
@@ -85,7 +89,7 @@ impl RulesetResult {
     /// Write output module to specified file if the module was mutated.
     /// Returns Ok(false) if there is no mutation.
     /// Returns error on writer error or invalid mode.
-    pub fn write(&mut self, mode: &str) -> Result<bool, Box<dyn Error>> {
+    pub fn write(mut self, mode: &str) -> Result<bool, Box<dyn Error>> {
         if let Some(module) = self.output_module.take() {
             let path = PathBuf::from(&self.output_path);
             let ret = match mode {
@@ -205,7 +209,7 @@ mod tests {
 
     #[test]
     fn writer_success_to_stdout() {
-        let mut ruleset_result = {
+        let ruleset_result = {
             let mut result = RulesetResult::new("Test".to_string());
             let module = Module::default();
             result.set_output_module(module);
@@ -213,20 +217,14 @@ mod tests {
             result
         };
 
-        // First run
         let result = ruleset_result.write("hex");
         assert!(result.is_ok());
         assert_eq!(result.unwrap(), true);
-
-        // Second run
-        let result = ruleset_result.write("hex");
-        assert!(result.is_ok());
-        assert_eq!(result.unwrap(), false);
     }
 
     #[test]
     fn writer_deny_raw_binary_to_stdout() {
-        let mut ruleset_result = {
+        let ruleset_result = {
             let mut result = RulesetResult::new("Test".to_string());
             let module = Module::default();
             result.set_output_module(module);
@@ -240,7 +238,7 @@ mod tests {
 
     #[test]
     fn writer_invalid_mode() {
-        let mut ruleset_result = {
+        let ruleset_result = {
             let mut result = RulesetResult::new("Test".to_string());
             let module = Module::default();
             result.set_output_module(module);
@@ -254,14 +252,8 @@ mod tests {
 
     #[test]
     fn writer_no_module() {
-        let mut ruleset_result = RulesetResult::new("Test".to_string());
+        let ruleset_result = RulesetResult::new("Test".to_string());
 
-        // First run
-        let result = ruleset_result.write("hex");
-        assert!(result.is_ok());
-        assert_eq!(result.expect("Should be Ok"), false);
-
-        // Second run
         let result = ruleset_result.write("hex");
         assert!(result.is_ok());
         assert_eq!(result.expect("Should be Ok"), false);
