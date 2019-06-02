@@ -13,6 +13,7 @@ pub mod trimexports;
 pub mod trimstartfunc;
 pub mod verifyexports;
 pub mod verifyimports;
+pub mod remapexports;
 
 mod depgraph;
 
