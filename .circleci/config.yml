@@ -32,7 +32,11 @@ jobs:
              cargo fmt --all -- --check
       - run:
           name: Build
-          command: cargo build --release
+          command: |
+             cargo build --release
+             cargo build --release --features wabt
       - run:
           name: Test
-          command: cargo test
+          command: |
+             cargo test
+             cargo test --features wabt
