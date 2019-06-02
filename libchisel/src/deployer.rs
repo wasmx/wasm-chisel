@@ -71,18 +71,21 @@ fn create_custom_deployer(payload: &[u8]) -> Module {
     let code = deployer_code();
 
     // This is the pre-written deployer code.
-    let mut module: Module = parity_wasm::deserialize_buffer(&code).expect("Failed to load module");
+    let mut module: Module = parity_wasm::deserialize_buffer(&code).expect("invalid wasm bytecode");
 
     // Re-write memory to pre-allocate enough for code size
     let memory_initial = (payload.len() as u32 / 65536) + 1;
     let mem_type = parity_wasm::elements::MemoryType::new(memory_initial, None, false);
-    module.memory_section_mut().unwrap().entries_mut()[0] = mem_type;
+    module
+        .memory_section_mut()
+        .expect("failed to get memory section")
+        .entries_mut()[0] = mem_type;
 
     // Prepare payload (append length).
     let mut custom_payload = payload.to_vec();
     custom_payload
         .write_i32::<LittleEndian>(payload.len() as i32)
-        .unwrap();
+        .expect("failed to write payload size");
 
     // Prepare and append custom section.
     let custom = CustomSection::new("deployer".to_string(), custom_payload);
