@@ -304,7 +304,8 @@ pub fn imported_func_sig_by_index(module: &Module, index: usize) -> FunctionType
 #[cfg(test)]
 mod tests {
     use super::*;
-    use parity_wasm::elements::{deserialize_buffer, ValueType};
+    use crate::utils::SerializationHelpers;
+    use parity_wasm::elements::ValueType;
 
     #[test]
     fn no_imports_ok_ewasm() {
@@ -322,7 +323,7 @@ mod tests {
             0x0a, 0x04, 0x01, 0x02, 0x00, 0x0b,
         ];
 
-        let module = deserialize_buffer::<Module>(&wasm).unwrap();
+        let module = Module::from_slice(&wasm).unwrap();
         let checker = VerifyImports::with_preset("ewasm").unwrap();
         let result = checker.validate(&module).unwrap();
         assert_eq!(true, result);
@@ -347,7 +348,7 @@ mod tests {
             0x72, 0x79, 0x02, 0x00, 0x0a, 0x04, 0x01, 0x02, 0x00, 0x0b,
         ];
 
-        let module = deserialize_buffer::<Module>(&wasm).unwrap();
+        let module = Module::from_slice(&wasm).unwrap();
         let checker = VerifyImports::with_preset("ewasm").unwrap();
         let result = checker.validate(&module).unwrap();
         assert_eq!(true, result);
@@ -372,7 +373,7 @@ mod tests {
             0x79, 0x02, 0x00, 0x0a, 0x04, 0x01, 0x02, 0x00, 0x0b,
         ];
 
-        let module = deserialize_buffer::<Module>(&wasm).unwrap();
+        let module = Module::from_slice(&wasm).unwrap();
         let checker = VerifyImports::with_preset("ewasm").unwrap();
         let result = checker.validate(&module).unwrap();
         assert_eq!(false, result);
@@ -397,7 +398,7 @@ mod tests {
             0x04, 0x01, 0x02, 0x00, 0x0b,
         ];
 
-        let module = deserialize_buffer::<Module>(&wasm).unwrap();
+        let module = Module::from_slice(&wasm).unwrap();
         let checker = VerifyImports::with_preset("ewasm").unwrap();
         let result = checker.validate(&module).unwrap();
         assert_eq!(false, result);
@@ -422,7 +423,7 @@ mod tests {
             0x79, 0x02, 0x00, 0x0a, 0x04, 0x01, 0x02, 0x00, 0x0b,
         ];
 
-        let module = deserialize_buffer::<Module>(&wasm).unwrap();
+        let module = Module::from_slice(&wasm).unwrap();
         let checker = VerifyImports::with_preset("ewasm").unwrap();
         let result = checker.validate(&module).unwrap();
         assert_eq!(false, result);
@@ -458,7 +459,7 @@ mod tests {
             0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
         ];
 
-        let module = deserialize_buffer::<Module>(&wasm).unwrap();
+        let module = Module::from_slice(&wasm).unwrap();
         let checker = VerifyImports::with_preset("ewasm").unwrap();
         let result = checker.validate(&module).unwrap();
         assert_eq!(true, result);
@@ -485,7 +486,7 @@ mod tests {
             0x6d, 0x65, 0x6d, 0x6f, 0x72, 0x79, 0x02, 0x00, 0x0a, 0x04, 0x01, 0x02, 0x00, 0x0b,
         ];
 
-        let module = deserialize_buffer::<Module>(&wasm).unwrap();
+        let module = Module::from_slice(&wasm).unwrap();
         let checker = VerifyImports::with_preset("ewasm").unwrap();
         let result = checker.validate(&module).unwrap();
         assert_eq!(false, result);
@@ -512,7 +513,7 @@ mod tests {
             0x6d, 0x65, 0x6d, 0x6f, 0x72, 0x79, 0x02, 0x00, 0x0a, 0x04, 0x01, 0x02, 0x00, 0x0b,
         ];
 
-        let module = deserialize_buffer::<Module>(&wasm).unwrap();
+        let module = Module::from_slice(&wasm).unwrap();
         let mut checker = VerifyImports::with_preset("ewasm").unwrap();
         // Allow unlisted, just for this test case
         checker.set_allow_unlisted(true);
@@ -539,7 +540,7 @@ mod tests {
             0x72, 0x79, 0x02, 0x00, 0x0a, 0x04, 0x01, 0x02, 0x00, 0x0b,
         ];
 
-        let module = deserialize_buffer::<Module>(&wasm).unwrap();
+        let module = Module::from_slice(&wasm).unwrap();
         let mut checker = VerifyImports::with_preset("ewasm").unwrap();
         // Require all, just for this test case
         checker.set_require_all(true);
@@ -566,7 +567,7 @@ mod tests {
             0x72, 0x79, 0x02, 0x00, 0x0a, 0x04, 0x01, 0x02, 0x00, 0x0b,
         ];
 
-        let module = deserialize_buffer::<Module>(&wasm).unwrap();
+        let module = Module::from_slice(&wasm).unwrap();
         let checker = VerifyImports {
             list: ImportList::with_entries(vec![ImportType::Function(
                 "ethereum",
@@ -601,7 +602,7 @@ mod tests {
             0x6f, 0x72, 0x79, 0x02, 0x00, 0x0a, 0x04, 0x01, 0x02, 0x00, 0x0b,
         ];
 
-        let module = deserialize_buffer::<Module>(&wasm).unwrap();
+        let module = Module::from_slice(&wasm).unwrap();
         let checker = VerifyImports {
             list: ImportList::with_entries(vec![ImportType::Function(
                 "ethereum",
@@ -636,7 +637,7 @@ mod tests {
             0x6f, 0x72, 0x79, 0x02, 0x00, 0x0a, 0x04, 0x01, 0x02, 0x00, 0x0b,
         ];
 
-        let module = deserialize_buffer::<Module>(&wasm).unwrap();
+        let module = Module::from_slice(&wasm).unwrap();
         let checker = VerifyImports {
             list: ImportList::with_preset("ewasm").unwrap(),
             allow_unlisted: false,
@@ -667,7 +668,7 @@ mod tests {
             0x0a, 0x04, 0x01, 0x02, 0x00, 0x0b,
         ];
 
-        let module = deserialize_buffer::<Module>(&wasm).unwrap();
+        let module = Module::from_slice(&wasm).unwrap();
         let checker = VerifyImports {
             list: ImportList::with_preset("ewasm").unwrap(),
             allow_unlisted: false,
@@ -704,7 +705,7 @@ mod tests {
             0x69, 0x6e, 0x00, 0x01, 0x0a, 0x04, 0x01, 0x02, 0x00, 0x0b,
         ];
 
-        let module = deserialize_buffer::<Module>(&wasm).unwrap();
+        let module = Module::from_slice(&wasm).unwrap();
         let checker = VerifyImports::with_preset("ewasm").unwrap();
 
         let result = checker.validate(&module).unwrap();

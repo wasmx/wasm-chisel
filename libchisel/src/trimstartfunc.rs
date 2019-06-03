@@ -51,9 +51,8 @@ impl ModuleTranslator for TrimStartFunc {
 
 #[cfg(test)]
 mod tests {
-
     use super::*;
-    use parity_wasm::elements::deserialize_buffer;
+    use crate::utils::SerializationHelpers;
 
     #[test]
     fn start_removed() {
@@ -63,12 +62,12 @@ mod tests {
             0x08, 0x01, 0x00, 0x0a, 0x04, 0x01, 0x02, 0x00, 0x0b,
         ];
 
-        let mut module = deserialize_buffer::<Module>(&wasm).unwrap();
+        let mut module = Module::from_slice(&wasm).unwrap();
 
         let trimmer = TrimStartFunc::with_preset("ewasm").unwrap();
         trimmer.translate_inplace(&mut module).unwrap();
 
-        let result = serialize::<Module>(module).unwrap();
+        let result = module.to_vec().unwrap();
         let expect: Vec<u8> = vec![
             0x00, 0x61, 0x73, 0x6d, 0x01, 0x00, 0x00, 0x00, 0x01, 0x04, 0x01, 0x60, 0x00, 0x00,
             0x03, 0x02, 0x01, 0x00, 0x07, 0x08, 0x01, 0x04, 0x6d, 0x61, 0x69, 0x6e, 0x00, 0x00,
@@ -86,12 +85,12 @@ mod tests {
             0x0a, 0x04, 0x01, 0x02, 0x00, 0x0b,
         ];
 
-        let mut module = deserialize_buffer::<Module>(&wasm).unwrap();
+        let mut module = Module::from_slice(&wasm).unwrap();
 
         let trimmer = TrimStartFunc::with_preset("ewasm").unwrap();
         trimmer.translate_inplace(&mut module).unwrap();
 
-        let result = serialize::<Module>(module).unwrap();
+        let result = module.to_vec().unwrap();
 
         // result is equal to initial wasm (not changed)
         assert_eq!(result, wasm);

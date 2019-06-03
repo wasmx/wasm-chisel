@@ -42,7 +42,7 @@ impl ModuleTranslator for Repack {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::utils::*;
+    use crate::utils::SerializationHelpers;
     use parity_wasm::builder;
     use rustc_hex::FromHex;
 
