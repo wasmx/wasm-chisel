@@ -16,6 +16,7 @@ pub mod verifyexports;
 pub mod verifyimports;
 
 mod depgraph;
+mod utils;
 
 use std::{error, fmt};
 
