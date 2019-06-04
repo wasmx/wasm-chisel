@@ -3,22 +3,30 @@ use super::{imports::ImportList, ModuleError, ModulePreset, ModuleTranslator};
 use parity_wasm::elements::*;
 
 pub struct RemapImports<'a> {
-    /// The list of correct imports.
-    list: ImportList<'a>,
-    /// The prefix that compiler-generated import names contain. In the case of ewasm, this is
-    /// "ethereum_"
-    prefix: &'a str,
+    /// A list of import sets to remap.
+    interfaces: Vec<ImportInterface<'a>>,
 }
+
+/// A pair containing a list of imports for RemapImports to remap against, and a string with which all
+/// imports are expected to be prefixed.
+pub struct ImportInterface<'a>(ImportList<'a>, &'a str);
 
 impl<'a> ModulePreset for RemapImports<'a> {
     fn with_preset(preset: &str) -> Result<Self, ()> {
-        match preset {
-            "ewasm" => Ok(RemapImports {
-                list: ImportList::with_preset("ewasm").unwrap(),
-                prefix: "ethereum_",
-            }),
-            _ => Err(()),
+        let mut interface_set: Vec<ImportInterface> = Vec::new();
+        
+        // Accept a comma-separated list of presets.
+        let presets: String = preset.chars().filter(|c| *c != '_' && *c != ' ').collect();
+        for preset_individual in presets.split(',') {
+            match preset_individual {
+                "ewasm" => interface_set.push(ImportInterface::new(ImportList::with_preset("ewasm").expect("Missing ewasm preset"), "ethereum_")),
+                _ => return Err(()),
+            }
         }
+        
+        Ok(RemapImports {
+            interfaces: interface_set,
+        })
     }
 }
 
@@ -27,13 +35,15 @@ impl<'a> ModuleTranslator for RemapImports<'a> {
         let mut was_mutated = false;
 
         if let Some(section) = module.import_section_mut() {
-            *section = ImportSection::with_entries(
-                section
-                    .entries()
-                    .iter()
-                    .map(|e| self.remap_from_list(e, &mut was_mutated))
-                    .collect(),
-            );
+            for interface in self.interfaces.iter() {
+                *section = ImportSection::with_entries(
+                    section
+                        .entries()
+                        .iter()
+                        .map(|e| self.remap_from_list(e, &mut was_mutated, interface))
+                        .collect(),
+                );
+            }
         }
 
         Ok(was_mutated)
@@ -45,13 +55,15 @@ impl<'a> ModuleTranslator for RemapImports<'a> {
 
         if let Some(section) = new_module.import_section_mut() {
             // Iterate over entries and remap if needed.
-            *section = ImportSection::with_entries(
-                section
-                    .entries()
-                    .iter()
-                    .map(|e| self.remap_from_list(e, &mut was_mutated))
-                    .collect(),
-            );
+            for interface in self.interfaces.iter() {
+                *section = ImportSection::with_entries(
+                    section
+                        .entries()
+                        .iter()
+                        .map(|e| self.remap_from_list(e, &mut was_mutated, interface))
+                        .collect(),
+                );
+            }
         }
 
         if was_mutated {
@@ -62,16 +74,30 @@ impl<'a> ModuleTranslator for RemapImports<'a> {
     }
 }
 
+impl<'a> ImportInterface<'a> {
+    pub fn new(imports: ImportList<'a>, prefix: &'a str) -> Self {
+        ImportInterface(imports, prefix)
+    }
+
+    pub fn prefix(&self) -> &str {
+        self.1
+    }
+
+    pub fn imports(&self) -> &ImportList<'a> {
+        &self.0
+    }
+}
+
 impl<'a> RemapImports<'a> {
     /// Takes an import entry and returns either the same entry or a remapped version if it exists.
     /// Sets the mutation flag if was remapped.
-    fn remap_from_list(&self, entry: &ImportEntry, mutflag: &mut bool) -> ImportEntry {
-        if entry.field().len() > self.prefix.len()
-            && self.prefix == &entry.field()[..self.prefix.len()]
+    fn remap_from_list(&self, entry: &ImportEntry, mutflag: &mut bool, interface: &ImportInterface) -> ImportEntry {
+        if entry.field().len() > interface.prefix().len()
+            && interface.prefix() == &entry.field()[..interface.prefix().len()]
         {
-            if let Some(import) = self
-                .list
-                .lookup_by_field(&entry.field()[self.prefix.len()..])
+            if let Some(import) = interface
+                .imports()
+                .lookup_by_field(&entry.field()[interface.prefix().len()..])
             {
                 *mutflag = true;
                 return ImportEntry::new(
