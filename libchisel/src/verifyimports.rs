@@ -42,6 +42,16 @@ impl<'a> ModulePreset for VerifyImports<'a> {
                 require_all: false,
                 allow_unlisted: false,
             }),
+            "debug" => Ok(VerifyImports {
+                list: ImportList::with_preset("debug").unwrap(),
+                require_all: false,
+                allow_unlisted: false
+            }),
+            "bignum" => Ok(VerifyImports {
+                list: ImportList::with_preset("bignum").unwrap(),
+                require_all: false,
+                allow_unlisted: false
+            }),
             _ => Err(()),
         }
     }
