@@ -14,38 +14,42 @@ pub enum DropSection<'a> {
     UnknownSectionByIndex(usize),
 }
 
-fn names_section_index_for(module: &Module) -> Result<usize, String> {
+fn names_section_index_for(module: &Module) -> Option<usize> {
     for (index, section) in module.sections().iter().enumerate() {
         if let Section::Name(_section) = section {
-            return Ok(index);
+            return Some(index);
         }
     }
-    Err("Not found".to_string())
+    None
 }
 
-fn custom_section_index_for(module: &Module, name: &String) -> Result<usize, String> {
+fn custom_section_index_for(module: &Module, name: &String) -> Option<usize> {
     for (index, section) in module.sections().iter().enumerate() {
         if let Section::Custom(_section) = section {
             if _section.name() == name {
-                return Ok(index);
+                return Some(index);
             }
         }
     }
-    Err("Not found".to_string())
+    None
 }
 
 impl<'a> DropSection<'a> {
-    fn find_index(&self, module: &Module) -> Result<usize, String> {
-        Ok(match &self {
-            DropSection::NamesSection => names_section_index_for(module)?,
-            DropSection::CustomSectionByName(name) => custom_section_index_for(module, &name)?,
-            DropSection::CustomSectionByIndex(index) => *index,
-            DropSection::UnknownSectionByIndex(index) => *index,
-        })
+    fn find_index(&self, module: &Module) -> Option<usize> {
+        match &self {
+            DropSection::NamesSection => names_section_index_for(module),
+            DropSection::CustomSectionByName(name) => custom_section_index_for(module, &name),
+            DropSection::CustomSectionByIndex(index) => Some(*index),
+            DropSection::UnknownSectionByIndex(index) => Some(*index),
+        }
     }
 
     fn drop_section(&self, module: &mut Module) -> Result<bool, ModuleError> {
-        let index = self.find_index(&module)?;
+        let index = self.find_index(&module);
+        if index.is_none() {
+            return Err(ModuleError::NotFound);
+        }
+        let index = index.unwrap();
 
         let sections = module.sections_mut();
         if index > sections.len() {
