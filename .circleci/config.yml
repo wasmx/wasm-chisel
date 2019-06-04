@@ -7,10 +7,24 @@ jobs:
     steps:
       - checkout
       - run:
+          name: Install libclang
+          command: |
+            gcc --version
+            g++ --version
+            apt-get -y update
+            apt-get -y install libclang-3.8-dev clang-3.8 libclang-dev libgcc-6-dev libclang-common-3.8-dev cmake
+            # Make clang the default compiler (needed for binaryen, wabt and others with native bindings)
+            update-alternatives --install /usr/bin/cc cc /usr/bin/clang-3.8 100
+            update-alternatives --install /usr/bin/c++ c++ /usr/bin/clang++-3.8 100
+            gcc --version
+            g++ --version
+      - run:
           name: Update rustc
           command: |
             rustup component add rustfmt-preview
             rustup update
+            cargo --version
+            rustc --version
       - run:
            name: Check formatting
            command: |
