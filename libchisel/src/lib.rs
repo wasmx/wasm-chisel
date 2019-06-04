@@ -57,6 +57,13 @@ impl From<String> for ModuleError {
     }
 }
 
+impl From<std::io::Error> for ModuleError {
+    fn from(error: std::io::Error) -> Self {
+        use std::error::Error;
+        ModuleError::Custom(error.description().to_string())
+    }
+}
+
 impl fmt::Display for ModuleError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(
