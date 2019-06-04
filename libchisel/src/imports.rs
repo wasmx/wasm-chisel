@@ -257,6 +257,58 @@ impl<'a> ModulePreset for ImportList<'a> {
                     FunctionType::new(vec![ValueType::I32], None),
                 ),
             ])),
+            "debug" => Ok(ImportList(vec![
+                ImportType::Function(
+                    "debug",
+                    "print32",
+                    FunctionType::new(vec![ValueType::I32], None),
+                ),
+                ImportType::Function(
+                    "debug",
+                    "print64",
+                    FunctionType::new(vec![ValueType::I64], None),
+                ),
+                ImportType::Function(
+                    "debug",
+                    "printMem",
+                    FunctionType::new(vec![ValueType::I32, ValueType::I32], None),
+                ),
+                ImportType::Function(
+                    "debug",
+                    "printMemHex",
+                    FunctionType::new(vec![ValueType::I32, ValueType::I32], None),
+                ),
+                ImportType::Function(
+                    "debug",
+                    "printStorage",
+                    FunctionType::new(vec![ValueType::I32], None),
+                ),
+                ImportType::Function(
+                    "debug",
+                    "printStorageHex",
+                    FunctionType::new(vec![ValueType::I32], None),
+                ),
+            ])),
+            "bignum" => Ok(ImportList(vec![
+                ImportType::Function(
+                    "bignum",
+                    "mul256",
+                    FunctionType::new(vec![ValueType::I32, ValueType::I32, ValueType::I32], None),
+                ),
+                ImportType::Function(
+                    "bignum",
+                    "umulmod256",
+                    FunctionType::new(
+                        vec![
+                            ValueType::I32,
+                            ValueType::I32,
+                            ValueType::I32,
+                            ValueType::I32,
+                        ],
+                        None,
+                    ),
+                ),
+            ])),
             _ => Err(()),
         }
     }
