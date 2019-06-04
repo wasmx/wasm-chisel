@@ -314,6 +314,33 @@ impl<'a> ModulePreset for ImportList<'a> {
                     FunctionType::new(vec![ValueType::I32], None),
                 ),
             ])),
+            "eth2" => Ok(ImportList(vec![
+                ImportType::Function(
+                    "eth2",
+                    "loadPreStateRoot",
+                    FunctionType::new(vec![ValueType::I32], None),
+                ),
+                ImportType::Function(
+                    "eth2",
+                    "blockDataSize",
+                    FunctionType::new(vec![], Some(ValueType::I32)),
+                ),
+                ImportType::Function(
+                    "eth2",
+                    "blockDataCopy",
+                    FunctionType::new(vec![ValueType::I32, ValueType::I32, ValueType::I32], None),
+                ),
+                ImportType::Function(
+                    "eth2",
+                    "savePostStateRoot",
+                    FunctionType::new(vec![ValueType::I32], None),
+                ),
+                ImportType::Function(
+                    "eth2",
+                    "pushNewDeposit",
+                    FunctionType::new(vec![ValueType::I32, ValueType::I32], None),
+                ),
+            ])),
             "debug" => Ok(ImportList(vec![
                 ImportType::Function(
                     "debug",

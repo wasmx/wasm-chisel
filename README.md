@@ -32,7 +32,6 @@ Remove start function.
 This comes with the following preset:
 - `ewasm`: removes `start` function if present
 
-
 ### verifyimports
 
 Verifies that the module's imports are compliant with the provided import interface.
@@ -43,6 +42,7 @@ The following presets are provided:
 - `ewasm`: Verifies the ewasm [EEI](https://github.com/ewasm/design/blob/master/eth_interface.md). Disallows unlisted imports, and does not require that the entire interface be imported.
 - `debug`: Debug utilities for ewasm.
 - `bignum`: Big-number library for ewasm.
+- `eth2`: Verifies imports according to [Scout](https://github.com/ewasm/scout).
 
 ### verifyexports
 
