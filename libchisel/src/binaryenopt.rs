@@ -116,6 +116,7 @@ fn binaryen_optimiser(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use rustc_hex::FromHex;
 
     #[test]
     fn smoke_test_o0() {
@@ -136,5 +137,27 @@ mod tests {
         let result = translator.translate(&module).unwrap().unwrap();
         let serialized = result.to_bytes().unwrap();
         assert_eq!(expected, serialized);
+    }
+
+    #[test]
+    fn test_keep_names_section() {
+        let input = FromHex::from_hex(
+            "0061736d010000000104016000000303020000070801046d61696e00010a
+0a020300010b040010000b0014046e616d65010d0200047465737401046d
+61696e",
+        )
+        .unwrap();
+        let module = Module::from_bytes(&input)
+            .unwrap()
+            .parse_names()
+            .expect("parsing the names section failed");
+        assert_eq!(module.has_names_section(), true);
+
+        let translator = BinaryenOptimiser::with_preset("O0").unwrap();
+        let result = translator.translate(&module).unwrap().unwrap();
+        assert_eq!(result.has_names_section(), true);
+
+        let output = result.to_bytes().unwrap();
+        assert_eq!(input, output);
     }
 }
