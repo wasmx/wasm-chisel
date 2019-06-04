@@ -36,35 +36,30 @@ pub struct VerifyImports<'a> {
 
 impl<'a> ModulePreset for VerifyImports<'a> {
     fn with_preset(preset: &str) -> Result<Self, ()> {
-        match preset {
-            "ewasm" => Ok(VerifyImports {
-                list: ImportList::with_preset("ewasm").unwrap(),
-                require_all: false,
-                allow_unlisted: false,
-            }),
-            "debug" => Ok(VerifyImports {
-                list: ImportList::with_preset("debug").unwrap(),
-                require_all: false,
-                allow_unlisted: false
-            }),
-            "bignum" => Ok(VerifyImports {
-                list: ImportList::with_preset("bignum").unwrap(),
-                require_all: false,
-                allow_unlisted: false
-            }),
-            _ => Err(()),
+        let mut import_set = ImportList::new();
+        let presets: String = preset.chars().filter(|c| *c != ' ' && *c != '_').collect();
+
+        for preset_individual in presets.split(',') {
+            let to_append = ImportList::with_preset(preset_individual).expect("Invalid preset");
+            import_set.concatenate(to_append);
         }
+
+        Ok(VerifyImports {
+            list: import_set,
+            require_all: false, //FIXME: How should require_all and allow_unlisted be handled in the case of multiple presets?
+            allow_unlisted: false,
+        })
     }
 }
 
 // Utility functions used in tests to get more coverage
 #[cfg(test)]
 impl<'a> VerifyImports<'a> {
-    fn set_require_all(&mut self, arg: bool) {
+    pub fn set_require_all(&mut self, arg: bool) {
         self.require_all = arg;
     }
 
-    fn set_allow_unlisted(&mut self, arg: bool) {
+    pub fn set_allow_unlisted(&mut self, arg: bool) {
         self.allow_unlisted = arg;
     }
 }
