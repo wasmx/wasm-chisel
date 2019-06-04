@@ -47,13 +47,13 @@ impl<'a> DropSection<'a> {
     fn drop_section(&self, module: &mut Module) -> Result<bool, ModuleError> {
         let index = self.find_index(&module);
         if index.is_none() {
-            return Err(ModuleError::NotFound);
+            return Ok(false);
         }
         let index = index.unwrap();
 
         let sections = module.sections_mut();
-        if index > sections.len() {
-            return Err(ModuleError::NotFound);
+        if index >= sections.len() {
+            return Ok(false);
         }
         sections.remove(index);
 
@@ -116,5 +116,57 @@ mod tests {
         let dropper = DropSection::CustomSectionByName(&name);
         let did_change = dropper.translate_inplace(&mut module).unwrap();
         assert_eq!(did_change, true);
+    }
+
+    #[test]
+    fn remove_custom_section_by_index() {
+        let mut module = builder::module()
+            .with_section(Section::Custom(CustomSection::new(
+                "test".to_string(),
+                vec![],
+            )))
+            .build();
+        let dropper = DropSection::CustomSectionByIndex(0);
+        let did_change = dropper.translate_inplace(&mut module).unwrap();
+        assert_eq!(did_change, true);
+    }
+
+    #[test]
+    fn remove_oob_custom_section_by_index() {
+        let mut module = builder::module()
+            .with_section(Section::Custom(CustomSection::new(
+                "test".to_string(),
+                vec![],
+            )))
+            .build();
+        let dropper = DropSection::CustomSectionByIndex(1);
+        let did_change = dropper.translate_inplace(&mut module).unwrap();
+        assert_eq!(did_change, false);
+    }
+
+    #[test]
+    fn remove_custom_unknown_by_index() {
+        let mut module = builder::module()
+            .with_section(Section::Custom(CustomSection::new(
+                "test".to_string(),
+                vec![],
+            )))
+            .build();
+        let dropper = DropSection::UnknownSectionByIndex(0);
+        let did_change = dropper.translate_inplace(&mut module).unwrap();
+        assert_eq!(did_change, true);
+    }
+
+    #[test]
+    fn remove_oob_unknown_section_by_index() {
+        let mut module = builder::module()
+            .with_section(Section::Custom(CustomSection::new(
+                "test".to_string(),
+                vec![],
+            )))
+            .build();
+        let dropper = DropSection::UnknownSectionByIndex(1);
+        let did_change = dropper.translate_inplace(&mut module).unwrap();
+        assert_eq!(did_change, false);
     }
 }
