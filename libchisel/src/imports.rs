@@ -14,8 +14,25 @@ pub enum ImportType<'a> {
 }
 
 impl<'a> ImportList<'a> {
+    pub fn new() -> Self {
+        ImportList(Vec::new())
+    }
+
     pub fn entries(&'a self) -> &'a Vec<ImportType<'a>> {
         &self.0
+    }
+
+    pub fn entries_mut(&'a mut self) -> &'a mut Vec<ImportType<'a>> {
+        &mut self.0
+    }
+
+    pub fn into_inner(self) -> Vec<ImportType<'a>> {
+        self.0
+    }
+
+    pub fn concatenate(&mut self, other: ImportList<'a>) {
+        let mut to_append = other.into_inner();
+        self.0.append(&mut to_append);
     }
 
     pub fn with_entries(entries: Vec<ImportType<'a>>) -> Self {
@@ -255,6 +272,58 @@ impl<'a> ModulePreset for ImportList<'a> {
                     "ethereum",
                     "selfDestruct",
                     FunctionType::new(vec![ValueType::I32], None),
+                ),
+            ])),
+            "debug" => Ok(ImportList(vec![
+                ImportType::Function(
+                    "debug",
+                    "print32",
+                    FunctionType::new(vec![ValueType::I32], None),
+                ),
+                ImportType::Function(
+                    "debug",
+                    "print64",
+                    FunctionType::new(vec![ValueType::I64], None),
+                ),
+                ImportType::Function(
+                    "debug",
+                    "printMem",
+                    FunctionType::new(vec![ValueType::I32, ValueType::I32], None),
+                ),
+                ImportType::Function(
+                    "debug",
+                    "printMemHex",
+                    FunctionType::new(vec![ValueType::I32, ValueType::I32], None),
+                ),
+                ImportType::Function(
+                    "debug",
+                    "printStorage",
+                    FunctionType::new(vec![ValueType::I32], None),
+                ),
+                ImportType::Function(
+                    "debug",
+                    "printStorageHex",
+                    FunctionType::new(vec![ValueType::I32], None),
+                ),
+            ])),
+            "bignum" => Ok(ImportList(vec![
+                ImportType::Function(
+                    "bignum",
+                    "mul256",
+                    FunctionType::new(vec![ValueType::I32, ValueType::I32, ValueType::I32], None),
+                ),
+                ImportType::Function(
+                    "bignum",
+                    "umulmod256",
+                    FunctionType::new(
+                        vec![
+                            ValueType::I32,
+                            ValueType::I32,
+                            ValueType::I32,
+                            ValueType::I32,
+                        ],
+                        None,
+                    ),
                 ),
             ])),
             _ => Err(()),
