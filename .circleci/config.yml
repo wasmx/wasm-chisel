@@ -21,7 +21,7 @@ jobs:
       - run:
           name: Update rustc
           command: |
-            rustup component add rustfmt-preview
+            rustup component add rustfmt
             rustup update
             cargo --version
             rustc --version
@@ -29,8 +29,7 @@ jobs:
            name: Check formatting
            command: |
              rustfmt --version
-             cargo fmt
-             git diff --exit-code
+             cargo fmt --all -- --check
       - run:
           name: Build
           command: cargo build --release
