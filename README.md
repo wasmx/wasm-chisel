@@ -55,6 +55,10 @@ Wraps module into an ewasm-compatible constructor. It has two presets:
 
 Re-serializes the module. It will drop any unknown (custom) sections.
 
+### remapstart
+
+If there is a start section, export it as `main` (replacing any pre-existing `main` export) and remove the start section
+
 ## CLI
 
 `chisel` is available as a command line tool.
