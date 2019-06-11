@@ -33,6 +33,16 @@ pub enum ModuleError {
     Custom(String),
 }
 
+/// Utility interface for chisel modules.
+pub trait ChiselModule<'a>: Sized {
+    type ObjectReference: ?Sized;
+    /// Returns the name of the chisel module.
+    fn id(&'a self) -> String;
+
+    /// Borrows the instance as a trait object.
+    fn as_abstract(&'a self) -> Self::ObjectReference;
+}
+
 pub trait ModuleCreator {
     /// Returns new module.
     fn create(&self) -> Result<Module, ModuleError>;
@@ -127,6 +137,20 @@ mod tests {
         }
     }
 
+    impl<'a> ChiselModule<'a> for SampleModule {
+        // Yes, it implements all the traits, but we will treat it as a validator when used as a
+        // trait object for testing purposes.
+        type ObjectReference = &'a dyn ModuleValidator;
+
+        fn id(&'a self) -> String {
+            "Sample".to_string()
+        }
+
+        fn as_abstract(&'a self) -> Self::ObjectReference {
+            self as Self::ObjectReference
+        }
+    }
+
     #[test]
     fn creator_succeeds() {
         let creator = SampleModule {};
@@ -181,5 +205,16 @@ mod tests {
         let err_custom = ModuleError::Custom("bar".to_string());
         let err_description_custom = err_custom.description();
         assert_eq!("bar", err_description_custom);
+    }
+
+    #[test]
+    fn opaque_module() {
+        let validator = SampleModule {};
+        assert_eq!(validator.id(), "Sample");
+
+        let as_trait = validator.as_abstract();
+
+        let result = as_trait.validate(&Module::default());
+        assert!(result.is_ok());
     }
 }
