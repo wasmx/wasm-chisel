@@ -9,6 +9,7 @@ pub mod imports;
 pub mod checkstartfunc;
 pub mod deployer;
 pub mod remapimports;
+pub mod remapstart;
 pub mod repack;
 pub mod trimexports;
 pub mod trimstartfunc;

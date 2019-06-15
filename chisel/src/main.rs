@@ -10,8 +10,8 @@ use std::fs::{read, read_to_string};
 use std::process;
 
 use libchisel::{
-    checkstartfunc::*, deployer::*, remapimports::*, repack::*, trimexports::*, trimstartfunc::*,
-    verifyexports::*, verifyimports::*,
+    checkstartfunc::*, deployer::*, remapimports::*, remapstart::*, repack::*, trimexports::*,
+    trimstartfunc::*, verifyexports::*, verifyimports::*,
 };
 
 use clap::{App, Arg, ArgMatches, SubCommand};
@@ -236,6 +236,14 @@ fn execute_module(context: &ModuleContext, module: &mut Module) -> bool {
         "remapimports" => {
             is_translator = true;
             if let Ok(chisel) = RemapImports::with_preset(&preset) {
+                translate_module(module, chisel)
+            } else {
+                Err("remapimports: Invalid preset")
+            }
+        }
+        "remapstart" => {
+            is_translator = true;
+            if let Ok(chisel) = RemapStart::with_preset(&preset) {
                 translate_module(module, chisel)
             } else {
                 Err("remapimports: Invalid preset")
