@@ -45,6 +45,10 @@ Can be set to allow or prohibit unlisted additional exports.
 The following presets are provided:
 - `ewasm`: Verifies that the `main` function and `memory` is exported. Disallows any unlisted exports.
 
+### dropsection
+
+Removes selected sections from the module.
+
 ### deployer
 
 Wraps module into an ewasm-compatible constructor. It has two presets:
