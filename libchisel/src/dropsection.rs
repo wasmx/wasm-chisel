@@ -15,23 +15,17 @@ pub enum DropSection<'a> {
 }
 
 fn names_section_index_for(module: &Module) -> Option<usize> {
-    for (index, section) in module.sections().iter().enumerate() {
-        if let Section::Name(_section) = section {
-            return Some(index);
-        }
-    }
-    None
+    module.sections().iter().position(|e| match e {
+        Section::Name(_) => true,
+        _ => false,
+    })
 }
 
 fn custom_section_index_for(module: &Module, name: &String) -> Option<usize> {
-    for (index, section) in module.sections().iter().enumerate() {
-        if let Section::Custom(_section) = section {
-            if _section.name() == name {
-                return Some(index);
-            }
-        }
-    }
-    None
+    module.sections().iter().position(|e| match e {
+        Section::Custom(_section) => _section.name() == name,
+        _ => false,
+    })
 }
 
 impl<'a> DropSection<'a> {
