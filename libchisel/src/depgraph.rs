@@ -38,6 +38,7 @@ impl DepGraph {
         }
     }
 
+    #[cfg(test)]
     pub fn edgecount(&self) -> usize {
         self.edges.len()
     }
