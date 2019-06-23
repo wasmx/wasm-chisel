@@ -250,7 +250,6 @@ mod tests {
     use crate::{ModulePreset, ModuleTranslator, ModuleValidator};
     use parity_wasm;
     use rustc_hex::FromHex;
-    use std::collections::HashMap;
 
     #[test]
     fn smoke_test() {

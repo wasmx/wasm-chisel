@@ -1,5 +1,4 @@
 use super::{ModuleCreator, ModuleError};
-use crate::utils::*;
 use parity_wasm::builder;
 use parity_wasm::elements::{CustomSection, Module};
 
