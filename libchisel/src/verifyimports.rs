@@ -102,7 +102,7 @@ impl<'a> ModuleValidator for VerifyImports<'a> {
                 .is_none(),
             (false, false) => {
                 // Check that all existent imports are listed and correct.
-                let mut checklist: Vec<ImportStatus> = self
+                let checklist: Vec<ImportStatus> = self
                     .list
                     .entries()
                     .iter()

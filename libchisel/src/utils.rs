@@ -11,7 +11,7 @@ pub trait HasNamesSection {
 impl HasNamesSection for Module {
     fn has_names_section(&self) -> bool {
         // Lets forcefully parse in case it wasn't yet.
-        let mut module = self
+        let module = self
             .clone()
             .parse_names()
             .expect("parsing the names section failed");

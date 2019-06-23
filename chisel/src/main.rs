@@ -73,7 +73,7 @@ impl ChiselContext {
         if let Value::Mapping(rules) = ruleset {
             let mut ret: Vec<ChiselContext> = vec![];
 
-            for (name, mut config) in rules.iter().filter(|(left, right)| match (left, right) {
+            for (name, config) in rules.iter().filter(|(left, right)| match (left, right) {
                 (Value::String(_s), Value::Mapping(_m)) => true,
                 _ => false,
             }) {
