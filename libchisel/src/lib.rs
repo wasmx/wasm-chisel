@@ -113,7 +113,7 @@ mod tests {
             Ok(Some(Module::default()))
         }
         fn translate_inplace(&self, module: &mut Module) -> Result<bool, ModuleError> {
-            Ok((true))
+            Ok(true)
         }
     }
 

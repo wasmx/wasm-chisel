@@ -109,7 +109,7 @@ fn create_memory_deployer(payload: &[u8]) -> Module {
 
     let memory_initial = (payload.len() as u32 / 65536) + 1;
 
-    let module = builder::module()
+    builder::module()
         // Create a func/type for the ethereum::finish
         .function()
             .signature()
@@ -152,9 +152,7 @@ fn create_memory_deployer(payload: &[u8]) -> Module {
             .offset(parity_wasm::elements::Instruction::I32Const(0))
             .value(payload.to_vec())
             .build()
-        .build();
-
-    module
+        .build()
 }
 
 impl<'a> ModuleCreator for Deployer<'a> {

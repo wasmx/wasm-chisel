@@ -174,21 +174,6 @@ impl ModulePreset for Translations {
 }
 
 impl Translations {
-    fn insert(&mut self, from_module: &str, from_field: &str, to_module: &str, to_field: &str) {
-        self.translations.insert(
-            ImportPair::new(from_module, from_field),
-            ImportPair::new(to_module, to_field),
-        );
-    }
-
-    //    fn get_simple(&self, module: &str, field: &str) -> Option<&str, &str> {
-    //        if let Some(translation) = self.translations.get(&ImportPair::new(module, field)) {
-    //            Some(translation.module.clone(), translation.field.clone())
-    //        } else {
-    //            None
-    //        }
-    //    }
-
     fn get(&self, pair: &ImportPair) -> Option<&ImportPair> {
         self.translations.get(&pair)
     }

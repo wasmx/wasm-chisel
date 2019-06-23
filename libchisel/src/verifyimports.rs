@@ -274,7 +274,7 @@ fn has_func_import(module: &Module, namespace: &str, field: &str, sig: &Function
 
 /// Resolves an imported function's signature from its callable index.
 pub fn imported_func_sig_by_index(module: &Module, index: usize) -> FunctionType {
-    let import_section = module.import_section().expect("No function section found");
+    module.import_section().expect("No function section found");
     let type_section = module.type_section().expect("No type section found");
 
     match type_section.types()[index] {
