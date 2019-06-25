@@ -180,7 +180,7 @@ fn func_import_section_len(imports: &ImportSection) -> u32 {
         .entries()
         .iter()
         .filter(|e| match e.external() {
-            &External::Function(_) => true,
+            External::Function(_) => true,
             _ => false,
         })
         .count() as u32
