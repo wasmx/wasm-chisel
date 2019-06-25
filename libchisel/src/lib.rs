@@ -14,6 +14,7 @@ pub mod fromwat;
 pub mod remapimports;
 pub mod remapstart;
 pub mod repack;
+pub mod snip;
 pub mod trimexports;
 pub mod trimstartfunc;
 pub mod verifyexports;

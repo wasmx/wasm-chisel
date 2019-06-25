@@ -10,8 +10,8 @@ use std::fs::{read, read_to_string};
 use std::process;
 
 use libchisel::{
-    checkstartfunc::*, deployer::*, remapimports::*, remapstart::*, repack::*, trimexports::*,
-    trimstartfunc::*, verifyexports::*, verifyimports::*,
+    checkstartfunc::*, deployer::*, remapimports::*, remapstart::*, repack::*, snip::*,
+    trimexports::*, trimstartfunc::*, verifyexports::*, verifyimports::*,
 };
 
 use clap::{App, Arg, ArgMatches, SubCommand};
@@ -263,6 +263,7 @@ fn execute_module(context: &ModuleContext, module: &mut Module) -> bool {
             }
         }
         "repack" => translate_module(module, &Repack::new()),
+        "snip" => translate_module(module, &Snip::new()),
         _ => Err("Module Not Found"),
     };
 
