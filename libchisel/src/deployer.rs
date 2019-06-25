@@ -97,7 +97,7 @@ fn create_custom_deployer(payload: &[u8]) -> Result<Module, ModuleError> {
 }
 
 /// Returns a module which contains the deployable bytecode as a data segment.
-#[cfg_attr(rustfmt, rustfmt_skip)]
+#[rustfmt::skip]
 fn create_memory_deployer(payload: &[u8]) -> Module {
     // Instructions calling finish(0, payload_len)
     let instructions = vec![
