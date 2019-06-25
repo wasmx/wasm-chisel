@@ -1,6 +1,6 @@
 use std::collections::HashSet;
 
-use parity_wasm::elements::{CodeSection, Func, FuncBody, FunctionSection, Instruction, Module};
+use parity_wasm::elements::{FuncBody, Instruction, Module};
 
 /// A function dependency graph is represented as a list of "edges", or pairs of function indices
 /// (a, b) where a calls b.
@@ -8,7 +8,7 @@ use parity_wasm::elements::{CodeSection, Func, FuncBody, FunctionSection, Instru
 /// An edge, where the function at the left index calls the function at the right
 /// index.
 #[derive(PartialEq, Eq, Hash)]
-struct Edge(u32, u32);
+pub struct Edge(u32, u32);
 
 /// Container struct for the function dependency graph.
 pub struct DepGraph {
@@ -16,7 +16,7 @@ pub struct DepGraph {
 }
 
 /// Private interface for managing the function dependency graph
-trait DepGraphManager {
+pub trait DepGraphManager {
     /// Recursive graph builder. Requires import section length in order to resolve the correct
     /// function body.
     fn probe(&mut self, idx: u32, imports_len: u32, bodies: &[FuncBody]);
