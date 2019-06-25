@@ -21,7 +21,7 @@ fn names_section_index_for(module: &Module) -> Option<usize> {
     })
 }
 
-fn custom_section_index_for(module: &Module, name: &String) -> Option<usize> {
+fn custom_section_index_for(module: &Module, name: &str) -> Option<usize> {
     module.sections().iter().position(|e| match e {
         Section::Custom(_section) => _section.name() == name,
         _ => false,

@@ -161,8 +161,8 @@ fn err_exit(msg: &str) -> ! {
     process::exit(-1);
 }
 
-fn yaml_configure(yaml: &String) -> Result<Vec<ChiselContext>, &'static str> {
-    if let Ok(rulesets) = serde_yaml::from_str::<Value>(yaml.as_str()) {
+fn yaml_configure(yaml: &str) -> Result<Vec<ChiselContext>, &'static str> {
+    if let Ok(rulesets) = serde_yaml::from_str::<Value>(yaml) {
         ChiselContext::from_ruleset(&rulesets)
     } else {
         Err(ERR_FAILED_PARSE_CONFIG)
