@@ -7,23 +7,41 @@ pub struct RemapImports<'a> {
     interfaces: Vec<ImportInterface<'a>>,
 }
 
-/// A pair containing a list of imports for RemapImports to remap against, and a string with which all
+/// A pair containing a list of imports for RemapImports to remap against, and an optional string with which all
 /// imports are expected to be prefixed.
-pub struct ImportInterface<'a>(ImportList<'a>, &'a str);
+pub struct ImportInterface<'a>(ImportList<'a>, Option<&'a str>);
 
 impl<'a> ModulePreset for RemapImports<'a> {
     fn with_preset(preset: &str) -> Result<Self, ()> {
         let mut interface_set: Vec<ImportInterface> = Vec::new();
-        
+
         // Accept a comma-separated list of presets.
-        let presets: String = preset.chars().filter(|c| *c != '_' && *c != ' ').collect();
+        let presets: String = preset
+            .chars()
+            .filter(|c| *c != '_' && *c != ' ' && *c != '\n' && *c != '\t')
+            .collect();
         for preset_individual in presets.split(',') {
             match preset_individual {
-                "ewasm" => interface_set.push(ImportInterface::new(ImportList::with_preset("ewasm").expect("Missing ewasm preset"), "ethereum_")),
+                "ewasm" => interface_set.push(ImportInterface::new(
+                    ImportList::with_preset("ewasm").expect("Missing ewasm preset"),
+                    Some("ethereum_"),
+                )),
+                "eth2" => interface_set.push(ImportInterface::new(
+                    ImportList::with_preset("eth2").expect("Missing eth2 preset"),
+                    Some("eth2_"),
+                )),
+                "debug" => interface_set.push(ImportInterface::new(
+                    ImportList::with_preset("debug").expect("Missing debug preset"),
+                    Some("debug_"),
+                )),
+                "bignum" => interface_set.push(ImportInterface::new(
+                    ImportList::with_preset("bignum").expect("Missing bignum preset"),
+                    Some("bignum_"),
+                )),
                 _ => return Err(()),
             }
         }
-        
+
         Ok(RemapImports {
             interfaces: interface_set,
         })
@@ -75,11 +93,11 @@ impl<'a> ModuleTranslator for RemapImports<'a> {
 }
 
 impl<'a> ImportInterface<'a> {
-    pub fn new(imports: ImportList<'a>, prefix: &'a str) -> Self {
+    pub fn new(imports: ImportList<'a>, prefix: Option<&'a str>) -> Self {
         ImportInterface(imports, prefix)
     }
 
-    pub fn prefix(&self) -> &str {
+    pub fn prefix(&self) -> Option<&str> {
         self.1
     }
 
@@ -91,23 +109,44 @@ impl<'a> ImportInterface<'a> {
 impl<'a> RemapImports<'a> {
     /// Takes an import entry and returns either the same entry or a remapped version if it exists.
     /// Sets the mutation flag if was remapped.
-    fn remap_from_list(&self, entry: &ImportEntry, mutflag: &mut bool, interface: &ImportInterface) -> ImportEntry {
-        if entry.field().len() > interface.prefix().len()
-            && interface.prefix() == &entry.field()[..interface.prefix().len()]
-        {
-            if let Some(import) = interface
-                .imports()
-                .lookup_by_field(&entry.field()[interface.prefix().len()..])
-            {
-                *mutflag = true;
-                return ImportEntry::new(
-                    import.module().into(),
-                    import.field().into(),
-                    entry.external().clone(),
-                );
+    fn remap_from_list(
+        &self,
+        entry: &ImportEntry,
+        mutflag: &mut bool,
+        interface: &ImportInterface,
+    ) -> ImportEntry {
+        match interface.prefix() {
+            Some(prefix) => {
+                let prefix_len = prefix.len();
+                if entry.field().len() > prefix_len && prefix == &entry.field()[..prefix_len] {
+                    // Look for a matching remappable import and mutate if found.
+                    if let Some(import) = interface
+                        .imports()
+                        .lookup_by_field(&entry.field()[prefix_len..])
+                    {
+                        *mutflag = true;
+                        return ImportEntry::new(
+                            import.module().into(),
+                            import.field().into(),
+                            entry.external().clone(),
+                        );
+                    }
+                }
+                entry.clone()
+            }
+            None => {
+                if let Some(import) = interface.imports().lookup_by_field(&entry.field()) {
+                    *mutflag = true;
+                    ImportEntry::new(
+                        import.module().into(),
+                        import.field().into(),
+                        entry.external().clone(),
+                    )
+                } else {
+                    entry.clone()
+                }
             }
         }
-        entry.clone() // FIXME: useless copy
     }
 }
 
