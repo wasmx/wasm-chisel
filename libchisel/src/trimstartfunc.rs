@@ -5,7 +5,7 @@ pub struct TrimStartFunc;
 
 impl TrimStartFunc {
     fn trim_startfunc(&self, module: &mut Module) -> bool {
-        if let Some(start_section) = module.start_section() {
+        if let Some(_start_section) = module.start_section() {
             module.clear_start_section();
             true
         } else {
@@ -28,7 +28,7 @@ impl ModuleTranslator for TrimStartFunc {
         Ok(self.trim_startfunc(module))
     }
 
-    fn translate(&self, module: &Module) -> Result<Option<Module>, ModuleError> {
+    fn translate(&self, _module: &Module) -> Result<Option<Module>, ModuleError> {
         Err(ModuleError::NotSupported)
     }
 }

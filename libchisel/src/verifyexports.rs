@@ -161,7 +161,7 @@ fn func_sig_by_index(module: &Module, index: u32) -> Option<&FunctionType> {
                     _ => None,
                 }
             }
-            (None, Some(import_section)) => None,
+            (None, Some(_import_section)) => None,
             (None, None) => None,
         }
     } else {
