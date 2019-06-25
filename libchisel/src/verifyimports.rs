@@ -37,7 +37,10 @@ pub struct VerifyImports<'a> {
 impl<'a> ModulePreset for VerifyImports<'a> {
     fn with_preset(preset: &str) -> Result<Self, ()> {
         let mut import_set = ImportList::new();
-        let presets: String = preset.chars().filter(|c| *c != ' ' && *c != '_').collect();
+        let presets: String = preset
+            .chars()
+            .filter(|c| *c != ' ' && *c != '_' && *c != '\n' && *c != '\t')
+            .collect();
 
         for preset_individual in presets.split(',') {
             let to_append = ImportList::with_preset(preset_individual).expect("Invalid preset");
