@@ -96,6 +96,10 @@ ewasm:
 
 TBA
 
+## Changelog
+
+A [changelog is available](CHANGELOG.md).
+
 ## Maintainers
 
 * Alex Beregszaszi [@axic]
