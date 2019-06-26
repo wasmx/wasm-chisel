@@ -1,5 +1,8 @@
 # wasm-chisel
 
+![Build](https://circleci.com/gh/wasmx/wasm-chisel.svg?style=shield&circle-token=:circle-token)
+![Version](https://img.shields.io/crates/v/chisel.svg)
+
 Some useful utilities to transform WebAssembly binaries, most importantly for WebAssembly used in a deterministic / blockchain context,
 such as with [ewasm].
 
@@ -93,6 +96,17 @@ ewasm:
 
 TBA
 
+## Maintainers
+
+* Alex Beregszaszi [@axic]
+* Jake Lang [@jakelang]
+
+## License
+
+[Apache 2.0](LICENSE).
+
+[@axic]: https://github.com/axic
+[@jakelang]: https://github.com/jakelang
 [ewasm]: http://github.com/ewasm
 [wasm-gc]: https://github.com/alexcrichton/wasm-gc
 [wasm-utils]: https://github.com/paritytech/wasm-utils
