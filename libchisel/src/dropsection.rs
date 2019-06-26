@@ -1,6 +1,5 @@
 use super::{ModuleError, ModuleTranslator};
 
-use parity_wasm::builder::*;
 use parity_wasm::elements::*;
 
 /// Enum on which ModuleTranslator is implemented.

@@ -73,7 +73,7 @@ impl ChiselContext {
         if let Value::Mapping(rules) = ruleset {
             let mut ret: Vec<ChiselContext> = vec![];
 
-            for (name, mut config) in rules.iter().filter(|(left, right)| match (left, right) {
+            for (name, config) in rules.iter().filter(|(left, right)| match (left, right) {
                 (Value::String(_s), Value::Mapping(_m)) => true,
                 _ => false,
             }) {
@@ -170,7 +170,7 @@ fn yaml_configure(yaml: &str) -> Result<Vec<ChiselContext>, &'static str> {
 }
 
 /// Helper that tries both translation methods in the case that a module cannot implement one of them.
-fn translate_module<T>(module: &mut Module, translator: T) -> Result<bool, &'static str>
+fn translate_module<T>(module: &mut Module, translator: &T) -> Result<bool, &'static str>
 where
     T: ModuleTranslator,
 {
@@ -220,7 +220,7 @@ fn execute_module(context: &ModuleContext, module: &mut Module) -> bool {
             is_translator = true;
 
             if let Ok(chisel) = TrimExports::with_preset(&preset) {
-                translate_module(module, chisel)
+                translate_module(module, &chisel)
             } else {
                 Err("trimexports: Invalid preset")
             }
@@ -228,7 +228,7 @@ fn execute_module(context: &ModuleContext, module: &mut Module) -> bool {
         "trimstartfunc" => {
             is_translator = true;
             if let Ok(chisel) = TrimStartFunc::with_preset(&preset) {
-                translate_module(module, chisel)
+                translate_module(module, &chisel)
             } else {
                 Err("trimstartfunc: Invalid preset")
             }
@@ -236,7 +236,7 @@ fn execute_module(context: &ModuleContext, module: &mut Module) -> bool {
         "remapimports" => {
             is_translator = true;
             if let Ok(chisel) = RemapImports::with_preset(&preset) {
-                translate_module(module, chisel)
+                translate_module(module, &chisel)
             } else {
                 Err("remapimports: Invalid preset")
             }
@@ -244,7 +244,7 @@ fn execute_module(context: &ModuleContext, module: &mut Module) -> bool {
         "remapstart" => {
             is_translator = true;
             if let Ok(chisel) = RemapStart::with_preset(&preset) {
-                translate_module(module, chisel)
+                translate_module(module, &chisel)
             } else {
                 Err("remapimports: Invalid preset")
             }
@@ -262,7 +262,7 @@ fn execute_module(context: &ModuleContext, module: &mut Module) -> bool {
                 Err("deployer: Invalid preset")
             }
         }
-        "repack" => translate_module(module, Repack::new()),
+        "repack" => translate_module(module, &Repack::new()),
         _ => Err("Module Not Found"),
     };
 

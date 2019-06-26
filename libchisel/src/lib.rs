@@ -109,16 +109,16 @@ mod tests {
     }
 
     impl ModuleTranslator for SampleModule {
-        fn translate(&self, module: &Module) -> Result<Option<Module>, ModuleError> {
+        fn translate(&self, _module: &Module) -> Result<Option<Module>, ModuleError> {
             Ok(Some(Module::default()))
         }
-        fn translate_inplace(&self, module: &mut Module) -> Result<bool, ModuleError> {
-            Ok((true))
+        fn translate_inplace(&self, _module: &mut Module) -> Result<bool, ModuleError> {
+            Ok(true)
         }
     }
 
     impl ModuleValidator for SampleModule {
-        fn validate(&self, module: &Module) -> Result<bool, ModuleError> {
+        fn validate(&self, _module: &Module) -> Result<bool, ModuleError> {
             Ok(true)
         }
     }

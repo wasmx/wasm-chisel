@@ -1,5 +1,4 @@
 use super::{ModuleCreator, ModuleError};
-use crate::utils::*;
 use parity_wasm::builder;
 use parity_wasm::elements::{CustomSection, Module};
 
@@ -98,7 +97,7 @@ fn create_custom_deployer(payload: &[u8]) -> Result<Module, ModuleError> {
 }
 
 /// Returns a module which contains the deployable bytecode as a data segment.
-#[cfg_attr(rustfmt, rustfmt_skip)]
+#[rustfmt::skip]
 fn create_memory_deployer(payload: &[u8]) -> Module {
     // Instructions calling finish(0, payload_len)
     let instructions = vec![
@@ -110,7 +109,7 @@ fn create_memory_deployer(payload: &[u8]) -> Module {
 
     let memory_initial = (payload.len() as u32 / 65536) + 1;
 
-    let module = builder::module()
+    builder::module()
         // Create a func/type for the ethereum::finish
         .function()
             .signature()
@@ -153,9 +152,7 @@ fn create_memory_deployer(payload: &[u8]) -> Module {
             .offset(parity_wasm::elements::Instruction::I32Const(0))
             .value(payload.to_vec())
             .build()
-        .build();
-
-    module
+        .build()
 }
 
 impl<'a> ModuleCreator for Deployer<'a> {

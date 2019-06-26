@@ -61,7 +61,7 @@ fn remap_or_export_main(module: &mut Module, export_name: &str, func_idx: u32) {
         // section with the supplied func index.
         if let Some(main_export_loc) = export_section
             .iter_mut()
-            .position(|e| *e.field() == export_name.to_string())
+            .position(|e| e.field() == export_name)
         {
             export_section[main_export_loc] = new_func_export;
         } else {

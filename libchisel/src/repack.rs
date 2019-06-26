@@ -11,7 +11,7 @@ impl Repack {
 }
 
 impl ModuleTranslator for Repack {
-    fn translate_inplace(&self, module: &mut Module) -> Result<bool, ModuleError> {
+    fn translate_inplace(&self, _module: &mut Module) -> Result<bool, ModuleError> {
         Err(ModuleError::NotSupported)
     }
 
@@ -32,7 +32,7 @@ mod tests {
 
     #[test]
     fn smoke_test() {
-        let mut module = Module::default();
+        let module = Module::default();
 
         let repack = Repack::new();
         assert_eq!(module, repack.translate(&module).unwrap().unwrap());
@@ -40,7 +40,7 @@ mod tests {
 
     #[test]
     fn basic_sections_only() {
-        let mut module = builder::module()
+        let module = builder::module()
             .function()
             .signature()
             .build()

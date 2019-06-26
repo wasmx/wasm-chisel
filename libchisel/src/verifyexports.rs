@@ -161,7 +161,7 @@ fn func_sig_by_index(module: &Module, index: u32) -> Option<&FunctionType> {
                     _ => None,
                 }
             }
-            (None, Some(import_section)) => None,
+            (None, Some(_import_section)) => None,
             (None, None) => None,
         }
     } else {
@@ -180,7 +180,7 @@ fn func_import_section_len(imports: &ImportSection) -> u32 {
         .entries()
         .iter()
         .filter(|e| match e.external() {
-            &External::Function(_) => true,
+            External::Function(_) => true,
             _ => false,
         })
         .count() as u32
