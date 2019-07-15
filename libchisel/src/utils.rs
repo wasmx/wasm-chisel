@@ -1,7 +1,7 @@
 //! These are helpers to be used internally.
 
 use super::ModuleError;
-use parity_wasm::elements::{deserialize_buffer, serialize, Module};
+use parity_wasm::elements::{deserialize_buffer, serialize, Module, Section};
 
 pub trait HasNamesSection {
     /// Returns true if the module has a NamesSection.
@@ -10,12 +10,19 @@ pub trait HasNamesSection {
 
 impl HasNamesSection for Module {
     fn has_names_section(&self) -> bool {
-        // Lets forcefully parse in case it wasn't yet.
-        let module = self
-            .clone()
-            .parse_names()
-            .expect("parsing the names section failed");
-        module.names_section().is_some()
+        // TODO: move names_section_index_for helper from dropsection and consider upstreaming it
+        self.sections()
+            .iter()
+            .position(|e| {
+                match e {
+                    // The default case, when the section was not parsed by parity-wasm
+                    Section::Custom(_section) => _section.name() == "name",
+                    // This is the case, when the section was parsed by parity-wasm
+                    Section::Name(_) => true,
+                    _ => false,
+                }
+            })
+            .is_some()
     }
 }
 
