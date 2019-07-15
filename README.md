@@ -66,6 +66,10 @@ Re-serializes the module. It will drop any unknown (custom) sections.
 
 If there is a start section, export it as `main` (replacing any pre-existing `main` export) and remove the start section
 
+### snip
+
+Wraps [wasm-snip](https://github.com/rustwasm/wasm-snip/) and turns on removing Rust formatting and debugging from wasm.
+
 ## CLI
 
 `chisel` is available as a command line tool.
