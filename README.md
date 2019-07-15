@@ -70,6 +70,10 @@ If there is a start section, export it as `main` (replacing any pre-existing `ma
 
 Wraps [wasm-snip](https://github.com/rustwasm/wasm-snip/) and turns on removing Rust formatting and debugging from wasm.
 
+### dropnames
+
+Drops the NamesSection if present.
+
 ## CLI
 
 `chisel` is available as a command line tool.
