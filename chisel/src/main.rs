@@ -292,7 +292,12 @@ fn execute_module(context: &ModuleContext, module: &mut Module) -> bool {
 
 fn chisel_execute(context: &ChiselContext) -> Result<bool, &'static str> {
     if let Ok(buffer) = read(context.file()) {
-        if let Ok(mut module) = deserialize_buffer::<Module>(&buffer) {
+        if let Ok(module) = deserialize_buffer::<Module>(&buffer) {
+            // If we do not parse the NamesSection here, parity-wasm will drop it at serialisation
+            // It is useful to have this for a number of optimisation passes, including binaryenopt and snip
+            // TODO: better error handling
+            let mut module = module.parse_names().expect("Failed to parse NamesSection");
+
             let original = module.clone();
             println!("Ruleset {}:", context.name());
             let chisel_results = context
