@@ -14,9 +14,14 @@ pub enum DropSection<'a> {
 }
 
 fn names_section_index_for(module: &Module) -> Option<usize> {
-    module.sections().iter().position(|e| match e {
-        Section::Name(_) => true,
-        _ => false,
+    module.sections().iter().position(|e| {
+        match e {
+            // The default case, when the section was not parsed by parity-wasm
+            Section::Custom(_section) => _section.name() == "name",
+            // This is the case, when the section was parsed by parity-wasm
+            Section::Name(_) => true,
+            _ => false,
+        }
     })
 }
 
