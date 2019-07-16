@@ -28,6 +28,7 @@ impl CheckFloat {
 }
 
 impl ModuleValidator for CheckFloat {
+    // NOTE: this will not check for SIMD instructions.
     fn validate(&self, module: &Module) -> Result<bool, ModuleError> {
         let code_section = module.code_section();
         if code_section.is_none() {
@@ -68,26 +69,6 @@ impl ModuleValidator for CheckFloat {
                     | Instruction::F64PromoteF32
                     | Instruction::I32ReinterpretF32
                     | Instruction::F32ReinterpretI32
-                    | Instruction::F32x4Splat
-                    | Instruction::F32x4Eq
-                    | Instruction::F32x4Ne
-                    | Instruction::F32x4Lt
-                    | Instruction::F32x4Le
-                    | Instruction::F32x4Gt
-                    | Instruction::F32x4Ge
-                    | Instruction::F32x4Neg
-                    | Instruction::F32x4Abs
-                    | Instruction::F32x4Min
-                    | Instruction::F32x4Max
-                    | Instruction::F32x4Add
-                    | Instruction::F32x4Sub
-                    | Instruction::F32x4Div
-                    | Instruction::F32x4Mul
-                    | Instruction::F32x4Sqrt
-                    | Instruction::F32x4ConvertSI32x4
-                    | Instruction::F32x4ConvertUI32x4
-                    | Instruction::I32x4TruncSF32x4Sat
-                    | Instruction::I32x4TruncUF32x4Sat
                     | Instruction::F64Eq
                     | Instruction::F64Ne
                     | Instruction::F64Lt
@@ -118,30 +99,6 @@ impl ModuleValidator for CheckFloat {
                     | Instruction::F64ConvertUI64
                     | Instruction::I64ReinterpretF64
                     | Instruction::F64ReinterpretI64
-                    | Instruction::F64x2Splat
-                    | Instruction::F64x2Eq
-                    | Instruction::F64x2Ne
-                    | Instruction::F64x2Lt
-                    | Instruction::F64x2Le
-                    | Instruction::F64x2Gt
-                    | Instruction::F64x2Ge
-                    | Instruction::F64x2Neg
-                    | Instruction::F64x2Abs
-                    | Instruction::F64x2Min
-                    | Instruction::F64x2Max
-                    | Instruction::F64x2Add
-                    | Instruction::F64x2Sub
-                    | Instruction::F64x2Div
-                    | Instruction::F64x2Mul
-                    | Instruction::F64x2Sqrt
-                    | Instruction::F64x2ConvertSI64x2
-                    | Instruction::F64x2ConvertUI64x2
-                    | Instruction::I64x2TruncSF64x2Sat
-                    | Instruction::I64x2TruncUF64x2Sat
-                    | Instruction::F32x4ExtractLane(_)
-                    | Instruction::F32x4ReplaceLane(_)
-                    | Instruction::F64x2ExtractLane(_)
-                    | Instruction::F64x2ReplaceLane(_)
                     | Instruction::F32Const(_)
                     | Instruction::F32Load(_, _)
                     | Instruction::F32Store(_, _)

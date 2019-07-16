@@ -64,6 +64,7 @@ fn section_order(s: &Section) -> u8 {
         Section::Data(_) => 0x0b,
         Section::Name(_) => 0x00,
         Section::Reloc(_) => 0x00,
+        Section::DataCount(_) => 0x00,
     }
 }
 
