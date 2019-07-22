@@ -1,231 +1,159 @@
-use std::collections::HashMap;
+use super::{imports::ImportList, ModuleError, ModulePreset, ModuleTranslator};
 
-use super::{ModuleError, ModulePreset, ModuleTranslator};
 use parity_wasm::elements::*;
 
-#[derive(Hash, Eq, PartialEq, Debug, Clone)]
-pub struct ImportPair {
-    pub module: String,
-    pub field: String,
+pub struct RemapImports<'a> {
+    /// A list of import sets to remap.
+    interfaces: Vec<ImportInterface<'a>>,
 }
 
-impl ImportPair {
-    fn new(module: &str, field: &str) -> ImportPair {
-        ImportPair {
-            module: module.to_string(),
-            field: field.to_string(),
-        }
-    }
-}
+/// A pair containing a list of imports for RemapImports to remap against, and an optional string with which all
+/// imports are expected to be prefixed.
+pub struct ImportInterface<'a>(ImportList<'a>, Option<&'a str>);
 
-#[derive(Default)]
-pub struct Translations {
-    translations: HashMap<ImportPair, ImportPair>,
-}
-
-impl ModulePreset for Translations {
+impl<'a> ModulePreset for RemapImports<'a> {
     fn with_preset(preset: &str) -> Result<Self, ()> {
-        match preset {
-            "ewasm" => {
-                let trans: HashMap<ImportPair, ImportPair> = [
-                    (
-                        ImportPair::new("env", "ethereum_useGas"),
-                        ImportPair::new("ethereum", "useGas"),
-                    ),
-                    (
-                        ImportPair::new("env", "ethereum_getGasLeft"),
-                        ImportPair::new("ethereum", "getGasLeft"),
-                    ),
-                    (
-                        ImportPair::new("env", "ethereum_getAddress"),
-                        ImportPair::new("ethereum", "getAddress"),
-                    ),
-                    (
-                        ImportPair::new("env", "ethereum_getBlockHash"),
-                        ImportPair::new("ethereum", "getBlockHash"),
-                    ),
-                    (
-                        ImportPair::new("env", "ethereum_getBlockCoinbase"),
-                        ImportPair::new("ethereum", "getBlockCoinbase"),
-                    ),
-                    (
-                        ImportPair::new("env", "ethereum_getBlockDifficulty"),
-                        ImportPair::new("ethereum", "getBlockDifficulty"),
-                    ),
-                    (
-                        ImportPair::new("env", "ethereum_getBlockGasLimit"),
-                        ImportPair::new("ethereum", "getBlockGasLimit"),
-                    ),
-                    (
-                        ImportPair::new("env", "ethereum_getBlockNumber"),
-                        ImportPair::new("ethereum", "getBlockNumber"),
-                    ),
-                    (
-                        ImportPair::new("env", "ethereum_getBlockTimestamp"),
-                        ImportPair::new("ethereum", "getBlockTimestamp"),
-                    ),
-                    (
-                        ImportPair::new("env", "ethereum_getExternalBalance"),
-                        ImportPair::new("ethereum", "getExternalBalance"),
-                    ),
-                    (
-                        ImportPair::new("env", "ethereum_getTxGasPrice"),
-                        ImportPair::new("ethereum", "getTxGasPrice"),
-                    ),
-                    (
-                        ImportPair::new("env", "ethereum_getTxOrigin"),
-                        ImportPair::new("ethereum", "getTxOrigin"),
-                    ),
-                    (
-                        ImportPair::new("env", "ethereum_getCaller"),
-                        ImportPair::new("ethereum", "getCaller"),
-                    ),
-                    (
-                        ImportPair::new("env", "ethereum_getCallDataSize"),
-                        ImportPair::new("ethereum", "getCallDataSize"),
-                    ),
-                    (
-                        ImportPair::new("env", "ethereum_getCallValue"),
-                        ImportPair::new("ethereum", "getCallValue"),
-                    ),
-                    (
-                        ImportPair::new("env", "ethereum_callDataCopy"),
-                        ImportPair::new("ethereum", "callDataCopy"),
-                    ),
-                    (
-                        ImportPair::new("env", "ethereum_getCodeSize"),
-                        ImportPair::new("ethereum", "getCodeSize"),
-                    ),
-                    (
-                        ImportPair::new("env", "ethereum_getExternalCodeSize"),
-                        ImportPair::new("ethereum", "getExternalCodeSize"),
-                    ),
-                    (
-                        ImportPair::new("env", "ethereum_externalCodeCopy"),
-                        ImportPair::new("ethereum", "externalCodeCopy"),
-                    ),
-                    (
-                        ImportPair::new("env", "ethereum_codeCopy"),
-                        ImportPair::new("ethereum", "codeCopy"),
-                    ),
-                    (
-                        ImportPair::new("env", "ethereum_getReturnDataSize"),
-                        ImportPair::new("ethereum", "getReturnDataSize"),
-                    ),
-                    (
-                        ImportPair::new("env", "ethereum_returnDataCopy"),
-                        ImportPair::new("ethereum", "returnDataCopy"),
-                    ),
-                    (
-                        ImportPair::new("env", "ethereum_create"),
-                        ImportPair::new("ethereum", "create"),
-                    ),
-                    (
-                        ImportPair::new("env", "ethereum_call"),
-                        ImportPair::new("ethereum", "call"),
-                    ),
-                    (
-                        ImportPair::new("env", "ethereum_callCode"),
-                        ImportPair::new("ethereum", "callCode"),
-                    ),
-                    (
-                        ImportPair::new("env", "ethereum_callDelegate"),
-                        ImportPair::new("ethereum", "callDelegate"),
-                    ),
-                    (
-                        ImportPair::new("env", "ethereum_callStatic"),
-                        ImportPair::new("ethereum", "callStatic"),
-                    ),
-                    (
-                        ImportPair::new("env", "ethereum_storageLoad"),
-                        ImportPair::new("ethereum", "storageLoad"),
-                    ),
-                    (
-                        ImportPair::new("env", "ethereum_log"),
-                        ImportPair::new("ethereum", "log"),
-                    ),
-                    (
-                        ImportPair::new("env", "ethereum_storageStore"),
-                        ImportPair::new("ethereum", "storageStore"),
-                    ),
-                    (
-                        ImportPair::new("env", "ethereum_revert"),
-                        ImportPair::new("ethereum", "revert"),
-                    ),
-                    (
-                        ImportPair::new("env", "ethereum_finish"),
-                        ImportPair::new("ethereum", "finish"),
-                    ),
-                    (
-                        ImportPair::new("env", "ethereum_selfDestruct"),
-                        ImportPair::new("ethereum", "selfDestruct"),
-                    ),
-                ]
-                .iter()
-                .cloned()
-                .collect();
-                Ok(Translations {
-                    translations: trans,
-                })
+        let mut interface_set: Vec<ImportInterface> = Vec::new();
+
+        // Accept a comma-separated list of presets.
+        let presets: String = preset
+            .chars()
+            .filter(|c| *c != '_' && *c != ' ' && *c != '\n' && *c != '\t')
+            .collect();
+        for preset_individual in presets.split(',') {
+            match preset_individual {
+                "ewasm" => interface_set.push(ImportInterface::new(
+                    ImportList::with_preset("ewasm").expect("Missing ewasm preset"),
+                    Some("ethereum_"),
+                )),
+                "eth2" => interface_set.push(ImportInterface::new(
+                    ImportList::with_preset("eth2").expect("Missing eth2 preset"),
+                    Some("eth2_"),
+                )),
+                "debug" => interface_set.push(ImportInterface::new(
+                    ImportList::with_preset("debug").expect("Missing debug preset"),
+                    Some("debug_"),
+                )),
+                "bignum" => interface_set.push(ImportInterface::new(
+                    ImportList::with_preset("bignum").expect("Missing bignum preset"),
+                    Some("bignum_"),
+                )),
+                _ => return Err(()),
             }
-            _ => Err(()),
         }
+
+        Ok(RemapImports {
+            interfaces: interface_set,
+        })
     }
 }
 
-impl Translations {
-    fn get(&self, pair: &ImportPair) -> Option<&ImportPair> {
-        self.translations.get(&pair)
-    }
-}
-
-pub struct RemapImports {
-    translations: Translations,
-}
-
-impl ModulePreset for RemapImports {
-    fn with_preset(preset: &str) -> Result<Self, ()> {
-        match preset {
-            "ewasm" => Ok(RemapImports {
-                translations: Translations::with_preset("ewasm").unwrap(),
-            }),
-            _ => Err(()),
-        }
-    }
-}
-
-impl ModuleTranslator for RemapImports {
+impl<'a> ModuleTranslator for RemapImports<'a> {
     fn translate_inplace(&self, module: &mut Module) -> Result<bool, ModuleError> {
-        Ok(rename_imports(module, &self.translations))
+        let mut was_mutated = false;
+
+        if let Some(section) = module.import_section_mut() {
+            for interface in self.interfaces.iter() {
+                *section = ImportSection::with_entries(
+                    section
+                        .entries()
+                        .iter()
+                        .map(|e| self.remap_from_list(e, &mut was_mutated, interface))
+                        .collect(),
+                );
+            }
+        }
+
+        Ok(was_mutated)
     }
 
     fn translate(&self, module: &Module) -> Result<Option<Module>, ModuleError> {
-        let mut ret = module.clone();
-        let modified = rename_imports(&mut ret, &self.translations);
-        if modified {
-            return Ok(Some(ret));
+        let mut new_module = module.clone();
+        let mut was_mutated = false;
+
+        if let Some(section) = new_module.import_section_mut() {
+            // Iterate over entries and remap if needed.
+            for interface in self.interfaces.iter() {
+                *section = ImportSection::with_entries(
+                    section
+                        .entries()
+                        .iter()
+                        .map(|e| self.remap_from_list(e, &mut was_mutated, interface))
+                        .collect(),
+                );
+            }
         }
-        Ok(None)
+
+        if was_mutated {
+            Ok(Some(new_module))
+        } else {
+            Ok(None)
+        }
     }
 }
 
-fn rename_imports(module: &mut Module, translations: &Translations) -> bool {
-    let mut ret = false;
-    if let Some(section) = module.import_section_mut() {
-        for entry in section.entries_mut().iter_mut() {
-            if let Some(replacement) =
-                translations.get(&ImportPair::new(entry.module(), entry.field()))
-            {
-                ret = true;
-                *entry = ImportEntry::new(
-                    replacement.module.clone(),
-                    replacement.field.clone(),
-                    *entry.external(),
-                )
+impl<'a> ImportInterface<'a> {
+    pub fn new(imports: ImportList<'a>, prefix: Option<&'a str>) -> Self {
+        ImportInterface(imports, prefix)
+    }
+
+    pub fn prefix(&self) -> Option<&str> {
+        self.1
+    }
+
+    pub fn imports(&self) -> &ImportList<'a> {
+        &self.0
+    }
+}
+
+impl<'a> RemapImports<'a> {
+    fn new(interfaces: Vec<ImportInterface<'a>>) -> Self {
+        RemapImports {
+            interfaces: interfaces,
+        }
+    }
+
+    /// Takes an import entry and returns either the same entry or a remapped version if it exists.
+    /// Sets the mutation flag if was remapped.
+    fn remap_from_list(
+        &self,
+        entry: &ImportEntry,
+        mutflag: &mut bool,
+        interface: &ImportInterface,
+    ) -> ImportEntry {
+        match interface.prefix() {
+            Some(prefix) => {
+                let prefix_len = prefix.len();
+                if entry.field().len() > prefix_len && prefix == &entry.field()[..prefix_len] {
+                    // Look for a matching remappable import and mutate if found.
+                    if let Some(import) = interface
+                        .imports()
+                        .lookup_by_field(&entry.field()[prefix_len..])
+                    {
+                        *mutflag = true;
+                        return ImportEntry::new(
+                            import.module().into(),
+                            import.field().into(),
+                            entry.external().clone(),
+                        );
+                    }
+                }
+                entry.clone()
+            }
+            None => {
+                if let Some(import) = interface.imports().lookup_by_field(&entry.field()) {
+                    *mutflag = true;
+                    ImportEntry::new(
+                        import.module().into(),
+                        import.field().into(),
+                        entry.external().clone(),
+                    )
+                } else {
+                    entry.clone()
+                }
             }
         }
     }
-    ret
 }
 
 #[cfg(test)]
@@ -365,5 +293,93 @@ mod tests {
             .unwrap();
 
         assert_eq!(verified, true);
+    }
+
+    #[test]
+    fn remap_mutated_multiple_interfaces() {
+        // wast:
+        // (module
+        //   (type (;0;) (func (result i64)))
+        //   (type (;1;) (func (param i32 i32 i32)))
+        //   (type (;2;) (func (param i32)))
+        //   (import "env" "ethereum_getGasLeft" (func (;0;) (type 0)))
+        //   (import "env" "bignum_mul256" (func (;1;) (type 1)))
+        //   (import "env" "debug_printStorage" (func (;2;) (type 2)))
+        //   (memory 1)
+        //   (func $main)
+        //   (export "main" (func $main))
+        //   (export "memory" (memory 0))
+        // )
+
+        let wasm: Vec<u8> = vec![
+            0x00, 0x61, 0x73, 0x6d, 0x01, 0x00, 0x00, 0x00, 0x01, 0x12, 0x04, 0x60, 0x00, 0x01,
+            0x7e, 0x60, 0x03, 0x7f, 0x7f, 0x7f, 0x00, 0x60, 0x01, 0x7f, 0x00, 0x60, 0x00, 0x00,
+            0x02, 0x48, 0x03, 0x03, 0x65, 0x6e, 0x76, 0x13, 0x65, 0x74, 0x68, 0x65, 0x72, 0x65,
+            0x75, 0x6d, 0x5f, 0x67, 0x65, 0x74, 0x47, 0x61, 0x73, 0x4c, 0x65, 0x66, 0x74, 0x00,
+            0x00, 0x03, 0x65, 0x6e, 0x76, 0x0d, 0x62, 0x69, 0x67, 0x6e, 0x75, 0x6d, 0x5f, 0x6d,
+            0x75, 0x6c, 0x32, 0x35, 0x36, 0x00, 0x01, 0x03, 0x65, 0x6e, 0x76, 0x12, 0x64, 0x65,
+            0x62, 0x75, 0x67, 0x5f, 0x70, 0x72, 0x69, 0x6e, 0x74, 0x53, 0x74, 0x6f, 0x72, 0x61,
+            0x67, 0x65, 0x00, 0x02, 0x03, 0x02, 0x01, 0x03, 0x05, 0x03, 0x01, 0x00, 0x01, 0x07,
+            0x11, 0x02, 0x04, 0x6d, 0x61, 0x69, 0x6e, 0x00, 0x03, 0x06, 0x6d, 0x65, 0x6d, 0x6f,
+            0x72, 0x79, 0x02, 0x00, 0x0a, 0x04, 0x01, 0x02, 0x00, 0x0b,
+        ];
+
+        let module = parity_wasm::deserialize_buffer(&wasm).unwrap();
+
+        let new = RemapImports::with_preset("ewasm, bignum, debug")
+            .unwrap()
+            .translate(&module)
+            .expect("Module internal error")
+            .expect("Module was not mutated");
+
+        let verifier = VerifyImports::with_preset("ewasm, bignum, debug").unwrap();
+
+        assert_eq!(verifier.validate(&new), Ok(true));
+    }
+
+    #[test]
+    fn no_prefix() {
+        // wast:
+        // (module
+        //   (type (;0;) (func (result i64)))
+        //   (type (;1;) (func (param i32 i32 i32)))
+        //   (type (;2;) (func (param i32)))
+        //   (import "env" "getGasLeft" (func (;0;) (type 0)))
+        //   (import "env" "mul256" (func (;1;) (type 1)))
+        //   (import "env" "printStorage" (func (;2;) (type 2)))
+        //   (memory 1)
+        //   (func $main)
+        //   (export "main" (func $main))
+        //   (export "memory" (memory 0))
+        // )
+
+        let wasm: Vec<u8> = vec![
+            0x00, 0x61, 0x73, 0x6d, 0x01, 0x00, 0x00, 0x00, 0x01, 0x12, 0x04, 0x60, 0x00, 0x01,
+            0x7e, 0x60, 0x03, 0x7f, 0x7f, 0x7f, 0x00, 0x60, 0x01, 0x7f, 0x00, 0x60, 0x00, 0x00,
+            0x02, 0x32, 0x03, 0x03, 0x65, 0x6e, 0x76, 0x0a, 0x67, 0x65, 0x74, 0x47, 0x61, 0x73,
+            0x4c, 0x65, 0x66, 0x74, 0x00, 0x00, 0x03, 0x65, 0x6e, 0x76, 0x06, 0x6d, 0x75, 0x6c,
+            0x32, 0x35, 0x36, 0x00, 0x01, 0x03, 0x65, 0x6e, 0x76, 0x0c, 0x70, 0x72, 0x69, 0x6e,
+            0x74, 0x53, 0x74, 0x6f, 0x72, 0x61, 0x67, 0x65, 0x00, 0x02, 0x03, 0x02, 0x01, 0x03,
+            0x05, 0x03, 0x01, 0x00, 0x01, 0x07, 0x11, 0x02, 0x04, 0x6d, 0x61, 0x69, 0x6e, 0x00,
+            0x03, 0x06, 0x6d, 0x65, 0x6d, 0x6f, 0x72, 0x79, 0x02, 0x00, 0x0a, 0x04, 0x01, 0x02,
+            0x00, 0x0b,
+        ];
+
+        let module = parity_wasm::deserialize_buffer(&wasm).unwrap();
+
+        let interfaces_noprefix = vec![
+            ImportInterface::new(ImportList::with_preset("ewasm").unwrap(), None),
+            ImportInterface::new(ImportList::with_preset("bignum").unwrap(), None),
+            ImportInterface::new(ImportList::with_preset("debug").unwrap(), None),
+        ];
+
+        let new = RemapImports::new(interfaces_noprefix)
+            .translate(&module)
+            .expect("Module internal error")
+            .expect("Module was not mutated");
+
+        let verifier = VerifyImports::with_preset("ewasm, bignum, debug").unwrap();
+
+        assert_eq!(verifier.validate(&new), Ok(true));
     }
 }
