@@ -1,4 +1,4 @@
-use super::{ModuleError, ModuleTranslator};
+use super::{ChiselModule, ModuleError, ModuleTranslator};
 use parity_wasm::elements::Module;
 
 #[derive(Clone)]
@@ -12,6 +12,18 @@ impl Snip {
         options.snip_rust_panicking_code = true;
         options.skip_producers_section = true;
         Snip { 0: options }
+    }
+}
+
+impl<'a> ChiselModule<'a> for Snip {
+    type ObjectReference = &'a dyn ModuleTranslator;
+
+    fn id(&'a self) -> String {
+        "snip".to_string()
+    }
+
+    fn as_abstract(&'a self) -> Self::ObjectReference {
+        self as Self::ObjectReference
     }
 }
 

@@ -1,4 +1,4 @@
-use super::{ModuleError, ModuleTranslator};
+use super::{ChiselModule, ModuleError, ModuleTranslator};
 
 use parity_wasm::elements::*;
 
@@ -11,6 +11,18 @@ pub enum DropSection<'a> {
     CustomSectionByIndex(usize),
     /// Index of the unknown section.
     UnknownSectionByIndex(usize),
+}
+
+impl<'a> ChiselModule<'a> for DropSection<'a> {
+    type ObjectReference = &'a dyn ModuleTranslator;
+
+    fn id(&'a self) -> String {
+        "dropsection".to_string()
+    }
+
+    fn as_abstract(&'a self) -> Self::ObjectReference {
+        self as Self::ObjectReference
+    }
 }
 
 fn names_section_index_for(module: &Module) -> Option<usize> {

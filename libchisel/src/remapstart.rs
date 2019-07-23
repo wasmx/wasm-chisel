@@ -1,6 +1,6 @@
 use parity_wasm::elements::*;
 
-use super::{ModuleError, ModulePreset, ModuleTranslator};
+use super::{ChiselModule, ModuleError, ModulePreset, ModuleTranslator};
 
 pub struct RemapStart;
 
@@ -11,6 +11,18 @@ impl ModulePreset for RemapStart {
             "ewasm" => Ok(RemapStart {}),
             _ => Err(()),
         }
+    }
+}
+
+impl<'a> ChiselModule<'a> for RemapStart {
+    type ObjectReference = &'a dyn ModuleTranslator;
+
+    fn id(&'a self) -> String {
+        "remapstart".to_string()
+    }
+
+    fn as_abstract(&'a self) -> Self::ObjectReference {
+        self as Self::ObjectReference
     }
 }
 

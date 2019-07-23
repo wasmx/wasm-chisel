@@ -1,4 +1,4 @@
-use super::{ModuleError, ModulePreset, ModuleTranslator};
+use super::{ChiselModule, ModuleError, ModulePreset, ModuleTranslator};
 use parity_wasm::elements::*;
 
 pub struct TrimStartFunc;
@@ -11,6 +11,18 @@ impl TrimStartFunc {
         } else {
             false
         }
+    }
+}
+
+impl<'a> ChiselModule<'a> for TrimStartFunc {
+    type ObjectReference = &'a dyn ModuleTranslator;
+
+    fn id(&'a self) -> String {
+        "trimstartfunc".to_string()
+    }
+
+    fn as_abstract(&'a self) -> Self::ObjectReference {
+        self as Self::ObjectReference
     }
 }
 

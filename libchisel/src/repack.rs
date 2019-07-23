@@ -1,4 +1,4 @@
-use super::{ModuleError, ModuleTranslator};
+use super::{ChiselModule, ModuleError, ModuleTranslator};
 use parity_wasm::builder;
 use parity_wasm::elements::*;
 
@@ -7,6 +7,18 @@ pub struct Repack;
 impl Repack {
     pub fn new() -> Self {
         Repack {}
+    }
+}
+
+impl<'a> ChiselModule<'a> for Repack {
+    type ObjectReference = &'a dyn ModuleTranslator;
+
+    fn id(&'a self) -> String {
+        "repack".to_string()
+    }
+
+    fn as_abstract(&'a self) -> Self::ObjectReference {
+        self as Self::ObjectReference
     }
 }
 

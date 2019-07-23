@@ -1,4 +1,4 @@
-use super::{imports::ImportList, ModuleError, ModulePreset, ModuleTranslator};
+use super::{imports::ImportList, ChiselModule, ModuleError, ModulePreset, ModuleTranslator};
 
 use parity_wasm::elements::*;
 
@@ -10,6 +10,18 @@ pub struct RemapImports<'a> {
 /// A pair containing a list of imports for RemapImports to remap against, and an optional string with which all
 /// imports are expected to be prefixed.
 pub struct ImportInterface<'a>(ImportList<'a>, Option<&'a str>);
+
+impl<'a> ChiselModule<'a> for RemapImports<'a> {
+    type ObjectReference = &'a dyn ModuleTranslator;
+
+    fn id(&'a self) -> String {
+        "remapimports".to_string()
+    }
+
+    fn as_abstract(&'a self) -> Self::ObjectReference {
+        self as Self::ObjectReference
+    }
+}
 
 impl<'a> ModulePreset for RemapImports<'a> {
     fn with_preset(preset: &str) -> Result<Self, ()> {

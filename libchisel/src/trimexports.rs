@@ -1,4 +1,4 @@
-use super::{ModuleError, ModulePreset, ModuleTranslator};
+use super::{ChiselModule, ModuleError, ModulePreset, ModuleTranslator};
 use parity_wasm::elements::*;
 
 /// Struct containing a list of valid exports.
@@ -10,6 +10,18 @@ struct ExportWhitelist {
 /// Removes any exports that are noncompliant with a specified interface.
 pub struct TrimExports {
     whitelist: ExportWhitelist,
+}
+
+impl<'a> ChiselModule<'a> for TrimExports {
+    type ObjectReference = &'a dyn ModuleTranslator;
+
+    fn id(&'a self) -> String {
+        "trimexports".to_string()
+    }
+
+    fn as_abstract(&'a self) -> Self::ObjectReference {
+        self as Self::ObjectReference
+    }
 }
 
 /// Helper that compares the enum variant of two WebAssembly exports.
