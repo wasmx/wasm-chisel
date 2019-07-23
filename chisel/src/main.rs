@@ -20,12 +20,7 @@ use libchisel::*;
 use parity_wasm::elements::{deserialize_buffer, serialize_to_file, Module, Serialize};
 use serde_yaml::Value;
 
-// Error messages
-static ERR_NO_SUBCOMMAND: &'static str = "No subcommand provided.";
-static ERR_FAILED_OPEN_BINARY: &'static str = "Failed to open wasm binary.";
-static ERR_DESERIALIZE_MODULE: &'static str = "Failed to deserialize the wasm binary.";
-
-// Other constants
+// Constants
 static DEFAULT_CONFIG_PATH: &'static str = "chisel.yml";
 
 /// Chisel configuration structure. Contains a file to chisel and a list of modules configurations.
@@ -304,13 +299,13 @@ fn execute_module(context: &ModuleContext, module: &mut Module) -> bool {
     ret || is_translator
 }
 
-fn chisel_execute(context: &ChiselContext) -> Result<bool, &'static str> {
+fn chisel_execute(context: &ChiselContext) -> bool {
     if let Ok(buffer) = read(context.file()) {
         if let Ok(module) = deserialize_buffer::<Module>(&buffer) {
             // If we do not parse the NamesSection here, parity-wasm will drop it at serialisation
             // It is useful to have this for a number of optimisation passes, including binaryenopt and snip
             // TODO: better error handling
-            let mut module = module.parse_names().expect("Failed to parse NamesSection");
+            let mut module = module.parse_names().expect("Failed to parse names section");
 
             let original = module.clone();
             println!("Ruleset {}:", context.name());
@@ -330,12 +325,12 @@ fn chisel_execute(context: &ChiselContext) -> Result<bool, &'static str> {
                     serialize_to_file(context.file(), module).unwrap();
                 }
             }
-            Ok(chisel_results)
+            chisel_results
         } else {
-            Err(ERR_DESERIALIZE_MODULE)
+            err_exit("Failed to deserialize wasm module")
         }
     } else {
-        Err(ERR_FAILED_OPEN_BINARY)
+        err_exit(&format!("Failed to load wasm binary: {}", context.file()))
     }
 }
 
@@ -345,12 +340,9 @@ fn chisel_subcommand_run(args: &ArgMatches) -> i32 {
     if let Ok(conf) = read_to_string(config_path) {
         let ctxs = yaml_configure(&conf);
 
-        let result_final = ctxs.iter().fold(0, |acc, ctx| match chisel_execute(&ctx) {
-            Ok(result) => acc + if result { 0 } else { 1 }, // Add the number of module failures to exit code.
-            Err(msg) => err_exit(msg),
-        });
-
-        result_final
+        // Add the number of module failures to exit code.
+        ctxs.iter()
+            .fold(0, |acc, ctx| acc + if chisel_execute(&ctx) { 0 } else { 1 })
     } else {
         err_exit(&format!(
             "Could not load configuration file: {}",
@@ -379,6 +371,6 @@ pub fn main() {
 
     match cli_matches.subcommand() {
         ("run", Some(subcmd_matches)) => process::exit(chisel_subcommand_run(subcmd_matches)),
-        _ => err_exit(ERR_NO_SUBCOMMAND),
+        _ => err_exit("No subcommand provided"),
     };
 }
