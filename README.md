@@ -15,6 +15,8 @@ Provide a list of imports (with namespace and name) and replace them with a new 
 This can be very useful together with compilers, which do not support the specification of a namespace in imports yet. As of writing mid-2018,
 that includes pretty much every compiler (one exception is AssemblyScript).
 
+It supports the same presets as `verifyimports`.
+
 ### trimexports
 
 Removes all exports, but the ones specified.
@@ -39,6 +41,8 @@ Can be set to allow or prohibit unlisted additional imports.
 
 The following presets are provided:
 - `ewasm`: Verifies the ewasm [EEI](https://github.com/ewasm/design/blob/master/eth_interface.md). Disallows unlisted imports, and does not require that the entire interface be imported.
+- `debug`: Debug utilities for ewasm.
+- `bignum`: Big-number library for ewasm.
 
 ### verifyexports
 
