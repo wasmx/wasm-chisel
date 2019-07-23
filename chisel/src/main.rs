@@ -22,12 +22,7 @@ use serde_yaml::Value;
 // Error messages
 static ERR_NO_SUBCOMMAND: &'static str = "No subcommand provided.";
 static ERR_FAILED_OPEN_BINARY: &'static str = "Failed to open wasm binary.";
-static ERR_MODULE_TYPE_MISMATCH: &'static str =
-    "A module configuration does not point to a key-value map. Perhaps an option field is missing?";
-static ERR_PRESET_TYPE_MISMATCH: &'static str =
-    "A field 'preset' belonging to a module is not a string";
 static ERR_DESERIALIZE_MODULE: &'static str = "Failed to deserialize the wasm binary.";
-static ERR_MISSING_PRESET: &'static str = "Module configuration missing preset.";
 
 // Other constants
 static DEFAULT_CONFIG_PATH: &'static str = "chisel.yml";
@@ -91,7 +86,7 @@ impl ChiselContext {
                 let mut config_itr = config_clone.iter();
                 // Read modules while there are still modules left.
                 while let Some(module) = config_itr.next() {
-                    module_confs.push(ModuleContext::from_yaml(module).unwrap());
+                    module_confs.push(ModuleContext::from_yaml(module));
                 }
 
                 ret.push(ChiselContext {
@@ -126,22 +121,26 @@ impl ChiselContext {
 }
 
 impl ModuleContext {
-    fn from_yaml(yaml: (&Value, &Value)) -> Result<Self, &'static str> {
+    fn from_yaml(yaml: (&Value, &Value)) -> Self {
         match yaml {
-            (Value::String(name), Value::Mapping(flags)) => Ok(ModuleContext {
+            (Value::String(name), Value::Mapping(flags)) => ModuleContext {
                 module_name: name.clone(),
                 preset: if let Some(pset) = flags.get(&Value::String(String::from("preset"))) {
                     // Check that the value to which "preset" resolves is a String. If not, return an error.
                     if pset.is_string() {
                         String::from(pset.as_str().unwrap())
                     } else {
-                        return Err(ERR_PRESET_TYPE_MISMATCH);
+                        err_exit("Type mismatch: Value of field 'preset' must be a string")
                     }
                 } else {
-                    return Err(ERR_MISSING_PRESET);
+                    err_exit("Module missing required field: 'preset'")
                 },
-            }),
-            _ => Err(ERR_MODULE_TYPE_MISMATCH),
+            },
+            (Value::String(name), _) => err_exit(&format!(
+                "Type mismatch: {} must be a string-map pair",
+                name
+            )),
+            _ => err_exit("Malformed ruleset field"),
         }
     }
 
