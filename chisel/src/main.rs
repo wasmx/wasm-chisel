@@ -25,8 +25,6 @@ static ERR_FAILED_OPEN_CONFIG: &'static str = "Failed to open configuration file
 static ERR_FAILED_OPEN_BINARY: &'static str = "Failed to open wasm binary.";
 static ERR_FAILED_PARSE_CONFIG: &'static str = "Failed to parse configuration file.";
 static ERR_CONFIG_INVALID: &'static str = "Config is invalid.";
-static ERR_CONFIG_MISSING_FILE: &'static str = "Config missing file path to chisel.";
-static ERR_INPUT_FILE_TYPE_MISMATCH: &'static str = "Entry 'file' does not map to a string.";
 static ERR_MODULE_TYPE_MISMATCH: &'static str =
     "A module configuration does not point to a key-value map. Perhaps an option field is missing?";
 static ERR_PRESET_TYPE_MISMATCH: &'static str =
@@ -52,20 +50,10 @@ struct ModuleContext {
 }
 
 /// Helper to get a field from a config mapping. Assumes that the Value is a Mapping.
-fn get_field(yaml: &Value, key: &str) -> Result<String, &'static str> {
-    if let Some(path) = yaml
-        .as_mapping()
+fn get_field<'a>(yaml: &'a Value, key: &str) -> Option<&'a Value> {
+    yaml.as_mapping()
         .unwrap()
         .get(&Value::String(String::from(key)))
-    {
-        if path.is_string() {
-            Ok(String::from(path.as_str().unwrap()))
-        } else {
-            Err(ERR_INPUT_FILE_TYPE_MISMATCH)
-        }
-    } else {
-        Err(ERR_CONFIG_MISSING_FILE)
-    }
 }
 
 impl ChiselContext {
@@ -77,10 +65,24 @@ impl ChiselContext {
                 (Value::String(_s), Value::Mapping(_m)) => true,
                 _ => false,
             }) {
-                let filepath = get_field(config, "file")?;
+                let filepath = if let Some(yaml) = get_field(config, "file") {
+                    yaml.as_str()
+                        .unwrap_or_else(|| {
+                            err_exit("Type mismatch: The value of 'file' must be a string")
+                        })
+                        .to_string()
+                } else {
+                    err_exit("Ruleset missing required field: 'file'")
+                };
 
-                let outfilepath = if let Ok(out) = get_field(config, "output") {
-                    Some(out)
+                let outfilepath = if let Some(yaml) = get_field(config, "output") {
+                    Some(
+                        yaml.as_str()
+                            .unwrap_or_else(|| {
+                                err_exit("Type mismatch: The value of 'output' must be a string")
+                            })
+                            .to_string(),
+                    )
                 } else {
                     None
                 };
