@@ -262,9 +262,18 @@ fn execute_module(context: &ModuleContext, module: &mut Module) -> bool {
                 Err("deployer: Invalid preset")
             }
         }
-        "repack" => translate_module(module, &Repack::new()),
-        "snip" => translate_module(module, &Snip::new()),
-        "dropnames" => translate_module(module, &DropSection::NamesSection),
+        "repack" => {
+            is_translator = true;
+            translate_module(module, &Repack::new())
+        }
+        "snip" => {
+            is_translator = true;
+            translate_module(module, &Snip::new())
+        }
+        "dropnames" => {
+            is_translator = true;
+            translate_module(module, &DropSection::NamesSection)
+        }
         _ => Err("Module Not Found"),
     };
 
