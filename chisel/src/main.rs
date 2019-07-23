@@ -6,6 +6,7 @@ extern crate serde;
 extern crate serde_derive;
 extern crate serde_yaml;
 
+use std::error::Error;
 use std::fs::{read, read_to_string};
 use std::process;
 
@@ -163,22 +164,26 @@ fn yaml_configure(yaml: &str) -> Vec<ChiselContext> {
 }
 
 /// Helper that tries both translation methods in the case that a module cannot implement one of them.
-fn translate_module<T>(module: &mut Module, translator: &T) -> Result<bool, &'static str>
+fn translate_module<T>(module: &mut Module, translator: &T) -> Result<bool, ModuleError>
 where
     T: ModuleTranslator,
 {
     // NOTE: The module must return an Err (in the case of failure) without mutating the module or nasty stuff happens.
     if let Ok(ret) = translator.translate_inplace(module) {
         Ok(ret)
-    } else if let Ok(new_module) = translator.translate(module) {
-        if new_module.is_some() {
-            *module = new_module.unwrap();
-            Ok(true)
-        } else {
-            Ok(false)
-        }
     } else {
-        Err("Module translation failed")
+        let result = translator.translate(module);
+
+        if let Ok(new_module) = result {
+            if new_module.is_some() {
+                *module = new_module.unwrap();
+                Ok(true)
+            } else {
+                Ok(false)
+            }
+        } else {
+            Err(result.unwrap_err())
+        }
     }
 }
 
@@ -191,106 +196,116 @@ fn execute_module(context: &ModuleContext, module: &mut Module) -> bool {
     let ret = match name {
         "verifyexports" => {
             if let Ok(chisel) = VerifyExports::with_preset(&preset) {
-                Ok(chisel.validate(module).unwrap_or(false))
+                chisel.validate(module).unwrap_or_else(|e| {
+                    err_exit(&format!("Error in module {}: {}", name, e.description()))
+                })
             } else {
-                Err("verifyexports: Invalid preset")
+                err_exit("verifyexports: Invalid preset")
             }
         }
         "verifyimports" => {
             if let Ok(chisel) = VerifyImports::with_preset(&preset) {
-                Ok(chisel.validate(module).unwrap_or(false))
+                chisel.validate(module).unwrap_or_else(|e| {
+                    err_exit(&format!("Error in module {}: {}", name, e.description()))
+                })
             } else {
-                Err("verifyimports: Invalid preset")
+                err_exit("verifyimports: Invalid preset")
             }
         }
         "checkstartfunc" => {
             // NOTE: checkstartfunc takes a bool for configuration. false by default for now.
             let chisel = CheckStartFunc::new(false);
-            let ret = chisel.validate(module).unwrap_or(false);
-            Ok(ret)
+            chisel.validate(module).unwrap_or_else(|e| {
+                err_exit(&format!("Error in module {}: {}", name, e.description()))
+            })
         }
         "trimexports" => {
             is_translator = true;
 
             if let Ok(chisel) = TrimExports::with_preset(&preset) {
-                translate_module(module, &chisel)
+                translate_module(module, &chisel).unwrap_or_else(|e| {
+                    err_exit(&format!("Error in module {}: {}", name, e.description()))
+                })
             } else {
-                Err("trimexports: Invalid preset")
+                err_exit("trimexports: Invalid preset")
             }
         }
         "trimstartfunc" => {
             is_translator = true;
             if let Ok(chisel) = TrimStartFunc::with_preset(&preset) {
-                translate_module(module, &chisel)
+                translate_module(module, &chisel).unwrap_or_else(|e| {
+                    err_exit(&format!("Error in module {}: {}", name, e.description()))
+                })
             } else {
-                Err("trimstartfunc: Invalid preset")
+                err_exit("trimstartfunc: Invalid preset")
             }
         }
         "remapimports" => {
             is_translator = true;
             if let Ok(chisel) = RemapImports::with_preset(&preset) {
-                translate_module(module, &chisel)
+                translate_module(module, &chisel).unwrap_or_else(|e| {
+                    err_exit(&format!("Error in module {}: {}", name, e.description()))
+                })
             } else {
-                Err("remapimports: Invalid preset")
+                err_exit("remapimports: Invalid preset")
             }
         }
         "remapstart" => {
             is_translator = true;
             if let Ok(chisel) = RemapStart::with_preset(&preset) {
-                translate_module(module, &chisel)
+                translate_module(module, &chisel).unwrap_or_else(|e| {
+                    err_exit(&format!("Error in module {}: {}", name, e.description()))
+                })
             } else {
-                Err("remapimports: Invalid preset")
+                err_exit("remapstart: Invalid preset")
             }
         }
         "deployer" => {
             is_translator = true;
             let mut payload = Vec::new();
-            module.clone().serialize(&mut payload).unwrap(); // This should not fail, but perhaps check anyway?
+            module
+                .clone()
+                .serialize(&mut payload)
+                .expect("No failure cases");
 
             if let Ok(chisel) = Deployer::with_preset(&preset, &payload) {
                 let new_module = chisel.create().unwrap();
                 *module = new_module;
-                Ok(true)
+                true
             } else {
-                Err("deployer: Invalid preset")
+                err_exit("deployer: Invalid preset")
             }
         }
         "repack" => {
             is_translator = true;
-            translate_module(module, &Repack::new())
+            translate_module(module, &Repack::new()).unwrap_or_else(|e| {
+                err_exit(&format!("Error in module {}: {}", name, e.description()))
+            })
         }
         "snip" => {
             is_translator = true;
-            translate_module(module, &Snip::new())
+            translate_module(module, &Snip::new()).unwrap_or_else(|e| {
+                err_exit(&format!("Error in module {}: {}", name, e.description()))
+            })
         }
         "dropnames" => {
             is_translator = true;
-            translate_module(module, &DropSection::NamesSection)
+            translate_module(module, &DropSection::NamesSection).unwrap_or_else(|e| {
+                err_exit(&format!("Error in module {}: {}", name, e.description()))
+            })
         }
-        _ => Err("Module Not Found"),
+        _ => err_exit("Module not found"),
     };
 
-    let module_status_msg = if let Ok(result) = ret {
-        match (result, is_translator) {
-            (true, true) => "Translated",
-            (true, false) => "OK",
-            (false, true) => "Already OK; not translated",
-            (false, false) => "Malformed",
-        }
-    } else {
-        ret.unwrap_err()
+    let module_status_msg = match (ret, is_translator) {
+        (true, true) => "Translated",
+        (true, false) => "OK",
+        (false, true) => "Already OK; not translated",
+        (false, false) => "Malformed",
     };
     println!("\t{}: {}", name, module_status_msg);
 
-    if let Ok(result) = ret {
-        if !result && is_translator {
-            true
-        } else {
-            result
-        }
-    } else {
-        false
-    }
+    ret || is_translator
 }
 
 fn chisel_execute(context: &ChiselContext) -> Result<bool, &'static str> {
