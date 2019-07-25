@@ -1,6 +1,17 @@
 # Changelog
 
-## [0.5.0] - unreleased
+## [0.5.0] - 2019-07-25
+- New module: `remapstart`. [[#107](https://github.com/wasmx/wasm-chisel/pull/107)]
+- New module: `dropsection`. [[#72](https://github.com/wasmx/wasm-chisel/pull/72)]
+- New module: `fromwat`. [[#100](https://github.com/wasmx/wasm-chisel/pull/100)]
+- New module: `snip` (for using wasm-snip). [[#123](https://github.com/wasmx/wasm-chisel/pull/123)]
+- New module: `dropnames`. [[#126](https://github.com/wasmx/wasm-chisel/pull/126)]
+- New module: `checkfloats`. [[#118](https://github.com/wasmx/wasm-chisel/pull/118)]
+- Refactored `verifyimpotrs` and `remapimports`. [[#6](https://github.com/wasmx/wasm-chisel/pull/66)]
+- Added support for `eth2` / `debug` and `bignum` imports. [[#112](https://github.com/wasmx/wasm-chisel/pull/112)]
+- Better handling for the names section.
+- Removed Rust and many Clippy warnings.
+
 
 ## [0.4.0] - 2019-06-04
 
