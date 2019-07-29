@@ -305,7 +305,16 @@ fn chisel_execute(context: &ChiselContext) -> bool {
             // If we do not parse the NamesSection here, parity-wasm will drop it at serialisation
             // It is useful to have this for a number of optimisation passes, including binaryenopt and snip
             // TODO: better error handling
-            let mut module = module.parse_names().expect("Failed to parse names section");
+            let mut module = match module.parse_names() {
+                Ok(m) => m,
+                Err((_, _)) => {
+                    eprintln!(
+                        "Failed to parse names sections in {}. Continuing.",
+                        context.file()
+                    );
+                    return false;
+                }
+            };
 
             let original = module.clone();
             println!("Ruleset {}:", context.name());
@@ -319,18 +328,29 @@ fn chisel_execute(context: &ChiselContext) -> bool {
             if original != module {
                 if let Some(path) = context.outfile() {
                     println!("Writing to file: {}", path);
-                    serialize_to_file(path, module).unwrap();
+                    serialize_to_file(path, module).expect("Failed to serialize module to file");
                 } else {
                     println!("No output file specified; writing in place");
-                    serialize_to_file(context.file(), module).unwrap();
+                    serialize_to_file(context.file(), module)
+                        .expect("Failed to serialize module to file");
                 }
             }
             chisel_results
         } else {
-            err_exit("Failed to deserialize wasm module")
+            eprintln!(
+                "Ruleset {}: Failed to deserialize wasm binary '{}'",
+                context.name(),
+                context.file()
+            );
+            false
         }
     } else {
-        err_exit(&format!("Failed to load wasm binary: {}", context.file()))
+        eprintln!(
+            "Ruleset {}: Failed to load wasm binary '{}'",
+            context.name(),
+            context.file()
+        );
+        false
     }
 }
 
