@@ -1,4 +1,4 @@
-use super::{ModuleError, ModulePreset, ModuleValidator};
+use super::{ChiselModule, ModuleError, ModulePreset, ModuleValidator};
 use parity_wasm::elements::{
     ExportSection, External, FunctionSection, FunctionType, ImportSection, Internal, Module, Type,
 };
@@ -20,6 +20,18 @@ trait IsExported {
 pub struct VerifyExports<'a> {
     entries: Vec<ExportType<'a>>,
     allow_unlisted: bool,
+}
+
+impl<'a> ChiselModule<'a> for VerifyExports<'a> {
+    type ObjectReference = &'a dyn ModuleValidator;
+
+    fn id(&'a self) -> String {
+        "verifyexports".to_string()
+    }
+
+    fn as_abstract(&'a self) -> Self::ObjectReference {
+        self as Self::ObjectReference
+    }
 }
 
 impl<'a> ModulePreset for VerifyExports<'a> {

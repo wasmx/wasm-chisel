@@ -1,4 +1,4 @@
-use super::{ModuleCreator, ModuleError};
+use super::{ChiselModule, ModuleCreator, ModuleError};
 use crate::utils::*;
 use parity_wasm::elements::{deserialize_buffer, Module};
 use wabt::Wat2Wasm;
@@ -6,6 +6,18 @@ use wabt::Wat2Wasm;
 /// Struct on which ModuleCreator is implemented.
 pub struct FromWat<'a> {
     filename: &'a str,
+}
+
+impl<'a> ChiselModule<'a> for FromWat<'a> {
+    type ObjectReference = &'a dyn ModuleCreator;
+
+    fn id(&'a self) -> String {
+        "fromwat".to_string()
+    }
+
+    fn as_abstract(&'a self) -> Self::ObjectReference {
+        self as Self::ObjectReference
+    }
 }
 
 impl<'a> FromWat<'a> {

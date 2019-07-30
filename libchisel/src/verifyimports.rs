@@ -1,6 +1,6 @@
 use super::{
     imports::{ImportList, ImportType},
-    ModuleError, ModulePreset, ModuleValidator,
+    ChiselModule, ModuleError, ModulePreset, ModuleValidator,
 };
 use parity_wasm::elements::{External, FunctionType, ImportSection, Module, Type};
 
@@ -32,6 +32,18 @@ pub struct VerifyImports<'a> {
     require_all: bool,
     /// Option to allow imports that are not listed in `entries`.
     allow_unlisted: bool,
+}
+
+impl<'a> ChiselModule<'a> for VerifyImports<'a> {
+    type ObjectReference = &'a dyn ModuleValidator;
+
+    fn id(&'a self) -> String {
+        "verifyimports".to_string()
+    }
+
+    fn as_abstract(&'a self) -> Self::ObjectReference {
+        self as Self::ObjectReference
+    }
 }
 
 impl<'a> ModulePreset for VerifyImports<'a> {

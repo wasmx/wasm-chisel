@@ -1,4 +1,4 @@
-use super::{ModuleError, ModuleValidator};
+use super::{ChiselModule, ModuleError, ModuleValidator};
 use parity_wasm::elements::Module;
 
 /// Struct on which ModuleValidator is implemented.
@@ -11,6 +11,18 @@ impl CheckStartFunc {
         CheckStartFunc {
             start_required: is_start_required,
         }
+    }
+}
+
+impl<'a> ChiselModule<'a> for CheckStartFunc {
+    type ObjectReference = &'a dyn ModuleValidator;
+
+    fn id(&'a self) -> String {
+        "checkstartfunc".to_string()
+    }
+
+    fn as_abstract(&'a self) -> Self::ObjectReference {
+        self as Self::ObjectReference
     }
 }
 

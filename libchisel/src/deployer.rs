@@ -1,4 +1,4 @@
-use super::{ModuleCreator, ModuleError};
+use super::{ChiselModule, ModuleCreator, ModuleError};
 use parity_wasm::builder;
 use parity_wasm::elements::{CustomSection, Module};
 
@@ -8,6 +8,18 @@ use byteorder::{LittleEndian, WriteBytesExt};
 pub enum Deployer<'a> {
     Memory(&'a [u8]),
     CustomSection(&'a [u8]),
+}
+
+impl<'a> ChiselModule<'a> for Deployer<'a> {
+    type ObjectReference = &'a dyn ModuleCreator;
+
+    fn id(&'a self) -> String {
+        "deployer".to_string()
+    }
+
+    fn as_abstract(&'a self) -> Self::ObjectReference {
+        self as Self::ObjectReference
+    }
 }
 
 // FIXME: Bring ModulePreset API in line with the other with_preset methods so a ModulePreset impl
