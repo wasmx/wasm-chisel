@@ -21,10 +21,7 @@ use serde_yaml::Value;
 
 // Error messages
 static ERR_NO_SUBCOMMAND: &'static str = "No subcommand provided.";
-static ERR_FAILED_OPEN_CONFIG: &'static str = "Failed to open configuration file.";
 static ERR_FAILED_OPEN_BINARY: &'static str = "Failed to open wasm binary.";
-static ERR_FAILED_PARSE_CONFIG: &'static str = "Failed to parse configuration file.";
-static ERR_CONFIG_INVALID: &'static str = "Config is invalid.";
 static ERR_MODULE_TYPE_MISMATCH: &'static str =
     "A module configuration does not point to a key-value map. Perhaps an option field is missing?";
 static ERR_PRESET_TYPE_MISMATCH: &'static str =
@@ -50,7 +47,7 @@ struct ModuleContext {
 }
 
 impl ChiselContext {
-    fn from_ruleset(ruleset: &Value) -> Result<Vec<Self>, &'static str> {
+    fn from_ruleset(ruleset: &Value) -> Vec<Self> {
         if let Value::Mapping(rules) = ruleset {
             let mut ret: Vec<ChiselContext> = vec![];
 
@@ -94,7 +91,7 @@ impl ChiselContext {
                 let mut config_itr = config_clone.iter();
                 // Read modules while there are still modules left.
                 while let Some(module) = config_itr.next() {
-                    module_confs.push(ModuleContext::from_yaml(module)?);
+                    module_confs.push(ModuleContext::from_yaml(module).unwrap());
                 }
 
                 ret.push(ChiselContext {
@@ -105,9 +102,9 @@ impl ChiselContext {
                 });
             }
 
-            Ok(ret)
+            ret
         } else {
-            Err(ERR_CONFIG_INVALID)
+            err_exit("Type mismatch: Top-level YAML value must be a map")
         }
     }
 
@@ -158,11 +155,11 @@ fn err_exit(msg: &str) -> ! {
     process::exit(-1);
 }
 
-fn yaml_configure(yaml: &str) -> Result<Vec<ChiselContext>, &'static str> {
+fn yaml_configure(yaml: &str) -> Vec<ChiselContext> {
     if let Ok(rulesets) = serde_yaml::from_str::<Value>(yaml) {
         ChiselContext::from_ruleset(&rulesets)
     } else {
-        Err(ERR_FAILED_PARSE_CONFIG)
+        err_exit("Failed to parse YAML configuration")
     }
 }
 
@@ -336,18 +333,19 @@ fn chisel_subcommand_run(args: &ArgMatches) -> i32 {
     let config_path = args.value_of("CONFIG").unwrap_or(DEFAULT_CONFIG_PATH);
 
     if let Ok(conf) = read_to_string(config_path) {
-        match yaml_configure(&conf) {
-            Ok(ctxs) => {
-                let result_final = ctxs.iter().fold(0, |acc, ctx| match chisel_execute(&ctx) {
-                    Ok(result) => acc + if result { 0 } else { 1 }, // Add the number of module failures to exit code.
-                    Err(msg) => err_exit(msg),
-                });
-                return result_final;
-            }
+        let ctxs = yaml_configure(&conf);
+
+        let result_final = ctxs.iter().fold(0, |acc, ctx| match chisel_execute(&ctx) {
+            Ok(result) => acc + if result { 0 } else { 1 }, // Add the number of module failures to exit code.
             Err(msg) => err_exit(msg),
-        };
+        });
+
+        result_final
     } else {
-        err_exit(ERR_FAILED_OPEN_CONFIG);
+        err_exit(&format!(
+            "Could not load configuration file: {}",
+            config_path
+        ))
     }
 }
 
