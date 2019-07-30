@@ -49,13 +49,6 @@ struct ModuleContext {
     preset: String,
 }
 
-/// Helper to get a field from a config mapping. Assumes that the Value is a Mapping.
-fn get_field<'a>(yaml: &'a Value, key: &str) -> Option<&'a Value> {
-    yaml.as_mapping()
-        .unwrap()
-        .get(&Value::String(String::from(key)))
-}
-
 impl ChiselContext {
     fn from_ruleset(ruleset: &Value) -> Result<Vec<Self>, &'static str> {
         if let Value::Mapping(rules) = ruleset {
@@ -65,7 +58,9 @@ impl ChiselContext {
                 (Value::String(_s), Value::Mapping(_m)) => true,
                 _ => false,
             }) {
-                let filepath = if let Some(yaml) = get_field(config, "file") {
+                let config = config.as_mapping().expect("Mapping expected");
+                let filepath = if let Some(yaml) = config.get(&Value::String(String::from("file")))
+                {
                     yaml.as_str()
                         .unwrap_or_else(|| {
                             err_exit("Type mismatch: The value of 'file' must be a string")
@@ -75,7 +70,9 @@ impl ChiselContext {
                     err_exit("Ruleset missing required field: 'file'")
                 };
 
-                let outfilepath = if let Some(yaml) = get_field(config, "output") {
+                let outfilepath = if let Some(yaml) =
+                    config.get(&Value::String(String::from("output")))
+                {
                     Some(
                         yaml.as_str()
                             .unwrap_or_else(|| {
@@ -87,9 +84,7 @@ impl ChiselContext {
                     None
                 };
 
-                // Parse all valid module entries. Unwrap is ok here because we
-                // established earlier that config is a Mapping.
-                let mut config_clone = config.as_mapping().unwrap().clone();
+                let mut config_clone = config.clone();
                 // Remove "file" and "output" so we don't interpret it as a module.
                 // TODO: use mappings to avoid the need for this
                 config_clone.remove(&Value::String(String::from("file")));
