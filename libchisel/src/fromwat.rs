@@ -1,4 +1,4 @@
-use super::{ChiselModule, ModuleCreator, ModuleError};
+use super::{ChiselModule, ModuleCreator, ModuleError, ModuleKind};
 use crate::utils::*;
 use parity_wasm::elements::{deserialize_buffer, Module};
 use wabt::Wat2Wasm;
@@ -13,6 +13,10 @@ impl<'a> ChiselModule<'a> for FromWat<'a> {
 
     fn id(&'a self) -> String {
         "fromwat".to_string()
+    }
+
+    fn kind(&'a self) -> ModuleKind {
+        ModuleKind::Creator
     }
 
     fn as_abstract(&'a self) -> Self::ObjectReference {

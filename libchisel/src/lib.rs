@@ -27,6 +27,13 @@ mod utils;
 use std::{error, fmt};
 
 #[derive(Eq, PartialEq, Debug)]
+pub enum ModuleKind {
+    Creator,
+    Translator,
+    Validator,
+}
+
+#[derive(Eq, PartialEq, Debug)]
 pub enum ModuleError {
     NotSupported,
     NotFound,
@@ -34,10 +41,12 @@ pub enum ModuleError {
 }
 
 /// Utility interface for chisel modules.
-pub trait ChiselModule<'a>: Sized {
+pub trait ChiselModule<'a> {
     type ObjectReference: ?Sized;
     /// Returns the name of the chisel module.
     fn id(&'a self) -> String;
+
+    fn kind(&'a self) -> ModuleKind;
 
     /// Borrows the instance as a trait object.
     fn as_abstract(&'a self) -> Self::ObjectReference;
@@ -146,6 +155,10 @@ mod tests {
             "Sample".to_string()
         }
 
+        fn kind(&'a self) -> ModuleKind {
+            ModuleKind::Validator
+        }
+
         fn as_abstract(&'a self) -> Self::ObjectReference {
             self as Self::ObjectReference
         }
@@ -212,7 +225,12 @@ mod tests {
         let validator = SampleModule {};
         assert_eq!(validator.id(), "Sample");
 
-        let as_trait = validator.as_abstract();
+        let opaque: &dyn ChiselModule<ObjectReference = &dyn ModuleValidator> =
+            &validator as &dyn ChiselModule<ObjectReference = &dyn ModuleValidator>;
+
+        assert_eq!(opaque.kind(), ModuleKind::Validator);
+
+        let as_trait: &dyn ModuleValidator = opaque.as_abstract();
 
         let result = as_trait.validate(&Module::default());
         assert!(result.is_ok());

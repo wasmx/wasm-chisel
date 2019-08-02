@@ -1,4 +1,4 @@
-use super::{ChiselModule, ModuleError, ModuleTranslator};
+use super::{ChiselModule, ModuleError, ModuleKind, ModuleTranslator};
 use parity_wasm::elements::Module;
 
 #[derive(Clone)]
@@ -20,6 +20,10 @@ impl<'a> ChiselModule<'a> for Snip {
 
     fn id(&'a self) -> String {
         "snip".to_string()
+    }
+
+    fn kind(&'a self) -> ModuleKind {
+        ModuleKind::Translator
     }
 
     fn as_abstract(&'a self) -> Self::ObjectReference {

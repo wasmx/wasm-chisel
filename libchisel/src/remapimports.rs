@@ -1,4 +1,6 @@
-use super::{imports::ImportList, ChiselModule, ModuleError, ModulePreset, ModuleTranslator};
+use super::{
+    imports::ImportList, ChiselModule, ModuleError, ModuleKind, ModulePreset, ModuleTranslator,
+};
 
 use parity_wasm::elements::*;
 
@@ -16,6 +18,10 @@ impl<'a> ChiselModule<'a> for RemapImports<'a> {
 
     fn id(&'a self) -> String {
         "remapimports".to_string()
+    }
+
+    fn kind(&'a self) -> ModuleKind {
+        ModuleKind::Translator
     }
 
     fn as_abstract(&'a self) -> Self::ObjectReference {

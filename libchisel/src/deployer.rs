@@ -1,4 +1,4 @@
-use super::{ChiselModule, ModuleCreator, ModuleError};
+use super::{ChiselModule, ModuleCreator, ModuleError, ModuleKind};
 use parity_wasm::builder;
 use parity_wasm::elements::{CustomSection, Module};
 
@@ -15,6 +15,10 @@ impl<'a> ChiselModule<'a> for Deployer<'a> {
 
     fn id(&'a self) -> String {
         "deployer".to_string()
+    }
+
+    fn kind(&'a self) -> ModuleKind {
+        ModuleKind::Creator
     }
 
     fn as_abstract(&'a self) -> Self::ObjectReference {
