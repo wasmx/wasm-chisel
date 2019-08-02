@@ -1,6 +1,6 @@
 use parity_wasm::elements::*;
 
-use super::{ChiselModule, ModuleError, ModulePreset, ModuleTranslator};
+use super::{ChiselModule, ModuleError, ModuleKind, ModulePreset, ModuleTranslator};
 
 pub struct RemapStart;
 
@@ -19,6 +19,10 @@ impl<'a> ChiselModule<'a> for RemapStart {
 
     fn id(&'a self) -> String {
         "remapstart".to_string()
+    }
+
+    fn kind(&'a self) -> ModuleKind {
+        ModuleKind::Translator
     }
 
     fn as_abstract(&'a self) -> Self::ObjectReference {

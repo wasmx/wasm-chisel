@@ -1,4 +1,4 @@
-use super::{ChiselModule, ModuleError, ModulePreset, ModuleValidator};
+use super::{ChiselModule, ModuleError, ModuleKind, ModulePreset, ModuleValidator};
 use parity_wasm::elements::{
     ExportSection, External, FunctionSection, FunctionType, ImportSection, Internal, Module, Type,
 };
@@ -27,6 +27,10 @@ impl<'a> ChiselModule<'a> for VerifyExports<'a> {
 
     fn id(&'a self) -> String {
         "verifyexports".to_string()
+    }
+
+    fn kind(&'a self) -> ModuleKind {
+        ModuleKind::Validator
     }
 
     fn as_abstract(&'a self) -> Self::ObjectReference {

@@ -1,4 +1,4 @@
-use super::{ChiselModule, ModuleError, ModulePreset, ModuleTranslator};
+use super::{ChiselModule, ModuleError, ModuleKind, ModulePreset, ModuleTranslator};
 use parity_wasm::elements::*;
 
 pub struct TrimStartFunc;
@@ -19,6 +19,10 @@ impl<'a> ChiselModule<'a> for TrimStartFunc {
 
     fn id(&'a self) -> String {
         "trimstartfunc".to_string()
+    }
+
+    fn kind(&'a self) -> ModuleKind {
+        ModuleKind::Translator
     }
 
     fn as_abstract(&'a self) -> Self::ObjectReference {

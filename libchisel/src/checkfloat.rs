@@ -1,6 +1,6 @@
 use parity_wasm::elements::{Instruction, Module};
 
-use super::{ChiselModule, ModuleError, ModuleValidator};
+use super::{ChiselModule, ModuleError, ModuleKind, ModuleValidator};
 
 /// Struct on which ModuleValidator is implemented.
 pub struct CheckFloat {}
@@ -10,6 +10,10 @@ impl<'a> ChiselModule<'a> for CheckFloat {
 
     fn id(&'a self) -> String {
         "checkfloat".to_string()
+    }
+
+    fn kind(&'a self) -> ModuleKind {
+        ModuleKind::Validator
     }
 
     fn as_abstract(&'a self) -> Self::ObjectReference {
