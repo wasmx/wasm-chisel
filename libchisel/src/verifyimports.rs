@@ -1,6 +1,6 @@
 use super::{
     imports::{ImportList, ImportType},
-    ChiselModule, ModuleError, ModulePreset, ModuleValidator,
+    ChiselModule, ModuleError, ModuleKind, ModulePreset, ModuleValidator,
 };
 use parity_wasm::elements::{External, FunctionType, ImportSection, Module, Type};
 
@@ -39,6 +39,10 @@ impl<'a> ChiselModule<'a> for VerifyImports<'a> {
 
     fn id(&'a self) -> String {
         "verifyimports".to_string()
+    }
+
+    fn kind(&'a self) -> ModuleKind {
+        ModuleKind::Validator
     }
 
     fn as_abstract(&'a self) -> Self::ObjectReference {

@@ -1,4 +1,4 @@
-use super::{ChiselModule, ModuleError, ModuleTranslator};
+use super::{ChiselModule, ModuleError, ModuleKind, ModuleTranslator};
 use parity_wasm::builder;
 use parity_wasm::elements::*;
 
@@ -15,6 +15,10 @@ impl<'a> ChiselModule<'a> for Repack {
 
     fn id(&'a self) -> String {
         "repack".to_string()
+    }
+
+    fn kind(&'a self) -> ModuleKind {
+        ModuleKind::Translator
     }
 
     fn as_abstract(&'a self) -> Self::ObjectReference {

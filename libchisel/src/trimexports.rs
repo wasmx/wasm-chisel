@@ -1,4 +1,4 @@
-use super::{ChiselModule, ModuleError, ModulePreset, ModuleTranslator};
+use super::{ChiselModule, ModuleError, ModuleKind, ModulePreset, ModuleTranslator};
 use parity_wasm::elements::*;
 
 /// Struct containing a list of valid exports.
@@ -17,6 +17,10 @@ impl<'a> ChiselModule<'a> for TrimExports {
 
     fn id(&'a self) -> String {
         "trimexports".to_string()
+    }
+
+    fn kind(&'a self) -> ModuleKind {
+        ModuleKind::Translator
     }
 
     fn as_abstract(&'a self) -> Self::ObjectReference {
