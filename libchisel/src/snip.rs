@@ -89,11 +89,11 @@ mod tests {
         )
         .unwrap();
 
-        let module = Module::from_slice(&wasm);
+        let module = Module::from_slice(&wasm).unwrap();
         let module = Snip::new().translate(&module);
         let module = module
             .expect("translation to be succesful")
             .expect("new module to be returned");
-        assert!(module.to_vec().len() < wasm.len());
+        assert!(module.to_vec().unwrap().len() < wasm.len());
     }
 }

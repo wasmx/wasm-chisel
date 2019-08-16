@@ -27,7 +27,7 @@ mod utils;
 pub use utils::SerializationHelpers;
 
 // This helper is exported here for users of this library not needing to import parity_wasm.
-pub fn module_from_slice(input: &[u8]) -> Module {
+pub fn module_from_slice(input: &[u8]) -> Result<Module, ModuleError> {
     Module::from_slice(input)
 }
 
@@ -255,12 +255,12 @@ mod tests {
     fn loading_from_slice() {
         let module_orig = Module::default();
 
-        let output = module_orig.clone().to_vec();
-        let module = module_from_slice(&output);
+        let output = module_orig.clone().to_vec().unwrap();
+        let module = module_from_slice(&output).unwrap();
         assert_eq!(module_orig, module);
 
-        let output = module_orig.clone().to_vec();
-        let module = Module::from_slice(&output);
+        let output = module_orig.clone().to_vec().unwrap();
+        let module = Module::from_slice(&output).unwrap();
         assert_eq!(module_orig, module);
     }
 }
