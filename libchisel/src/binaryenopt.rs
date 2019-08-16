@@ -1,4 +1,4 @@
-use super::{ModuleError, ModulePreset, ModuleTranslator};
+use super::{ChiselModule, ModuleError, ModuleKind, ModulePreset, ModuleTranslator};
 use crate::utils::SerializationHelpers;
 use parity_wasm::elements::*;
 
@@ -11,6 +11,22 @@ pub enum BinaryenOptimiser {
     O4,
     Os,
     Oz,
+}
+
+impl<'a> ChiselModule<'a> for BinaryenOptimiser {
+    type ObjectReference = &'a dyn ModuleTranslator;
+
+    fn id(&'a self) -> String {
+        "binaryenopt".to_string()
+    }
+
+    fn kind(&'a self) -> ModuleKind {
+        ModuleKind::Translator
+    }
+
+    fn as_abstract(&'a self) -> Self::ObjectReference {
+        self as Self::ObjectReference
+    }
 }
 
 impl ModulePreset for BinaryenOptimiser {
