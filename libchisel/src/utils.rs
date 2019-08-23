@@ -1,6 +1,5 @@
 //! These are helpers to be used internally.
 
-use super::ModuleError;
 use parity_wasm::elements::{deserialize_buffer, serialize, Module, Section};
 
 pub trait HasNamesSection {
@@ -47,6 +46,7 @@ impl SerializationHelpers for Module {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::ModuleError;
     use rustc_hex::FromHex;
 
     #[test]

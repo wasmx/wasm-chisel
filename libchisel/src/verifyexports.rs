@@ -168,13 +168,11 @@ fn func_sig_by_index(module: &Module, index: u32) -> Option<&FunctionType> {
                 index - func_import_section_len(import_section),
             )] {
                 Type::Function(ref ret) => Some(ret),
-                _ => None,
             },
             // If no function imports are present, no need to subtract them.
             (Some(type_section), None) => {
                 match type_section.types()[func_type_ref(&func_section, index)] {
                     Type::Function(ref ret) => Some(ret),
-                    _ => None,
                 }
             }
             (None, Some(_import_section)) => None,
