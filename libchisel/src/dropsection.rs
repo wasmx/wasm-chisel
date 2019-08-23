@@ -3,17 +3,17 @@ use super::{ChiselModule, ModuleError, ModuleKind, ModuleTranslator};
 use parity_wasm::elements::*;
 
 /// Enum on which ModuleTranslator is implemented.
-pub enum DropSection<'a> {
+pub enum DropSection {
     NamesSection,
     /// Name of the custom section.
-    CustomSectionByName(&'a String),
+    CustomSectionByName(String),
     /// Index of the custom section.
     CustomSectionByIndex(usize),
     /// Index of the unknown section.
     UnknownSectionByIndex(usize),
 }
 
-impl<'a> ChiselModule<'a> for DropSection<'a> {
+impl<'a> ChiselModule<'a> for DropSection {
     type ObjectReference = &'a dyn ModuleTranslator;
 
     fn id(&'a self) -> String {
@@ -48,7 +48,7 @@ fn custom_section_index_for(module: &Module, name: &str) -> Option<usize> {
     })
 }
 
-impl<'a> DropSection<'a> {
+impl DropSection {
     fn find_index(&self, module: &Module) -> Option<usize> {
         match &self {
             DropSection::NamesSection => names_section_index_for(module),
@@ -75,7 +75,7 @@ impl<'a> DropSection<'a> {
     }
 }
 
-impl<'a> ModuleTranslator for DropSection<'a> {
+impl<'a> ModuleTranslator for DropSection {
     fn translate_inplace(&self, module: &mut Module) -> Result<bool, ModuleError> {
         Ok(self.drop_section(module)?)
     }
@@ -99,7 +99,7 @@ mod tests {
     fn keep_intact() {
         let mut module = builder::module().build();
         let name = "empty".to_string();
-        let dropper = DropSection::CustomSectionByName(&name);
+        let dropper = DropSection::CustomSectionByName(name);
         let did_change = dropper.translate_inplace(&mut module).unwrap();
         assert_eq!(did_change, false);
     }
@@ -113,7 +113,7 @@ mod tests {
             )))
             .build();
         let name = "empty".to_string();
-        let dropper = DropSection::CustomSectionByName(&name);
+        let dropper = DropSection::CustomSectionByName(name);
         let did_change = dropper.translate_inplace(&mut module).unwrap();
         assert_eq!(did_change, false);
     }
@@ -127,7 +127,7 @@ mod tests {
             )))
             .build();
         let name = "test".to_string();
-        let dropper = DropSection::CustomSectionByName(&name);
+        let dropper = DropSection::CustomSectionByName(name);
         let did_change = dropper.translate_inplace(&mut module).unwrap();
         assert_eq!(did_change, true);
     }
