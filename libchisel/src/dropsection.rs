@@ -29,21 +29,10 @@ impl<'a> ChiselModule<'a> for DropSection {
     }
 }
 
-fn names_section_index_for(module: &Module) -> Option<usize> {
-    module.sections().iter().position(|e| {
-        match e {
-            // The default case, when the section was not parsed by parity-wasm
-            Section::Custom(_section) => _section.name() == "name",
-            // This is the case, when the section was parsed by parity-wasm
-            Section::Name(_) => true,
-            _ => false,
-        }
-    })
-}
-
 fn custom_section_index_for(module: &Module, name: &str) -> Option<usize> {
     module.sections().iter().position(|e| match e {
         Section::Custom(_section) => _section.name() == name,
+        Section::Name(_) => name == "name", // If the names section was parsed by parity-wasm, it is distinct from a custom section.
         _ => false,
     })
 }
@@ -51,7 +40,7 @@ fn custom_section_index_for(module: &Module, name: &str) -> Option<usize> {
 impl DropSection {
     fn find_index(&self, module: &Module) -> Option<usize> {
         match &self {
-            DropSection::NamesSection => names_section_index_for(module),
+            DropSection::NamesSection => custom_section_index_for(module, "name"),
             DropSection::CustomSectionByName(name) => custom_section_index_for(module, &name),
             DropSection::CustomSectionByIndex(index) => Some(*index),
             DropSection::UnknownSectionByIndex(index) => Some(*index),
