@@ -82,7 +82,9 @@ impl<'a> ModuleTranslator for DropSection {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::utils::SerializationHelpers;
     use parity_wasm::builder;
+    use rustc_hex::FromHex;
 
     #[test]
     fn keep_intact() {
@@ -171,5 +173,32 @@ mod tests {
         let dropper = DropSection::UnknownSectionByIndex(1);
         let did_change = dropper.translate_inplace(&mut module).unwrap();
         assert_eq!(did_change, false);
+    }
+
+    #[test]
+    fn names_section_index() {
+        let input = FromHex::from_hex(
+            "0061736d010000000104016000000303020000070801046d61696e00010a
+            0a020300010b040010000b0014046e616d65010d0200047465737401046d
+            61696e",
+        )
+        .unwrap();
+
+        let mut module = Module::from_slice(&input);
+        assert!(custom_section_index_for(&module, "name").is_some());
+        module = module.parse_names().expect("Should not fail");
+        assert!(custom_section_index_for(&module, "name").is_some());
+    }
+
+    #[test]
+    fn missing_name_section_index() {
+        let input = FromHex::from_hex(
+            "0061736d010000000104016000000303020000070801046d61696e00010a
+            0a020300010b040010000b",
+        )
+        .unwrap();
+
+        let module = Module::from_slice(&input);
+        assert!(custom_section_index_for(&module, "name").is_none());
     }
 }
