@@ -29,21 +29,10 @@ impl<'a> ChiselModule<'a> for DropSection {
     }
 }
 
-fn names_section_index_for(module: &Module) -> Option<usize> {
-    module.sections().iter().position(|e| {
-        match e {
-            // The default case, when the section was not parsed by parity-wasm
-            Section::Custom(_section) => _section.name() == "name",
-            // This is the case, when the section was parsed by parity-wasm
-            Section::Name(_) => true,
-            _ => false,
-        }
-    })
-}
-
 fn custom_section_index_for(module: &Module, name: &str) -> Option<usize> {
     module.sections().iter().position(|e| match e {
         Section::Custom(_section) => _section.name() == name,
+        Section::Name(_) => name == "name", // If the names section was parsed by parity-wasm, it is distinct from a custom section.
         _ => false,
     })
 }
@@ -51,7 +40,7 @@ fn custom_section_index_for(module: &Module, name: &str) -> Option<usize> {
 impl DropSection {
     fn find_index(&self, module: &Module) -> Option<usize> {
         match &self {
-            DropSection::NamesSection => names_section_index_for(module),
+            DropSection::NamesSection => custom_section_index_for(module, "name"),
             DropSection::CustomSectionByName(name) => custom_section_index_for(module, &name),
             DropSection::CustomSectionByIndex(index) => Some(*index),
             DropSection::UnknownSectionByIndex(index) => Some(*index),
@@ -93,7 +82,9 @@ impl<'a> ModuleTranslator for DropSection {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::utils::SerializationHelpers;
     use parity_wasm::builder;
+    use rustc_hex::FromHex;
 
     #[test]
     fn keep_intact() {
@@ -182,5 +173,32 @@ mod tests {
         let dropper = DropSection::UnknownSectionByIndex(1);
         let did_change = dropper.translate_inplace(&mut module).unwrap();
         assert_eq!(did_change, false);
+    }
+
+    #[test]
+    fn names_section_index() {
+        let input = FromHex::from_hex(
+            "0061736d010000000104016000000303020000070801046d61696e00010a
+            0a020300010b040010000b0014046e616d65010d0200047465737401046d
+            61696e",
+        )
+        .unwrap();
+
+        let mut module = Module::from_slice(&input);
+        assert!(custom_section_index_for(&module, "name").is_some());
+        module = module.parse_names().expect("Should not fail");
+        assert!(custom_section_index_for(&module, "name").is_some());
+    }
+
+    #[test]
+    fn missing_name_section_index() {
+        let input = FromHex::from_hex(
+            "0061736d010000000104016000000303020000070801046d61696e00010a
+            0a020300010b040010000b",
+        )
+        .unwrap();
+
+        let module = Module::from_slice(&input);
+        assert!(custom_section_index_for(&module, "name").is_none());
     }
 }
