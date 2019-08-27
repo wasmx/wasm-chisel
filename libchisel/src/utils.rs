@@ -44,13 +44,6 @@ impl SerializationHelpers for Module {
     }
 }
 
-impl From<parity_wasm::SerializationError> for ModuleError {
-    fn from(a: parity_wasm::SerializationError) -> Self {
-        use std::error::Error;
-        ModuleError::Custom(a.description().to_string())
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
