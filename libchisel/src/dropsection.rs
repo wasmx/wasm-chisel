@@ -201,4 +201,62 @@ mod tests {
         let module = Module::from_slice(&input);
         assert!(custom_section_index_for(&module, "name").is_none());
     }
+
+    #[test]
+    fn dropped_name_section_parsed() {
+        let input = FromHex::from_hex(
+            "0061736d010000000104016000000303020000070801046d61696e00010a
+            0a020300010b040010000b0014046e616d65010d0200047465737401046d
+            61696e",
+        )
+        .unwrap();
+
+        let mut module = Module::from_slice(&input)
+            .parse_names()
+            .expect("Should not fail");
+        let mut module1 = module.clone();
+
+        assert!(custom_section_index_for(&module, "name").is_some());
+
+        let dropper = DropSection::CustomSectionByName("name".to_string());
+        let dropper1 = DropSection::NamesSection;
+
+        assert!(dropper
+            .translate_inplace(&mut module)
+            .expect("Should not fail"));
+        assert!(dropper1
+            .translate_inplace(&mut module1)
+            .expect("Should not fail"));
+
+        assert!(custom_section_index_for(&module, "name").is_none());
+        assert!(custom_section_index_for(&module1, "name").is_none());
+    }
+
+    #[test]
+    fn dropped_name_section_index_unparsed() {
+        let input = FromHex::from_hex(
+            "0061736d010000000104016000000303020000070801046d61696e00010a
+            0a020300010b040010000b0014046e616d65010d0200047465737401046d
+            61696e",
+        )
+        .unwrap();
+
+        let mut module = Module::from_slice(&input);
+        let mut module1 = module.clone();
+
+        assert!(custom_section_index_for(&module, "name").is_some());
+
+        let dropper = DropSection::CustomSectionByName("name".to_string());
+        let dropper1 = DropSection::NamesSection;
+
+        assert!(dropper
+            .translate_inplace(&mut module)
+            .expect("Should not fail"));
+        assert!(dropper1
+            .translate_inplace(&mut module1)
+            .expect("Should not fail"));
+
+        assert!(custom_section_index_for(&module, "name").is_none());
+        assert!(custom_section_index_for(&module1, "name").is_none());
+    }
 }
