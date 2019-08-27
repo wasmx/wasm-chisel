@@ -89,6 +89,14 @@ impl From<std::io::Error> for ModuleError {
     }
 }
 
+// Also aliased as parity_wasm::SerializationError
+impl From<parity_wasm::elements::Error> for ModuleError {
+    fn from(a: parity_wasm::elements::Error) -> Self {
+        use std::error::Error;
+        ModuleError::Custom(a.description().to_string())
+    }
+}
+
 impl fmt::Display for ModuleError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(
