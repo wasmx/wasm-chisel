@@ -45,28 +45,6 @@ impl ModuleTranslator for RemapStart {
     }
 }
 
-// NOTE: This seems to be exported properly in later versions of parity-wasm.
-// TODO: When updated, use the proper method instead.
-fn section_order(s: &Section) -> u8 {
-    match s {
-        Section::Custom(_) => 0x00,
-        Section::Unparsed { .. } => 0x00,
-        Section::Type(_) => 0x1,
-        Section::Import(_) => 0x2,
-        Section::Function(_) => 0x3,
-        Section::Table(_) => 0x4,
-        Section::Memory(_) => 0x5,
-        Section::Global(_) => 0x6,
-        Section::Export(_) => 0x7,
-        Section::Start(_) => 0x8,
-        Section::Element(_) => 0x9,
-        Section::Code(_) => 0x0a,
-        Section::Data(_) => 0x0b,
-        Section::Name(_) => 0x00,
-        Section::Reloc(_) => 0x00,
-    }
-}
-
 /// Replace an exported function with another function, or export if unexported.
 fn remap_or_export_main(module: &mut Module, export_name: &str, func_idx: u32) {
     let new_func_export = ExportEntry::new(export_name.to_string(), Internal::Function(func_idx));
@@ -84,18 +62,13 @@ fn remap_or_export_main(module: &mut Module, export_name: &str, func_idx: u32) {
             export_section.push(new_func_export);
         }
     } else {
-        let sections = module.sections_mut();
         let new_export_section =
             Section::Export(ExportSection::with_entries(vec![new_func_export]));
 
-        // If we can find a section that is supposed to be after exports, insert the new section at its position (shifts other elements to the right).
-        // Otherwise, append it at the end.
-        // NOTE: Assumes that the ordering of sections is otherwise correct.
-        if let Some(exports_loc) = sections.iter().position(|sec| section_order(&sec) > 0x7) {
-            sections.insert(exports_loc, new_export_section);
-        } else {
-            sections.push(new_export_section);
-        }
+        // This should not fail, because there is no existing export section.
+        module
+            .insert_section(new_export_section)
+            .expect("insert_section should not fail");
     }
 }
 

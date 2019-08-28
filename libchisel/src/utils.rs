@@ -1,29 +1,6 @@
 //! These are helpers to be used internally.
 
-use parity_wasm::elements::{deserialize_buffer, serialize, Module, Section};
-
-pub trait HasNamesSection {
-    /// Returns true if the module has a NamesSection.
-    fn has_names_section(&self) -> bool;
-}
-
-impl HasNamesSection for Module {
-    fn has_names_section(&self) -> bool {
-        // TODO: move names_section_index_for helper from dropsection and consider upstreaming it
-        self.sections()
-            .iter()
-            .position(|e| {
-                match e {
-                    // The default case, when the section was not parsed by parity-wasm
-                    Section::Custom(_section) => _section.name() == "name",
-                    // This is the case, when the section was parsed by parity-wasm
-                    Section::Name(_) => true,
-                    _ => false,
-                }
-            })
-            .is_some()
-    }
-}
+use parity_wasm::elements::{deserialize_buffer, serialize, Module};
 
 pub trait SerializationHelpers {
     /// Deserialize bytecode to a Module.

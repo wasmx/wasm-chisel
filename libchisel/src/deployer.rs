@@ -91,7 +91,7 @@ fn create_custom_deployer(payload: &[u8]) -> Result<Module, ModuleError> {
 
     // Re-write memory to pre-allocate enough for code size
     let memory_initial = (payload.len() as u32 / 65536) + 1;
-    let mem_type = parity_wasm::elements::MemoryType::new(memory_initial, None, false);
+    let mem_type = parity_wasm::elements::MemoryType::new(memory_initial, None);
     module
         .memory_section_mut()
         // This would be an internal error (.e.g the the deployer code above has no memory section)
