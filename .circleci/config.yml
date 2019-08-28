@@ -34,12 +34,13 @@ jobs:
           name: Build
           command: |
              cargo build --release
-             cargo clean
-             cargo build --release --features wabt
-             cargo clean
+             # Explicitly move into the libchisel directory to properly build with features
+             # FIXME: make this work in workspace
+             cd libchisel && cargo build --release --features wabt && cd ..
       - run:
           name: Test
           command: |
              cargo test
-             cargo clean
-             cargo test --features wabt
+             # Explicitly move into the libchisel directory to properly build with features
+             # FIXME: make this work in workspace
+             cd libchisel && cargo test --features wabt && cd ..
