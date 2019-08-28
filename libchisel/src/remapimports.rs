@@ -125,6 +125,8 @@ impl<'a> ImportInterface<'a> {
 }
 
 impl<'a> RemapImports<'a> {
+    // NOTE: 'new()' is currently unused in the library but useful in the future.
+    #[allow(dead_code)]
     fn new(interfaces: Vec<ImportInterface<'a>>) -> Self {
         RemapImports {
             interfaces: interfaces,
