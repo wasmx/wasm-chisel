@@ -24,6 +24,14 @@ pub mod verifyimports;
 mod depgraph;
 mod utils;
 
+// Export `to_vec()` and `from_slice()`.
+pub use utils::SerializationHelpers;
+
+// This helper is exported here for users of this library not needing to import parity_wasm.
+pub fn module_from_slice(input: &[u8]) -> Module {
+    Module::from_slice(input)
+}
+
 use std::{error, fmt};
 
 #[derive(Eq, PartialEq, Debug)]
@@ -242,5 +250,18 @@ mod tests {
 
         let result = as_trait.validate(&Module::default());
         assert!(result.is_ok());
+    }
+
+    #[test]
+    fn loading_from_slice() {
+        let module_orig = Module::default();
+
+        let output = module_orig.clone().to_vec();
+        let module = module_from_slice(&output);
+        assert_eq!(module_orig, module);
+
+        let output = module_orig.clone().to_vec();
+        let module = Module::from_slice(&output);
+        assert_eq!(module_orig, module);
     }
 }
