@@ -29,6 +29,7 @@ impl<'a> ChiselModule<'a> for DropSection {
     }
 }
 
+// TODO: consider upstreaming this
 fn custom_section_index_for(module: &Module, name: &str) -> Option<usize> {
     module.sections().iter().position(|e| match e {
         Section::Custom(_section) => _section.name() == name,
@@ -48,19 +49,15 @@ impl DropSection {
     }
 
     fn drop_section(&self, module: &mut Module) -> Result<bool, ModuleError> {
-        let index = self.find_index(&module);
-        if index.is_none() {
-            return Ok(false);
+        if let Some(index) = self.find_index(&module) {
+            let sections = module.sections_mut();
+            if index < sections.len() {
+                sections.remove(index);
+                return Ok(true);
+            }
         }
-        let index = index.unwrap();
 
-        let sections = module.sections_mut();
-        if index >= sections.len() {
-            return Ok(false);
-        }
-        sections.remove(index);
-
-        Ok(true)
+        Ok(false)
     }
 }
 
