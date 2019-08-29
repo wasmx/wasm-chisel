@@ -3,3 +3,5 @@
 Cargo.lock
 **/*.swp
 **/chisel.yml
+**/src/*.wasm
+**/src/*.wat
