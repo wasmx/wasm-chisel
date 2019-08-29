@@ -2,8 +2,6 @@ use super::{ChiselModule, ModuleCreator, ModuleError, ModuleKind};
 use parity_wasm::builder;
 use parity_wasm::elements::{CustomSection, Module};
 
-use byteorder::{LittleEndian, WriteBytesExt};
-
 /// Enum on which ModuleCreator is implemented.
 pub enum Deployer<'a> {
     Memory(&'a [u8]),
@@ -99,8 +97,10 @@ fn create_custom_deployer(payload: &[u8]) -> Result<Module, ModuleError> {
         .entries_mut()[0] = mem_type;
 
     // Prepare payload (append length).
+    let payload_len = payload.len() as u32;
+    let payload_len = payload_len.to_le_bytes();
     let mut custom_payload = payload.to_vec();
-    custom_payload.write_i32::<LittleEndian>(payload.len() as i32)?;
+    custom_payload.extend_from_slice(&payload_len);
 
     // Prepare and append custom section.
     let custom = CustomSection::new("deployer".to_string(), custom_payload);

@@ -1,4 +1,3 @@
-extern crate byteorder;
 extern crate parity_wasm;
 extern crate rustc_hex;
 
