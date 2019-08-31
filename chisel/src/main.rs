@@ -6,6 +6,8 @@ extern crate serde;
 extern crate serde_derive;
 extern crate serde_yaml;
 
+mod logger;
+
 use std::fs::{read, read_to_string};
 use std::process;
 
@@ -150,7 +152,7 @@ impl ModuleContext {
 }
 
 fn err_exit(msg: &str) -> ! {
-    println!("{}: {}", crate_name!(), msg);
+    eprintln!("{}: {}", crate_name!(), msg);
     process::exit(-1);
 }
 
@@ -188,6 +190,7 @@ fn execute_module(context: &ModuleContext, module: &mut Module) -> bool {
 
     let mut is_translator = false; // Flag representing if the module is a translator
     let name = conf_name.as_str();
+    chisel_debug!(1, "Running module '{}'", name);
     let ret = match name {
         "verifyexports" => {
             if let Ok(chisel) = VerifyExports::with_preset(&preset) {
@@ -280,7 +283,7 @@ fn execute_module(context: &ModuleContext, module: &mut Module) -> bool {
     } else {
         ret.unwrap_err()
     };
-    println!("\t{}: {}", name, module_status_msg);
+    eprintln!("\t{}: {}", name, module_status_msg);
 
     if let Ok(result) = ret {
         if !result && is_translator {
@@ -302,7 +305,7 @@ fn chisel_execute(context: &ChiselContext) -> Result<bool, &'static str> {
             let mut module = module.parse_names().expect("Failed to parse NamesSection");
 
             let original = module.clone();
-            println!("Ruleset {}:", context.name());
+            eprintln!("Ruleset {}:", context.name());
             let chisel_results = context
                 .get_modules()
                 .iter()
@@ -312,10 +315,10 @@ fn chisel_execute(context: &ChiselContext) -> Result<bool, &'static str> {
             // If the module was mutated, serialize to file.
             if original != module {
                 if let Some(path) = context.outfile() {
-                    println!("Writing to file: {}", path);
+                    chisel_debug!(1, "Writing to file: {}", path);
                     serialize_to_file(path, module).unwrap();
                 } else {
-                    println!("No output file specified; writing in place");
+                    chisel_debug!(1, "No output file specified; writing in place");
                     serialize_to_file(context.file(), module).unwrap();
                 }
             }
@@ -331,12 +334,20 @@ fn chisel_execute(context: &ChiselContext) -> Result<bool, &'static str> {
 fn chisel_subcommand_run(args: &ArgMatches) -> i32 {
     let config_path = args.value_of("CONFIG").unwrap_or(DEFAULT_CONFIG_PATH);
 
+    if args.is_present("VERBOSE") {
+        logger::set_global_log_level(1);
+    }
+
     if let Ok(conf) = read_to_string(config_path) {
         let ctxs = yaml_configure(&conf);
+        chisel_debug!(1, "Loaded {} rulesets", ctxs.len());
 
-        let result_final = ctxs.iter().fold(0, |acc, ctx| match chisel_execute(&ctx) {
-            Ok(result) => acc + if result { 0 } else { 1 }, // Add the number of module failures to exit code.
-            Err(msg) => err_exit(msg),
+        let result_final = ctxs.iter().fold(0, |acc, ctx| {
+            chisel_debug!(1, "Executing ruleset {}", ctx.name());
+            match chisel_execute(&ctx) {
+                Ok(result) => acc + if result { 0 } else { 1 }, // Add the number of module failures to exit code.
+                Err(msg) => err_exit(msg),
+            }
         });
 
         result_final
@@ -352,6 +363,13 @@ pub fn main() {
     let cli_matches = App::new("chisel")
         .version(crate_version!())
         .about(crate_description!())
+        .arg(
+            Arg::with_name("VERBOSE")
+                .short("v")
+                .long("verbose")
+                .help("Enables verbose debug logging")
+                .global(true),
+        )
         .subcommand(
             SubCommand::with_name("run")
                 .about("Runs chisel with the closest configuration file.")
@@ -367,7 +385,10 @@ pub fn main() {
         .get_matches();
 
     match cli_matches.subcommand() {
-        ("run", Some(subcmd_matches)) => process::exit(chisel_subcommand_run(subcmd_matches)),
+        ("run", Some(subcmd_matches)) => {
+            chisel_debug!(1, "Running chisel");
+            process::exit(chisel_subcommand_run(subcmd_matches))
+        }
         _ => err_exit(ERR_NO_SUBCOMMAND),
     };
 }
