@@ -1,5 +1,5 @@
 use super::{ChiselModule, ModuleCreator, ModuleError, ModuleKind};
-use crate::utils::*;
+use crate::utils::SerializationHelpers;
 use parity_wasm::elements::{deserialize_buffer, Module};
 use wabt::Wat2Wasm;
 
@@ -53,8 +53,7 @@ fn convert_wat(input: &[u8]) -> Result<Module, ModuleError> {
         .write_debug_names(true)
         .convert(&input)?;
 
-    let module = deserialize_buffer::<Module>(module.as_ref())?;
-    Ok(module)
+    Ok(Module::from_slice(module.as_ref())?)
 }
 
 impl<'a> ModuleCreator for FromWat<'a> {

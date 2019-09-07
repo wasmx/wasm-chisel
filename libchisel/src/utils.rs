@@ -1,29 +1,30 @@
 //! These are helpers to be used internally.
 
+use crate::ModuleError;
+
 use parity_wasm::elements::{deserialize_buffer, serialize, Module};
 
 pub trait SerializationHelpers {
     /// Deserialize bytecode to a Module.
-    fn from_slice(input: &[u8]) -> Module;
+    fn from_slice(input: &[u8]) -> Result<Module, ModuleError>;
 
     /// Serialize Module to bytecode. Serialization consumes the input.
-    fn to_vec(self) -> Vec<u8>;
+    fn to_vec(self) -> Result<Vec<u8>, ModuleError>;
 }
 
 impl SerializationHelpers for Module {
-    fn from_slice(input: &[u8]) -> Self {
-        deserialize_buffer::<Module>(&input).expect("invalid Wasm bytecode")
+    fn from_slice(input: &[u8]) -> Result<Self, ModuleError> {
+        Ok(deserialize_buffer::<Module>(&input)?)
     }
 
-    fn to_vec(self) -> Vec<u8> {
-        serialize::<Module>(self).expect("invalid Wasm module")
+    fn to_vec(self) -> Result<Vec<u8>, ModuleError> {
+        Ok(serialize::<Module>(self)?)
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::ModuleError;
     use rustc_hex::FromHex;
 
     #[test]
@@ -35,8 +36,8 @@ mod tests {
 0a040102000b",
         )
         .unwrap();
-        let module = Module::from_slice(&input);
-        let output = module.to_vec();
+        let module = Module::from_slice(&input).unwrap();
+        let output = module.to_vec().unwrap();
         assert_eq!(input, output);
     }
 
@@ -48,7 +49,7 @@ mod tests {
 61696e",
         )
         .unwrap();
-        let module = Module::from_slice(&input);
+        let module = Module::from_slice(&input).unwrap();
         assert_eq!(module.has_names_section(), true);
     }
 
@@ -59,16 +60,8 @@ mod tests {
 0a020300010b040010000b",
         )
         .unwrap();
-        let module = Module::from_slice(&input);
+        let module = Module::from_slice(&input).unwrap();
         assert_eq!(module.has_names_section(), false);
-    }
-
-    fn try_serialize(module: Module) -> Result<Vec<u8>, ModuleError> {
-        Ok(serialize::<Module>(module)?)
-    }
-
-    fn try_deserialize(input: &[u8]) -> Result<Module, ModuleError> {
-        Ok(deserialize_buffer::<Module>(&input)?)
     }
 
     #[test]
@@ -82,16 +75,16 @@ mod tests {
             .build()
             .build();
         // Shouldn't this one fail due to the invalid function reference?
-        assert_eq!(try_serialize(module).is_ok(), true);
+        assert_eq!(module.to_vec().is_ok(), true);
 
         // The success case.
-        assert_eq!(try_serialize(Module::default()).is_ok(), true)
+        assert_eq!(Module::default().to_vec().is_ok(), true)
     }
 
     #[test]
     fn test_deserialize_error() {
         // The failure case.
-        assert_eq!(try_deserialize(&[0u8; 0]).is_ok(), false);
+        assert_eq!(Module::from_slice(&[0u8; 0]).is_ok(), false);
 
         // The success case.
         let input = FromHex::from_hex(
@@ -101,6 +94,6 @@ mod tests {
 0a040102000b",
         )
         .unwrap();
-        assert_eq!(try_deserialize(&input).is_ok(), true)
+        assert_eq!(Module::from_slice(&input).is_ok(), true)
     }
 }

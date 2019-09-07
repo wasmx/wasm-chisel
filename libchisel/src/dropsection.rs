@@ -181,7 +181,7 @@ mod tests {
         )
         .unwrap();
 
-        let mut module = Module::from_slice(&input);
+        let mut module = Module::from_slice(&input).unwrap();
         assert!(custom_section_index_for(&module, "name").is_some());
         module = module.parse_names().expect("Should not fail");
         assert!(custom_section_index_for(&module, "name").is_some());
@@ -195,7 +195,7 @@ mod tests {
         )
         .unwrap();
 
-        let module = Module::from_slice(&input);
+        let module = Module::from_slice(&input).unwrap();
         assert!(custom_section_index_for(&module, "name").is_none());
     }
 
@@ -209,6 +209,7 @@ mod tests {
         .unwrap();
 
         let mut module = Module::from_slice(&input)
+            .unwrap()
             .parse_names()
             .expect("Should not fail");
         let mut module1 = module.clone();
@@ -238,7 +239,7 @@ mod tests {
         )
         .unwrap();
 
-        let mut module = Module::from_slice(&input);
+        let mut module = Module::from_slice(&input).unwrap();
         let mut module1 = module.clone();
 
         assert!(custom_section_index_for(&module, "name").is_some());

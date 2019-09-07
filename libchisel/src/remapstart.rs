@@ -115,7 +115,7 @@ mod tests {
         )
         .unwrap();
 
-        let mut module = Module::from_slice(&wasm);
+        let mut module = Module::from_slice(&wasm).unwrap();
         module = module.parse_names().unwrap();
         assert!(module.names_section().is_some());
         let start_idx = module
@@ -159,7 +159,7 @@ mod tests {
         )
         .unwrap();
 
-        let module = Module::from_slice(&wasm);
+        let module = Module::from_slice(&wasm).unwrap();
         let new = RemapStart::with_preset("ewasm")
             .unwrap()
             .translate(&module)
@@ -189,7 +189,7 @@ mod tests {
         )
         .unwrap();
 
-        let mut module = Module::from_slice(&wasm);
+        let mut module = Module::from_slice(&wasm).unwrap();
         module = module.parse_names().unwrap();
         assert!(module.names_section().is_some());
 
@@ -222,7 +222,7 @@ mod tests {
         )
         .unwrap();
 
-        let mut module = Module::from_slice(&wasm);
+        let mut module = Module::from_slice(&wasm).unwrap();
         let res = RemapStart::with_preset("ewasm")
             .unwrap()
             .translate_inplace(&mut module)
@@ -247,7 +247,7 @@ mod tests {
         )
         .unwrap();
 
-        let mut module = Module::from_slice(&wasm);
+        let mut module = Module::from_slice(&wasm).unwrap();
         let res = RemapStart::with_preset("ewasm")
             .unwrap()
             .translate_inplace(&mut module)
@@ -273,7 +273,7 @@ mod tests {
         let wasm: Vec<u8> = FromHex::from_hex(
             "0061736d0100000001080260017e0060000002170103656e760f657468657265756d5f7573654761730000030201010503010001070a01066d656d6f727902000801010a040102000b"
         ).unwrap();
-        let mut module = Module::from_slice(&wasm);
+        let mut module = Module::from_slice(&wasm).unwrap();
         let remapper = RemapStart::with_preset("ewasm").expect("Can't fail");
 
         let res = remapper.translate_inplace(&mut module);

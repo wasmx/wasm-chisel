@@ -1,3 +1,4 @@
+use super::utils::SerializationHelpers;
 use super::{ChiselModule, ModuleError, ModuleKind, ModuleTranslator};
 use parity_wasm::elements::Module;
 
@@ -52,7 +53,7 @@ impl ModuleTranslator for Snip {
         let ret = wasm_snip::snip(options)?;
         let output = ret.emit_wasm()?;
 
-        let output = parity_wasm::elements::deserialize_buffer::<Module>(&output[..])?;
+        let output = Module::from_slice(&output[..])?;
         Ok(Some(output))
     }
 }
@@ -89,11 +90,11 @@ mod tests {
         )
         .unwrap();
 
-        let module = Module::from_slice(&wasm);
+        let module = Module::from_slice(&wasm).unwrap();
         let module = Snip::new().translate(&module);
         let module = module
             .expect("translation to be succesful")
             .expect("new module to be returned");
-        assert!(module.to_vec().len() < wasm.len());
+        assert!(module.to_vec().unwrap().len() < wasm.len());
     }
 }

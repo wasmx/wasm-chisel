@@ -117,7 +117,7 @@ mod tests {
 61696e",
         )
         .unwrap();
-        let module = Module::from_slice(&input);
+        let module = Module::from_slice(&input).unwrap();
         // Forcefully parse names section here.
         let module = module
             .parse_names()

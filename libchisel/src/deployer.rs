@@ -1,3 +1,4 @@
+use super::utils::SerializationHelpers;
 use super::{ChiselModule, ModuleCreator, ModuleError, ModuleKind};
 use parity_wasm::builder;
 use parity_wasm::elements::{CustomSection, Module};
@@ -85,7 +86,7 @@ fn create_custom_deployer(payload: &[u8]) -> Result<Module, ModuleError> {
     let code = deployer_code();
 
     // This is the pre-written deployer code.
-    let mut module: Module = parity_wasm::deserialize_buffer(&code)?;
+    let mut module = Module::from_slice(&code)?;
 
     // Re-write memory to pre-allocate enough for code size
     let memory_initial = (payload.len() as u32 / 65536) + 1;
