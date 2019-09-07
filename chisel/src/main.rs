@@ -18,7 +18,7 @@ use libchisel::{
 
 use clap::{App, Arg, ArgMatches, SubCommand};
 use libchisel::*;
-use parity_wasm::elements::{deserialize_buffer, serialize_to_file, Module, Serialize};
+use parity_wasm::elements::{deserialize_buffer, serialize_to_file, Module};
 use serde_yaml::Value;
 
 // Error messages
@@ -247,8 +247,7 @@ fn execute_module(context: &ModuleContext, module: &mut Module) -> bool {
         }
         "deployer" => {
             is_translator = true;
-            let mut payload = Vec::new();
-            module.clone().serialize(&mut payload).unwrap(); // This should not fail, but perhaps check anyway?
+            let payload = module.clone().to_vec();
 
             if let Ok(chisel) = Deployer::with_preset(&preset, &payload) {
                 let new_module = chisel.create().unwrap();
