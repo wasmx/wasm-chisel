@@ -186,7 +186,7 @@ impl<'a> ModuleCreator for Deployer<'a> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use parity_wasm;
+    use crate::utils::SerializationHelpers;
     use rustc_hex::FromHex;
 
     #[test]
@@ -209,7 +209,7 @@ mod tests {
         ",
         )
         .unwrap();
-        let output = parity_wasm::serialize(module).expect("Failed to serialize");
+        let output = module.to_vec().unwrap();
         assert_eq!(output, expected);
     }
 
@@ -233,7 +233,7 @@ mod tests {
         ",
         )
         .unwrap();
-        let output = parity_wasm::serialize(module).expect("Failed to serialize");
+        let output = module.to_vec().unwrap();
         assert_eq!(output, expected);
     }
 
@@ -265,7 +265,7 @@ mod tests {
         ",
         )
         .unwrap();
-        let output = parity_wasm::serialize(module).expect("Failed to serialize");
+        let output = module.to_vec().unwrap();
         assert_eq!(output, expected);
     }
 
@@ -285,7 +285,7 @@ mod tests {
         ",
         )
         .unwrap();
-        let output = parity_wasm::serialize(module).expect("Failed to serialize");
+        let output = module.to_vec().unwrap();
         assert_eq!(output, expected);
     }
 

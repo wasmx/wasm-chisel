@@ -39,7 +39,7 @@ impl ModuleValidator for CheckStartFunc {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use parity_wasm::elements::deserialize_buffer;
+    use crate::utils::SerializationHelpers;
 
     #[test]
     fn start_required_good() {
@@ -49,7 +49,7 @@ mod tests {
             0x08, 0x01, 0x00, 0x0a, 0x04, 0x01, 0x02, 0x00, 0x0b,
         ];
 
-        let module = deserialize_buffer::<Module>(&wasm).unwrap();
+        let module = Module::from_slice(&wasm).unwrap();
         let checker = CheckStartFunc::new(true);
 
         let result = checker.validate(&module).unwrap();
@@ -64,7 +64,7 @@ mod tests {
             0x08, 0x01, 0x00, 0x0a, 0x04, 0x01, 0x02, 0x00, 0x0b,
         ];
 
-        let module = deserialize_buffer::<Module>(&wasm).unwrap();
+        let module = Module::from_slice(&wasm).unwrap();
         let checker = CheckStartFunc::new(false);
 
         let result = checker.validate(&module).unwrap();
@@ -79,7 +79,7 @@ mod tests {
             0x0a, 0x04, 0x01, 0x02, 0x00, 0x0b,
         ];
 
-        let module = deserialize_buffer::<Module>(&wasm).unwrap();
+        let module = Module::from_slice(&wasm).unwrap();
         let checker = CheckStartFunc::new(false);
 
         let result = checker.validate(&module).unwrap();
@@ -94,7 +94,7 @@ mod tests {
             0x0a, 0x04, 0x01, 0x02, 0x00, 0x0b,
         ];
 
-        let module = deserialize_buffer::<Module>(&wasm).unwrap();
+        let module = Module::from_slice(&wasm).unwrap();
         let checker = CheckStartFunc::new(true);
 
         let result = checker.validate(&module).unwrap();

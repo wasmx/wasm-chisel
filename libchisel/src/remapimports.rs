@@ -179,9 +179,9 @@ impl<'a> RemapImports<'a> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::utils::SerializationHelpers;
     use crate::verifyimports::*;
     use crate::{ModulePreset, ModuleTranslator, ModuleValidator};
-    use parity_wasm;
     use rustc_hex::FromHex;
 
     #[test]
@@ -193,12 +193,12 @@ mod tests {
         ",
         )
         .unwrap();
-        let mut module = parity_wasm::deserialize_buffer(&input).expect("failed");
+        let mut module = Module::from_slice(&input).unwrap();
         let did_change = RemapImports::with_preset("ewasm")
             .unwrap()
             .translate_inplace(&mut module)
             .unwrap();
-        let output = parity_wasm::serialize(module).expect("failed");
+        let output = module.to_vec().unwrap();
         let expected = FromHex::from_hex(
             "
             0061736d0100000001050160017e0002130108657468657265756d067573
@@ -230,7 +230,7 @@ mod tests {
             0x00, 0x0a, 0x04, 0x01, 0x02, 0x00, 0x0b,
         ];
 
-        let module = parity_wasm::deserialize_buffer(&wasm).unwrap();
+        let module = Module::from_slice(&wasm).unwrap();
 
         let new = RemapImports::with_preset("ewasm")
             .unwrap()
@@ -260,7 +260,7 @@ mod tests {
             0x00, 0x0a, 0x04, 0x01, 0x02, 0x00, 0x0b,
         ];
 
-        let module = parity_wasm::deserialize_buffer(&wasm).unwrap();
+        let module = Module::from_slice(&wasm).unwrap();
 
         let new = RemapImports::with_preset("ewasm")
             .unwrap()
@@ -298,7 +298,7 @@ mod tests {
             0x6f, 0x72, 0x79, 0x02, 0x00, 0x0a, 0x04, 0x01, 0x02, 0x00, 0x0b,
         ];
 
-        let module = parity_wasm::deserialize_buffer(&wasm).unwrap();
+        let module = Module::from_slice(&wasm).unwrap();
 
         let new = RemapImports::with_preset("ewasm")
             .unwrap()
@@ -344,7 +344,7 @@ mod tests {
             0x72, 0x79, 0x02, 0x00, 0x0a, 0x04, 0x01, 0x02, 0x00, 0x0b,
         ];
 
-        let module = parity_wasm::deserialize_buffer(&wasm).unwrap();
+        let module = Module::from_slice(&wasm).unwrap();
 
         let new = RemapImports::with_preset("ewasm, bignum, debug")
             .unwrap()
@@ -385,7 +385,7 @@ mod tests {
             0x00, 0x0b,
         ];
 
-        let module = parity_wasm::deserialize_buffer(&wasm).unwrap();
+        let module = Module::from_slice(&wasm).unwrap();
 
         let interfaces_noprefix = vec![
             ImportInterface::new(ImportList::with_preset("ewasm").unwrap(), None),
