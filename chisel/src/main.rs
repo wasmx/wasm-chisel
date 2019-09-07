@@ -16,6 +16,9 @@ use libchisel::{
     snip::*, trimexports::*, trimstartfunc::*, verifyexports::*, verifyimports::*,
 };
 
+#[cfg(feature = "binaryen")]
+use libchisel::binaryenopt::*;
+
 use clap::{App, Arg, ArgMatches, SubCommand};
 use libchisel::*;
 use parity_wasm::elements::{deserialize_buffer, serialize_to_file, Module};
@@ -268,6 +271,15 @@ fn execute_module(context: &ModuleContext, module: &mut Module) -> bool {
         "dropnames" => {
             is_translator = true;
             translate_module(module, &DropSection::NamesSection)
+        }
+        #[cfg(feature = "binaryen")]
+        "binaryenopt" => {
+            is_translator = true;
+            if let Ok(chisel) = BinaryenOptimiser::with_preset(&preset) {
+                translate_module(module, &chisel)
+            } else {
+                Err("binaryenopt: Invalid preset")
+            }
         }
         _ => Err("Module Not Found"),
     };
