@@ -216,7 +216,6 @@ fn func_export_index_by_name(exports: &ExportSection, field_str: &str) -> Option
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::utils::*;
 
     #[test]
     fn no_exports() {
@@ -224,7 +223,7 @@ mod tests {
         // (module)
         let wasm: Vec<u8> = vec![0x00, 0x61, 0x73, 0x6d, 0x01, 0x00, 0x00, 0x00];
 
-        let module = Module::from_slice(&wasm).unwrap();
+        let module = Module::from_bytes(&wasm).unwrap();
         let checker = VerifyExports::with_preset("ewasm").unwrap();
         let result = checker.validate(&module).unwrap();
         assert_eq!(false, result);
@@ -246,7 +245,7 @@ mod tests {
             0x0a, 0x04, 0x01, 0x02, 0x00, 0x0b,
         ];
 
-        let module = Module::from_slice(&wasm).unwrap();
+        let module = Module::from_bytes(&wasm).unwrap();
         let checker = VerifyExports::with_preset("ewasm").unwrap();
         let result = checker.validate(&module).unwrap();
         assert_eq!(true, result);
@@ -270,7 +269,7 @@ mod tests {
             0x00, 0x0a, 0x06, 0x01, 0x04, 0x00, 0x41, 0x00, 0x0b,
         ];
 
-        let module = Module::from_slice(&wasm).unwrap();
+        let module = Module::from_bytes(&wasm).unwrap();
         let checker = VerifyExports::with_preset("ewasm").unwrap();
         let result = checker.validate(&module).unwrap();
         assert_eq!(false, result);
@@ -292,7 +291,7 @@ mod tests {
             0x00, 0x0a, 0x04, 0x01, 0x02, 0x00, 0x0b,
         ];
 
-        let module = Module::from_slice(&wasm).unwrap();
+        let module = Module::from_bytes(&wasm).unwrap();
         let checker = VerifyExports::with_preset("ewasm").unwrap();
         let result = checker.validate(&module).unwrap();
         assert_eq!(false, result);
@@ -312,7 +311,7 @@ mod tests {
             0x6d, 0x61, 0x69, 0x6e, 0x00, 0x00, 0x0a, 0x04, 0x01, 0x02, 0x00, 0x0b,
         ];
 
-        let module = Module::from_slice(&wasm).unwrap();
+        let module = Module::from_bytes(&wasm).unwrap();
         let checker = VerifyExports::with_preset("ewasm").unwrap();
         let result = checker.validate(&module).unwrap();
         assert_eq!(false, result);
@@ -332,7 +331,7 @@ mod tests {
             0x6d, 0x65, 0x6d, 0x6f, 0x72, 0x79, 0x02, 0x00, 0x0a, 0x04, 0x01, 0x02, 0x00, 0x0b,
         ];
 
-        let module = Module::from_slice(&wasm).unwrap();
+        let module = Module::from_bytes(&wasm).unwrap();
         let checker = VerifyExports::with_preset("ewasm").unwrap();
         let result = checker.validate(&module).unwrap();
         assert_eq!(false, result);
@@ -354,7 +353,7 @@ mod tests {
             0x0a, 0x04, 0x01, 0x02, 0x00, 0x0b,
         ];
 
-        let module = Module::from_slice(&wasm).unwrap();
+        let module = Module::from_bytes(&wasm).unwrap();
         let checker = VerifyExports::with_preset("ewasm").unwrap();
         let result = checker.validate(&module).unwrap();
         assert_eq!(false, result);
@@ -376,7 +375,7 @@ mod tests {
             0x0a, 0x04, 0x01, 0x02, 0x00, 0x0b,
         ];
 
-        let module = Module::from_slice(&wasm).unwrap();
+        let module = Module::from_bytes(&wasm).unwrap();
         let checker = VerifyExports::with_preset("ewasm").unwrap();
         let result = checker.validate(&module).unwrap();
         assert_eq!(false, result);
@@ -398,7 +397,7 @@ mod tests {
             0x04, 0x01, 0x02, 0x00, 0x0b,
         ];
 
-        let module = Module::from_slice(&wasm).unwrap();
+        let module = Module::from_bytes(&wasm).unwrap();
         let checker = VerifyExports::with_preset("ewasm").unwrap();
         let result = checker.validate(&module).unwrap();
         assert_eq!(false, result);
@@ -422,7 +421,7 @@ mod tests {
             0x0b,
         ];
 
-        let module = Module::from_slice(&wasm).unwrap();
+        let module = Module::from_bytes(&wasm).unwrap();
         let checker = VerifyExports::with_preset("ewasm").unwrap();
         let result = checker.validate(&module).unwrap();
         assert_eq!(false, result);
@@ -446,7 +445,7 @@ mod tests {
             0x0b,
         ];
 
-        let module = Module::from_slice(&wasm).unwrap();
+        let module = Module::from_bytes(&wasm).unwrap();
         let checker = VerifyExports {
             entries: vec![
                 ExportType::Function("main", FunctionType::default()),

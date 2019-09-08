@@ -1,4 +1,3 @@
-use super::utils::SerializationHelpers;
 use super::{ChiselModule, ModuleCreator, ModuleError, ModuleKind};
 use parity_wasm::builder;
 use parity_wasm::elements::{CustomSection, Module};
@@ -86,7 +85,7 @@ fn create_custom_deployer(payload: &[u8]) -> Result<Module, ModuleError> {
     let code = deployer_code();
 
     // This is the pre-written deployer code.
-    let mut module = Module::from_slice(&code)?;
+    let mut module = Module::from_bytes(&code)?;
 
     // Re-write memory to pre-allocate enough for code size
     let memory_initial = (payload.len() as u32 / 65536) + 1;
@@ -186,7 +185,6 @@ impl<'a> ModuleCreator for Deployer<'a> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::utils::SerializationHelpers;
     use rustc_hex::FromHex;
 
     #[test]
@@ -209,7 +207,7 @@ mod tests {
         ",
         )
         .unwrap();
-        let output = module.to_vec().unwrap();
+        let output = module.to_bytes().unwrap();
         assert_eq!(output, expected);
     }
 
@@ -233,7 +231,7 @@ mod tests {
         ",
         )
         .unwrap();
-        let output = module.to_vec().unwrap();
+        let output = module.to_bytes().unwrap();
         assert_eq!(output, expected);
     }
 
@@ -265,7 +263,7 @@ mod tests {
         ",
         )
         .unwrap();
-        let output = module.to_vec().unwrap();
+        let output = module.to_bytes().unwrap();
         assert_eq!(output, expected);
     }
 
@@ -285,7 +283,7 @@ mod tests {
         ",
         )
         .unwrap();
-        let output = module.to_vec().unwrap();
+        let output = module.to_bytes().unwrap();
         assert_eq!(output, expected);
     }
 

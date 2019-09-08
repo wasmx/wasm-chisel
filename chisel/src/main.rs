@@ -250,7 +250,7 @@ fn execute_module(context: &ModuleContext, module: &mut Module) -> bool {
         }
         "deployer" => {
             is_translator = true;
-            let payload = module.clone().to_vec().unwrap();
+            let payload = module.clone().to_bytes().unwrap();
 
             if let Ok(chisel) = Deployer::with_preset(&preset, &payload) {
                 let new_module = chisel.create().unwrap();

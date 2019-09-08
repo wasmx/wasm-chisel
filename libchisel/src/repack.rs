@@ -42,7 +42,6 @@ impl ModuleTranslator for Repack {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::utils::SerializationHelpers;
     use parity_wasm::builder;
     use rustc_hex::FromHex;
 
@@ -117,7 +116,7 @@ mod tests {
 61696e",
         )
         .unwrap();
-        let module = Module::from_slice(&input).unwrap();
+        let module = Module::from_bytes(&input).unwrap();
         // Forcefully parse names section here.
         let module = module
             .parse_names()

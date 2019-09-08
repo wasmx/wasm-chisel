@@ -108,7 +108,6 @@ impl From<(u32, u32)> for Edge {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::utils::SerializationHelpers;
 
     #[test]
     fn one_dep_main() {
@@ -130,7 +129,7 @@ mod tests {
             0x00, 0x0a, 0x09, 0x02, 0x04, 0x00, 0x10, 0x01, 0x0b, 0x02, 0x00, 0x0b,
         ];
 
-        let module = Module::from_slice(&wasm).unwrap();
+        let module = Module::from_bytes(&wasm).unwrap();
         let g = DepGraph::build(&module, 0).unwrap();
 
         assert!(g.edgecount() == 1);
@@ -159,7 +158,7 @@ mod tests {
             0x0b, 0x02, 0x00, 0x0b,
         ];
 
-        let module = Module::from_slice(&wasm).unwrap();
+        let module = Module::from_bytes(&wasm).unwrap();
         let g = DepGraph::build(&module, 0).unwrap();
 
         assert!(g.edgecount() == 2);
@@ -186,7 +185,7 @@ mod tests {
             0x00, 0x0a, 0x0b, 0x02, 0x04, 0x00, 0x10, 0x01, 0x0b, 0x04, 0x00, 0x10, 0x00, 0x0b,
         ];
 
-        let module = Module::from_slice(&wasm).unwrap();
+        let module = Module::from_bytes(&wasm).unwrap();
         let g = DepGraph::build(&module, 0).unwrap();
 
         assert!(g.edgecount() == 2);
@@ -211,7 +210,7 @@ mod tests {
             0x0a, 0x06, 0x01, 0x04, 0x00, 0x10, 0x00, 0x0b,
         ];
 
-        let module = Module::from_slice(&wasm).unwrap();
+        let module = Module::from_bytes(&wasm).unwrap();
         let g = DepGraph::build(&module, 0).unwrap();
 
         assert!(g.edgecount() == 1);
@@ -257,7 +256,7 @@ mod tests {
             0x00, 0x10, 0x01, 0x0b, 0x04, 0x00, 0x10, 0x04, 0x0b, 0x02, 0x00, 0x0b,
         ];
 
-        let module = Module::from_slice(&wasm).unwrap();
+        let module = Module::from_bytes(&wasm).unwrap();
         let g = DepGraph::build(&module, 0).unwrap();
 
         assert!(g.edgecount() == 7);
@@ -309,7 +308,7 @@ mod tests {
             0x00, 0x10, 0x02, 0x0b,
         ];
 
-        let module = Module::from_slice(&wasm).unwrap();
+        let module = Module::from_bytes(&wasm).unwrap();
         let g = DepGraph::build(&module, 0).unwrap();
 
         assert!(g.edgecount() == 10);
@@ -375,7 +374,7 @@ mod tests {
             0x10, 0x01, 0x37, 0x03, 0x00, 0x10, 0x04, 0x0b,
         ];
 
-        let module = Module::from_slice(&wasm).unwrap();
+        let module = Module::from_bytes(&wasm).unwrap();
         let g = DepGraph::build(&module, 2).unwrap();
 
         assert!(g.edgecount() == 15);
