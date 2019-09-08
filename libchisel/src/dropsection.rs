@@ -79,7 +79,6 @@ impl<'a> ModuleTranslator for DropSection {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::utils::SerializationHelpers;
     use parity_wasm::builder;
     use rustc_hex::FromHex;
 
@@ -181,7 +180,7 @@ mod tests {
         )
         .unwrap();
 
-        let mut module = Module::from_slice(&input).unwrap();
+        let mut module = Module::from_bytes(&input).unwrap();
         assert!(custom_section_index_for(&module, "name").is_some());
         module = module.parse_names().expect("Should not fail");
         assert!(custom_section_index_for(&module, "name").is_some());
@@ -195,7 +194,7 @@ mod tests {
         )
         .unwrap();
 
-        let module = Module::from_slice(&input).unwrap();
+        let module = Module::from_bytes(&input).unwrap();
         assert!(custom_section_index_for(&module, "name").is_none());
     }
 
@@ -208,7 +207,7 @@ mod tests {
         )
         .unwrap();
 
-        let mut module = Module::from_slice(&input)
+        let mut module = Module::from_bytes(&input)
             .unwrap()
             .parse_names()
             .expect("Should not fail");
@@ -239,7 +238,7 @@ mod tests {
         )
         .unwrap();
 
-        let mut module = Module::from_slice(&input).unwrap();
+        let mut module = Module::from_bytes(&input).unwrap();
         let mut module1 = module.clone();
 
         assert!(custom_section_index_for(&module, "name").is_some());

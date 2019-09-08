@@ -1,5 +1,4 @@
 use super::{ChiselModule, ModuleError, ModuleKind, ModulePreset, ModuleTranslator};
-use crate::utils::SerializationHelpers;
 use parity_wasm::elements::*;
 
 // FIXME: change level names
@@ -91,9 +90,9 @@ impl ModuleTranslator for BinaryenOptimiser {
             },
         };
 
-        let serialized = module.clone().to_vec()?;
+        let serialized = module.clone().to_bytes()?;
         let output = binaryen_optimiser(&serialized, &config)?;
-        let output = Module::from_slice(&output)?;
+        let output = Module::from_bytes(&output)?;
         Ok(Some(output))
     }
 }
@@ -133,10 +132,10 @@ mod tests {
             0x0a, 0x05, 0x01, 0x03, 0x00, 0x01, 0x0b,
         ];
 
-        let module = Module::from_slice(&input).unwrap();
+        let module = Module::from_bytes(&input).unwrap();
         let translator = BinaryenOptimiser::with_preset("O0").unwrap();
         let result = translator.translate(&module).unwrap().unwrap();
-        let serialized = result.to_vec().unwrap();
+        let serialized = result.to_bytes().unwrap();
         assert_eq!(expected, serialized);
     }
 }

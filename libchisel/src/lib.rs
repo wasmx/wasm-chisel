@@ -5,6 +5,8 @@ extern crate rustc_hex;
 
 use parity_wasm::elements::Module;
 
+use std::{error, fmt};
+
 pub mod imports;
 
 #[cfg(feature = "binaryen")]
@@ -25,17 +27,11 @@ pub mod verifyexports;
 pub mod verifyimports;
 
 mod depgraph;
-mod utils;
-
-// Export `to_vec()` and `from_slice()`.
-pub use utils::SerializationHelpers;
 
 // This helper is exported here for users of this library not needing to import parity_wasm.
-pub fn module_from_slice(input: &[u8]) -> Result<Module, ModuleError> {
-    Module::from_slice(input)
+pub fn module_from_bytes<T: AsRef<[u8]>>(input: T) -> Result<Module, ModuleError> {
+    Ok(Module::from_bytes(input)?)
 }
-
-use std::{error, fmt};
 
 #[derive(Eq, PartialEq, Debug)]
 pub enum ModuleKind {
@@ -256,15 +252,15 @@ mod tests {
     }
 
     #[test]
-    fn loading_from_slice() {
+    fn loading_from_bytes() {
         let module_orig = Module::default();
 
-        let output = module_orig.clone().to_vec().unwrap();
-        let module = module_from_slice(&output).unwrap();
+        let output = module_orig.clone().to_bytes().unwrap();
+        let module = module_from_bytes(&output).unwrap();
         assert_eq!(module_orig, module);
 
-        let output = module_orig.clone().to_vec().unwrap();
-        let module = Module::from_slice(&output).unwrap();
+        let output = module_orig.clone().to_bytes().unwrap();
+        let module = Module::from_bytes(&output).unwrap();
         assert_eq!(module_orig, module);
     }
 }

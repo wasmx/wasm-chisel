@@ -1,5 +1,4 @@
 use super::{ChiselModule, ModuleCreator, ModuleError, ModuleKind};
-use crate::utils::SerializationHelpers;
 use parity_wasm::elements::Module;
 use wabt::Wat2Wasm;
 
@@ -53,7 +52,7 @@ fn convert_wat(input: &[u8]) -> Result<Module, ModuleError> {
         .write_debug_names(true)
         .convert(&input)?;
 
-    Ok(Module::from_slice(module.as_ref())?)
+    Ok(Module::from_bytes(module.as_ref())?)
 }
 
 impl<'a> ModuleCreator for FromWat<'a> {
@@ -66,7 +65,6 @@ impl<'a> ModuleCreator for FromWat<'a> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::utils::SerializationHelpers;
 
     #[test]
     fn smoke() {
@@ -76,7 +74,7 @@ mod tests {
 
         let module = convert_wat(&r#"(module)"#.as_bytes()).unwrap();
 
-        let result = module.to_vec().unwrap();
+        let result = module.to_bytes().unwrap();
         assert_eq!(result, expectation);
     }
 
@@ -103,7 +101,7 @@ mod tests {
         )
         .unwrap();
 
-        let result = module.to_vec().unwrap();
+        let result = module.to_bytes().unwrap();
         assert_eq!(result, expectation);
     }
 }

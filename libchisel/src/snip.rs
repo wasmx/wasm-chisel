@@ -1,4 +1,3 @@
-use super::utils::SerializationHelpers;
 use super::{ChiselModule, ModuleError, ModuleKind, ModuleTranslator};
 use parity_wasm::elements::Module;
 
@@ -44,8 +43,7 @@ impl ModuleTranslator for Snip {
     }
 
     fn translate(&self, module: &Module) -> Result<Option<Module>, ModuleError> {
-        // TODO: there must be a better way to accomplish this.
-        let serialized = parity_wasm::elements::serialize::<Module>(module.clone())?;
+        let serialized = module.clone().to_bytes()?;
 
         // TODO: improve wasm-snip API...
         let mut options = self.0.clone();
@@ -53,7 +51,7 @@ impl ModuleTranslator for Snip {
         let ret = wasm_snip::snip(options)?;
         let output = ret.emit_wasm()?;
 
-        let output = Module::from_slice(&output[..])?;
+        let output = Module::from_bytes(&output[..])?;
         Ok(Some(output))
     }
 }
@@ -61,7 +59,6 @@ impl ModuleTranslator for Snip {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::utils::SerializationHelpers;
     use rustc_hex::FromHex;
 
     #[test]
@@ -90,11 +87,11 @@ mod tests {
         )
         .unwrap();
 
-        let module = Module::from_slice(&wasm).unwrap();
+        let module = Module::from_bytes(&wasm).unwrap();
         let module = Snip::new().translate(&module);
         let module = module
             .expect("translation to be succesful")
             .expect("new module to be returned");
-        assert!(module.to_vec().unwrap().len() < wasm.len());
+        assert!(module.to_bytes().unwrap().len() < wasm.len());
     }
 }
