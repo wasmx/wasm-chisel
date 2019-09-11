@@ -6,7 +6,9 @@ extern crate serde;
 extern crate serde_derive;
 extern crate serde_yaml;
 
+#[macro_use]
 mod logger;
+mod config;
 
 use std::fs::{read, read_to_string};
 use std::process;
