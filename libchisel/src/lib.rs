@@ -22,6 +22,9 @@ pub mod verifyimports;
 
 mod depgraph;
 
+/// Exported for users of this library.
+pub type WasmModule = Module;
+
 #[derive(Eq, PartialEq, Debug)]
 pub enum ModuleKind {
     Creator,
