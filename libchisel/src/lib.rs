@@ -3,7 +3,7 @@ extern crate binaryen;
 extern crate parity_wasm;
 extern crate rustc_hex;
 
-use parity_wasm::elements::Module;
+pub use parity_wasm::elements::Module;
 
 use std::{error, fmt};
 
@@ -27,11 +27,6 @@ pub mod verifyexports;
 pub mod verifyimports;
 
 mod depgraph;
-
-// This helper is exported here for users of this library not needing to import parity_wasm.
-pub fn module_from_bytes<T: AsRef<[u8]>>(input: T) -> Result<Module, ModuleError> {
-    Ok(Module::from_bytes(input)?)
-}
 
 #[derive(Eq, PartialEq, Debug)]
 pub enum ModuleKind {
@@ -249,18 +244,5 @@ mod tests {
 
         let result = as_trait.validate(&Module::default());
         assert!(result.is_ok());
-    }
-
-    #[test]
-    fn loading_from_bytes() {
-        let module_orig = Module::default();
-
-        let output = module_orig.clone().to_bytes().unwrap();
-        let module = module_from_bytes(&output).unwrap();
-        assert_eq!(module_orig, module);
-
-        let output = module_orig.clone().to_bytes().unwrap();
-        let module = Module::from_bytes(&output).unwrap();
-        assert_eq!(module_orig, module);
     }
 }

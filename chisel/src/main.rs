@@ -1,5 +1,4 @@
 extern crate libchisel;
-extern crate parity_wasm;
 #[macro_use]
 extern crate clap;
 extern crate serde;
@@ -10,7 +9,7 @@ extern crate serde_yaml;
 mod logger;
 mod config;
 
-use std::fs::{read, read_to_string};
+use std::fs::{read, read_to_string, write};
 use std::process;
 
 use libchisel::{
@@ -23,7 +22,6 @@ use libchisel::binaryenopt::*;
 
 use clap::{App, Arg, ArgMatches, SubCommand};
 use libchisel::*;
-use parity_wasm::elements::{deserialize_buffer, serialize_to_file, Module};
 use serde_yaml::Value;
 
 // Error messages
@@ -311,7 +309,7 @@ fn execute_module(context: &ModuleContext, module: &mut Module) -> bool {
 
 fn chisel_execute(context: &ChiselContext) -> Result<bool, &'static str> {
     if let Ok(buffer) = read(context.file()) {
-        if let Ok(module) = deserialize_buffer::<Module>(&buffer) {
+        if let Ok(module) = Module::from_bytes(&buffer) {
             // If we do not parse the NamesSection here, parity-wasm will drop it at serialisation
             // It is useful to have this for a number of optimisation passes, including binaryenopt and snip
             // TODO: better error handling
@@ -327,12 +325,13 @@ fn chisel_execute(context: &ChiselContext) -> Result<bool, &'static str> {
 
             // If the module was mutated, serialize to file.
             if original != module {
+                let serialized = module.to_bytes().expect("Failed to serialize Module");
                 if let Some(path) = context.outfile() {
                     chisel_debug!(1, "Writing to file: {}", path);
-                    serialize_to_file(path, module).unwrap();
+                    write(path, serialized).unwrap();
                 } else {
                     chisel_debug!(1, "No output file specified; writing in place");
-                    serialize_to_file(context.file(), module).unwrap();
+                    write(context.file(), serialized).unwrap();
                 }
             }
             Ok(chisel_results)
