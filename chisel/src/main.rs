@@ -309,7 +309,7 @@ fn execute_module(context: &ModuleContext, module: &mut Module) -> bool {
 
 fn chisel_execute(context: &ChiselContext) -> Result<bool, &'static str> {
     if let Ok(buffer) = read(context.file()) {
-        if let Ok(module) = module_from_bytes(&buffer) {
+        if let Ok(module) = Module::from_bytes(&buffer) {
             // If we do not parse the NamesSection here, parity-wasm will drop it at serialisation
             // It is useful to have this for a number of optimisation passes, including binaryenopt and snip
             // TODO: better error handling
