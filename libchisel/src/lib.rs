@@ -1,5 +1,6 @@
 pub use parity_wasm::elements::Module;
 
+use std::collections::HashMap;
 use std::{error, fmt};
 
 pub mod imports;
@@ -67,6 +68,17 @@ pub trait ModuleValidator {
 
 pub trait ModulePreset {
     fn with_preset(preset: &str) -> Result<Self, ModuleError>
+    where
+        Self: std::marker::Sized;
+}
+
+// TODO: move this to be part of ChiselModule and retire ModulePreset
+pub trait ModuleConfig {
+    fn with_defaults() -> Result<Self, ModuleError>
+    where
+        Self: std::marker::Sized;
+
+    fn with_config(config: &HashMap<String, String>) -> Result<Self, ModuleError>
     where
         Self: std::marker::Sized;
 }
