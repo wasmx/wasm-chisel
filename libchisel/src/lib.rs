@@ -3,7 +3,7 @@ extern crate binaryen;
 extern crate parity_wasm;
 extern crate rustc_hex;
 
-use parity_wasm::elements::Module;
+pub use parity_wasm::elements::Module;
 
 use std::{error, fmt};
 
