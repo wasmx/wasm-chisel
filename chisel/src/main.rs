@@ -26,6 +26,8 @@ use libchisel::binaryenopt::*;
 
 use libchisel::*;
 
+use config::*;
+
 // Error messages
 static ERR_NO_SUBCOMMAND: &'static str = "No subcommand provided.";
 static ERR_FAILED_OPEN_BINARY: &'static str = "Failed to open wasm binary.";
@@ -49,67 +51,6 @@ struct ModuleContext {
 }
 
 impl ChiselContext {
-    fn from_ruleset(ruleset: &Value) -> Vec<Self> {
-        if let Value::Mapping(rules) = ruleset {
-            let mut ret: Vec<ChiselContext> = vec![];
-
-            for (name, config) in rules.iter().filter(|(left, right)| match (left, right) {
-                (Value::String(_s), Value::Mapping(_m)) => true,
-                _ => false,
-            }) {
-                let config = config.as_mapping().expect("Mapping expected");
-                let filepath = if let Some(yaml) = config.get(&Value::String(String::from("file")))
-                {
-                    yaml.as_str()
-                        .unwrap_or_else(|| {
-                            err_exit("Type mismatch: The value of 'file' must be a string")
-                        })
-                        .to_string()
-                } else {
-                    err_exit("Ruleset missing required field: 'file'")
-                };
-
-                let outfilepath = if let Some(yaml) =
-                    config.get(&Value::String(String::from("output")))
-                {
-                    Some(
-                        yaml.as_str()
-                            .unwrap_or_else(|| {
-                                err_exit("Type mismatch: The value of 'output' must be a string")
-                            })
-                            .to_string(),
-                    )
-                } else {
-                    None
-                };
-
-                let mut config_clone = config.clone();
-                // Remove "file" and "output" so we don't interpret it as a module.
-                // TODO: use mappings to avoid the need for this
-                config_clone.remove(&Value::String(String::from("file")));
-                config_clone.remove(&Value::String(String::from("output")));
-
-                let mut module_confs: Vec<ModuleContext> = vec![];
-                let mut config_itr = config_clone.iter();
-                // Read modules while there are still modules left.
-                while let Some(module) = config_itr.next() {
-                    module_confs.push(ModuleContext::from_yaml(module));
-                }
-
-                ret.push(ChiselContext {
-                    ruleset_name: name.as_str().unwrap().into(),
-                    file: filepath,
-                    outfile: outfilepath,
-                    modules: module_confs,
-                });
-            }
-
-            ret
-        } else {
-            err_exit("Type mismatch: Top-level YAML value must be a map")
-        }
-    }
-
     fn name(&self) -> &String {
         &self.ruleset_name
     }
@@ -128,29 +69,6 @@ impl ChiselContext {
 }
 
 impl ModuleContext {
-    fn from_yaml(yaml: (&Value, &Value)) -> Self {
-        match yaml {
-            (Value::String(name), Value::Mapping(flags)) => ModuleContext {
-                module_name: name.clone(),
-                preset: if let Some(pset) = flags.get(&Value::String(String::from("preset"))) {
-                    // Check that the value to which "preset" resolves is a String. If not, return an error.
-                    if pset.is_string() {
-                        String::from(pset.as_str().unwrap())
-                    } else {
-                        err_exit("Type mismatch: Value of field 'preset' must be a string")
-                    }
-                } else {
-                    err_exit("Module missing required field: 'preset'")
-                },
-            },
-            (Value::String(name), _) => err_exit(&format!(
-                "Type mismatch: {} must be a string-map pair",
-                name
-            )),
-            _ => err_exit("Malformed ruleset field"),
-        }
-    }
-
     fn fields(&self) -> (&String, &String) {
         (&self.module_name, &self.preset)
     }
@@ -159,14 +77,6 @@ impl ModuleContext {
 fn err_exit(msg: &str) -> ! {
     eprintln!("{}: {}", crate_name!(), msg);
     process::exit(-1);
-}
-
-fn yaml_configure(yaml: &str) -> Vec<ChiselContext> {
-    if let Ok(rulesets) = serde_yaml::from_str::<Value>(yaml) {
-        ChiselContext::from_ruleset(&rulesets)
-    } else {
-        err_exit("Failed to parse YAML configuration")
-    }
 }
 
 /// Helper that tries both translation methods in the case that a module cannot implement one of them.
@@ -345,6 +255,53 @@ fn chisel_execute(context: &ChiselContext) -> Result<bool, &'static str> {
     }
 }
 
+fn yaml_configure(yaml: &str) -> ChiselConfig {
+    if let Ok(rulesets) = serde_yaml::from_str::<Value>(yaml) {
+        let config = ChiselConfig::from_yaml(&rulesets);
+        if config.is_err() {
+            err_exit(&config.unwrap_err());
+        } else {
+            config.unwrap()
+        }
+    } else {
+        err_exit("Failed to parse YAML configuration")
+    }
+}
+
+impl From<&(String, config::Ruleset)> for ChiselContext {
+    fn from(input: &(String, config::Ruleset)) -> ChiselContext {
+        let modules: Vec<ModuleContext> =
+            input
+                .1
+                .modules()
+                .iter()
+                .fold(Vec::new(), |mut acc, module| {
+                    acc.push(ModuleContext {
+                        module_name: module.0.clone(),
+                        preset: module
+                            .1
+                            .options()
+                            .get("preset")
+                            .unwrap_or_else(|| err_exit("Module missing required field: 'preset'"))
+                            .clone(),
+                    });
+                    acc
+                });
+
+        ChiselContext {
+            ruleset_name: input.0.clone(),
+            file: input
+                .1
+                .options()
+                .get("file")
+                .unwrap_or_else(|| err_exit("Ruleset missing required field: 'file'"))
+                .clone(),
+            outfile: input.1.options().get("output").cloned(),
+            modules: modules,
+        }
+    }
+}
+
 fn chisel_subcommand_run(args: &ArgMatches) -> i32 {
     let config_path = args.value_of("CONFIG").unwrap_or(DEFAULT_CONFIG_PATH);
 
@@ -354,10 +311,13 @@ fn chisel_subcommand_run(args: &ArgMatches) -> i32 {
 
     if let Ok(conf) = read_to_string(config_path) {
         let ctxs = yaml_configure(&conf);
+
+        let ctxs = ctxs.rulesets();
         chisel_debug!(1, "Loaded {} rulesets", ctxs.len());
 
         let result_final = ctxs.iter().fold(0, |acc, ctx| {
-            chisel_debug!(1, "Executing ruleset {}", ctx.name());
+            chisel_debug!(1, "Executing ruleset {}", ctx.0);
+            let ctx: ChiselContext = ctx.into();
             match chisel_execute(&ctx) {
                 Ok(result) => acc + if result { 0 } else { 1 }, // Add the number of module failures to exit code.
                 Err(msg) => err_exit(msg),
