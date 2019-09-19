@@ -1,7 +1,10 @@
+use std::collections::HashMap;
+
 use parity_wasm::elements::{ImportEntry, ImportSection, Module};
 
 use super::{
-    imports::ImportList, ChiselModule, ModuleError, ModuleKind, ModulePreset, ModuleTranslator,
+    imports::ImportList, ChiselModule, ModuleConfig, ModuleError, ModuleKind, ModulePreset,
+    ModuleTranslator,
 };
 
 pub struct RemapImports<'a> {
@@ -26,6 +29,20 @@ impl<'a> ChiselModule<'a> for RemapImports<'a> {
 
     fn as_abstract(&'a self) -> Self::ObjectReference {
         self as Self::ObjectReference
+    }
+}
+
+impl<'a> ModuleConfig for RemapImports<'a> {
+    fn with_defaults() -> Result<Self, ModuleError> {
+        Err(ModuleError::NotSupported)
+    }
+
+    fn with_config(config: &HashMap<String, String>) -> Result<Self, ModuleError> {
+        if let Some(preset) = config.get("preset") {
+            RemapImports::with_preset(preset)
+        } else {
+            Err(ModuleError::NotSupported)
+        }
     }
 }
 
