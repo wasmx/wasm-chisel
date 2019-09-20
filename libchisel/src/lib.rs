@@ -1,3 +1,5 @@
+#![feature(associated_type_defaults)]
+
 #[cfg(feature = "binaryen")]
 extern crate binaryen;
 extern crate parity_wasm;
@@ -28,6 +30,9 @@ pub mod verifyimports;
 
 mod depgraph;
 
+use std::collections::HashMap;
+use std::hash::Hash;
+
 #[derive(Eq, PartialEq, Debug)]
 pub enum ModuleKind {
     Creator,
@@ -52,6 +57,51 @@ pub trait ChiselModule<'a> {
 
     /// Borrows the instance as a trait object.
     fn as_abstract(&'a self) -> Self::ObjectReference;
+}
+
+pub trait ModuleConfig {
+    type ConfigKey: Clone + Hash + Eq;
+    type ConfigValue: Clone;
+    type Configuration: KeyValue<Self::ConfigKey, Self::ConfigValue> =
+        HashMap<Self::ConfigKey, Self::ConfigValue>;
+
+    fn with_config(config: &Self::Configuration) -> Self;
+}
+
+pub trait KeyValue<K, V>
+where
+    K: Clone + Hash + Eq,
+    V: Clone,
+{
+    fn insert(&mut self, key: &K, value: &V) -> Option<V>;
+
+    fn get(&self, key: &K) -> Option<&V>;
+
+    fn get_mut(&mut self, key: &K) -> Option<&mut V>;
+
+    fn remove(&mut self, key: &K) -> Option<V>;
+}
+
+impl<K, V> KeyValue<K, V> for HashMap<K, V>
+where
+    K: Clone + Hash + Eq,
+    V: Clone,
+{
+    fn insert(&mut self, key: &K, value: &V) -> Option<V> {
+        self.insert(key.clone(), value.clone())
+    }
+
+    fn get(&self, key: &K) -> Option<&V> {
+        self.get(key)
+    }
+
+    fn get_mut(&mut self, key: &K) -> Option<&mut V> {
+        self.get_mut(key)
+    }
+
+    fn remove(&mut self, key: &K) -> Option<V> {
+        self.remove(key)
+    }
 }
 
 pub trait ModuleCreator {
