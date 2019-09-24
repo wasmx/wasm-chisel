@@ -1,6 +1,7 @@
-use super::{ChiselModule, ModuleCreator, ModuleError, ModuleKind};
 use parity_wasm::builder;
 use parity_wasm::elements::{CustomSection, Module};
+
+use super::{ChiselModule, ModuleCreator, ModuleError, ModuleKind};
 
 /// Enum on which ModuleCreator is implemented.
 pub enum Deployer<'a> {
@@ -184,8 +185,9 @@ impl<'a> ModuleCreator for Deployer<'a> {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use rustc_hex::FromHex;
+
+    use super::*;
 
     #[test]
     fn zero_payload() {

@@ -129,9 +129,9 @@ impl error::Error for ModuleError {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
-
     use std::error::Error;
+
+    use super::*;
 
     struct SampleModule {}
 

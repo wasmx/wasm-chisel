@@ -392,8 +392,10 @@ impl Display for ModuleConfig {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use serde_yaml::Mapping;
+
+    use super::*;
+
     #[test]
     fn from_yaml() {
         let yaml = {

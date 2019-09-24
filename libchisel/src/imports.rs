@@ -1,6 +1,6 @@
-use super::ModulePreset;
-
 use parity_wasm::elements::{FunctionType, ValueType};
+
+use super::ModulePreset;
 
 pub struct ImportList<'a>(Vec<ImportType<'a>>);
 

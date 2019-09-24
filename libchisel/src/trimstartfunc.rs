@@ -1,5 +1,6 @@
+use parity_wasm::elements::Module;
+
 use super::{ChiselModule, ModuleError, ModuleKind, ModulePreset, ModuleTranslator};
-use parity_wasm::elements::*;
 
 pub struct TrimStartFunc;
 

@@ -1,5 +1,6 @@
-use super::{ChiselModule, ModuleError, ModuleKind, ModuleValidator};
 use parity_wasm::elements::Module;
+
+use super::{ChiselModule, ModuleError, ModuleKind, ModuleValidator};
 
 /// Struct on which ModuleValidator is implemented.
 pub struct CheckStartFunc {

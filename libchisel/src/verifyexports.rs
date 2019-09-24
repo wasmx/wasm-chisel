@@ -1,7 +1,8 @@
-use super::{ChiselModule, ModuleError, ModuleKind, ModulePreset, ModuleValidator};
 use parity_wasm::elements::{
     ExportSection, External, FunctionSection, FunctionType, ImportSection, Internal, Module, Type,
 };
+
+use super::{ChiselModule, ModuleError, ModuleKind, ModulePreset, ModuleValidator};
 
 /// Enum representing a type of export and any extra data to check.
 pub enum ExportType<'a> {
