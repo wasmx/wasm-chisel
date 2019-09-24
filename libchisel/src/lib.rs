@@ -142,13 +142,13 @@ mod tests {
 
     impl ModuleCreator for SampleModule {
         fn create(&self) -> Result<WasmModule, ModuleError> {
-            Ok(Module::default())
+            Ok(WasmModule::default())
         }
     }
 
     impl ModuleTranslator for SampleModule {
         fn translate(&self, _module: &WasmModule) -> Result<Option<WasmModule>, ModuleError> {
-            Ok(Some(Module::default()))
+            Ok(Some(WasmModule::default()))
         }
         fn translate_inplace(&self, _module: &mut WasmModule) -> Result<bool, ModuleError> {
             Ok(true)
