@@ -1,5 +1,6 @@
+use parity_wasm::elements::{ExportEntry, ExportSection, Internal, Module};
+
 use super::{ChiselModule, ModuleError, ModuleKind, ModulePreset, ModuleTranslator};
-use parity_wasm::elements::*;
 
 /// Struct containing a list of valid exports.
 struct ExportWhitelist {
@@ -135,8 +136,9 @@ impl ModuleTranslator for TrimExports {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use parity_wasm::builder;
+
+    use super::*;
 
     // Smoke tests
     #[test]

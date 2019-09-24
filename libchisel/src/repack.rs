@@ -1,6 +1,7 @@
-use super::{ChiselModule, ModuleError, ModuleKind, ModuleTranslator};
 use parity_wasm::builder;
-use parity_wasm::elements::*;
+use parity_wasm::elements::Module;
+
+use super::{ChiselModule, ModuleError, ModuleKind, ModuleTranslator};
 
 pub struct Repack;
 
@@ -41,9 +42,11 @@ impl ModuleTranslator for Repack {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use parity_wasm::builder;
+    use parity_wasm::elements::CustomSection;
     use rustc_hex::FromHex;
+
+    use super::*;
 
     #[test]
     fn smoke_test() {

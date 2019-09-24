@@ -1,6 +1,6 @@
-use super::{ChiselModule, ModuleError, ModuleKind, ModuleTranslator};
+use parity_wasm::elements::{Module, Section};
 
-use parity_wasm::elements::*;
+use super::{ChiselModule, ModuleError, ModuleKind, ModuleTranslator};
 
 /// Enum on which ModuleTranslator is implemented.
 pub enum DropSection {
@@ -78,9 +78,11 @@ impl<'a> ModuleTranslator for DropSection {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use parity_wasm::builder;
+    use parity_wasm::elements::CustomSection;
     use rustc_hex::FromHex;
+
+    use super::*;
 
     #[test]
     fn keep_intact() {

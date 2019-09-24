@@ -12,6 +12,9 @@ mod config;
 use std::fs::{read, read_to_string, write};
 use std::process;
 
+use clap::{App, Arg, ArgMatches, SubCommand};
+use serde_yaml::Value;
+
 use libchisel::{
     checkstartfunc::*, deployer::*, dropsection::*, remapimports::*, remapstart::*, repack::*,
     snip::*, trimexports::*, trimstartfunc::*, verifyexports::*, verifyimports::*,
@@ -20,9 +23,7 @@ use libchisel::{
 #[cfg(feature = "binaryen")]
 use libchisel::binaryenopt::*;
 
-use clap::{App, Arg, ArgMatches, SubCommand};
 use libchisel::*;
-use serde_yaml::Value;
 
 // Error messages
 static ERR_NO_SUBCOMMAND: &'static str = "No subcommand provided.";

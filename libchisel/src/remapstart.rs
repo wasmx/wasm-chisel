@@ -1,4 +1,4 @@
-use parity_wasm::elements::*;
+use parity_wasm::elements::{ExportEntry, ExportSection, Internal, Module, Section};
 
 use super::{ChiselModule, ModuleError, ModuleKind, ModulePreset, ModuleTranslator};
 
@@ -89,9 +89,10 @@ fn remap_start(module: &mut Module) -> bool {
 
 #[cfg(test)]
 mod tests {
+    use rustc_hex::FromHex;
+
     use super::*;
     use crate::{ModulePreset, ModuleTranslator};
-    use rustc_hex::FromHex;
 
     #[test]
     fn remapstart_mutation() {

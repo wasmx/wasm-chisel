@@ -1,8 +1,9 @@
+use parity_wasm::elements::{External, FunctionType, ImportSection, Module, Type};
+
 use super::{
     imports::{ImportList, ImportType},
     ChiselModule, ModuleError, ModuleKind, ModulePreset, ModuleValidator,
 };
-use parity_wasm::elements::{External, FunctionType, ImportSection, Module, Type};
 
 /// Enum representing the state of an import in a module.
 #[derive(PartialEq)]
@@ -303,8 +304,9 @@ pub fn imported_func_sig_by_index(module: &Module, index: usize) -> FunctionType
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use parity_wasm::elements::ValueType;
+
+    use super::*;
 
     #[test]
     fn no_imports_ok_ewasm() {

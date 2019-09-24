@@ -1,5 +1,6 @@
-use super::{ChiselModule, ModuleError, ModuleKind, ModuleTranslator};
 use parity_wasm::elements::Module;
+
+use super::{ChiselModule, ModuleError, ModuleKind, ModuleTranslator};
 
 #[derive(Clone)]
 pub struct Snip(wasm_snip::Options);
@@ -58,8 +59,9 @@ impl ModuleTranslator for Snip {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use rustc_hex::FromHex;
+
+    use super::*;
 
     #[test]
     fn smoke_test() {

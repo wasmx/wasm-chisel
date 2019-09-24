@@ -1,8 +1,8 @@
+use parity_wasm::elements::{ImportEntry, ImportSection, Module};
+
 use super::{
     imports::ImportList, ChiselModule, ModuleError, ModuleKind, ModulePreset, ModuleTranslator,
 };
-
-use parity_wasm::elements::*;
 
 pub struct RemapImports<'a> {
     /// A list of import sets to remap.
@@ -178,10 +178,11 @@ impl<'a> RemapImports<'a> {
 
 #[cfg(test)]
 mod tests {
+    use rustc_hex::FromHex;
+
     use super::*;
     use crate::verifyimports::*;
     use crate::{ModulePreset, ModuleTranslator, ModuleValidator};
-    use rustc_hex::FromHex;
 
     #[test]
     fn smoke_test() {

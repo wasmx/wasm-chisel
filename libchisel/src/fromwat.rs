@@ -1,6 +1,7 @@
-use super::{ChiselModule, ModuleCreator, ModuleError, ModuleKind};
 use parity_wasm::elements::Module;
 use wabt::Wat2Wasm;
+
+use super::{ChiselModule, ModuleCreator, ModuleError, ModuleKind};
 
 /// Struct on which ModuleCreator is implemented.
 pub struct FromWat<'a> {
