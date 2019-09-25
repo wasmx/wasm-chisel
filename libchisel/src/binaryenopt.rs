@@ -1,6 +1,8 @@
+use std::collections::HashMap;
+
 use parity_wasm::elements::Module;
 
-use super::{ChiselModule, ModuleError, ModuleKind, ModulePreset, ModuleTranslator};
+use super::{ChiselModule, ModuleConfig, ModuleError, ModuleKind, ModulePreset, ModuleTranslator};
 
 // FIXME: change level names
 pub enum BinaryenOptimiser {
@@ -26,6 +28,20 @@ impl<'a> ChiselModule<'a> for BinaryenOptimiser {
 
     fn as_abstract(&'a self) -> Self::ObjectReference {
         self as Self::ObjectReference
+    }
+}
+
+impl ModuleConfig for BinaryenOptimiser {
+    fn with_defaults() -> Result<Self, ModuleError> {
+        Ok(BinaryenOptimiser::O2)
+    }
+
+    fn with_config(config: &HashMap<String, String>) -> Result<Self, ModuleError> {
+        if let Some(preset) = config.get("preset") {
+            BinaryenOptimiser::with_preset(preset)
+        } else {
+            Err(ModuleError::NotSupported)
+        }
     }
 }
 
