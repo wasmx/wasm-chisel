@@ -33,14 +33,6 @@ pub struct RulesetResult {
     output_module: Option<Module>,
 }
 
-/// Output writer struct for Chisel module output.
-pub enum ChiselOutputWriter {
-    Bin(Module, PathBuf),
-    Hex(Module, PathBuf),
-    #[cfg(feature = "wabt")]
-    Wat(Module, PathBuf),
-}
-
 #[derive(Clone)]
 /// Individual module execution result. Left-hand field is the module name, and left-hand is the
 /// return value.
@@ -95,63 +87,37 @@ impl RulesetResult {
     /// Returns error on writer error or invalid mode.
     pub fn write(&mut self, mode: &str) -> Result<bool, Box<dyn Error>> {
         if let Some(module) = self.output_module.take() {
-            let writer = match mode {
-                "bin" => Some(ChiselOutputWriter::Bin(
-                    module,
-                    PathBuf::from(&self.output_path),
-                )),
-                "hex" => Some(ChiselOutputWriter::Hex(
-                    module,
-                    PathBuf::from(&self.output_path),
-                )),
-                #[cfg(feature = "wabt")]
-                "wat" => Some(ChiselOutputWriter::Wat(
-                    module,
-                    PathBuf::from(&self.output_path),
-                )),
-                _ => None,
-            };
-            if let Some(writer) = writer {
-                match writer.write() {
-                    Ok(()) => Ok(true),
-                    Err(e) => Err(e),
+            let path = PathBuf::from(&self.output_path);
+            let ret = match mode {
+                "bin" => {
+                    if *path == PathBuf::from("/dev/stdout")
+                        || *path == PathBuf::from("/dev/stderr")
+                    {
+                        return Err("cannot write raw binary to a standard stream".into());
+                    } else {
+                        let module = module.to_bytes()?;
+                        write(path, module)
+                    }
                 }
-            } else {
-                Err("invalid mode".into())
+                "hex" => {
+                    let module = module.to_bytes()?;
+                    let hex = hex::encode(&module);
+                    write(path, hex)
+                }
+                #[cfg(feature = "wabt")]
+                "wat" => {
+                    let module = module.to_bytes()?;
+                    let wat = wabt::wasm2wat(module)?;
+                    write(path, wat)
+                }
+                _ => return Err("invalid mode".into()),
+            };
+            match ret {
+                Ok(()) => Ok(true),
+                Err(e) => Err(e.into()),
             }
         } else {
             Ok(false)
-        }
-    }
-}
-
-impl ChiselOutputWriter {
-    /// Serializes and writes the contained module.
-    pub fn write(self) -> Result<(), Box<dyn Error>> {
-        let ret = match self {
-            ChiselOutputWriter::Bin(module, path) => {
-                if *path == PathBuf::from("/dev/stdout") || *path == PathBuf::from("/dev/stderr") {
-                    return Err("cannot write raw binary to a standard stream".into());
-                } else {
-                    let module = module.to_bytes()?;
-                    write(path, module)
-                }
-            }
-            ChiselOutputWriter::Hex(module, path) => {
-                let module = module.to_bytes()?;
-                let hex = hex::encode(&module);
-                write(path, hex)
-            }
-            #[cfg(feature = "wabt")]
-            ChiselOutputWriter::Wat(module, path) => {
-                let module = module.to_bytes()?;
-                let wat = wabt::wasm2wat(module)?;
-                write(path, wat)
-            }
-        };
-        match ret {
-            Ok(()) => Ok(()),
-            Err(e) => Err(e.into()),
         }
     }
 }
@@ -238,6 +204,27 @@ mod tests {
     use super::*;
 
     #[test]
+    fn writer_success_to_stdout() {
+        let mut ruleset_result = {
+            let mut result = RulesetResult::new("Test".to_string());
+            let module = Module::default();
+            result.set_output_module(module);
+            result.set_output_path(PathBuf::from("/dev/stdout"));
+            result
+        };
+
+        // First run
+        let result = ruleset_result.write("hex");
+        assert!(result.is_ok());
+        assert_eq!(result.unwrap(), true);
+
+        // Second run
+        let result = ruleset_result.write("hex");
+        assert!(result.is_ok());
+        assert_eq!(result.unwrap(), false);
+    }
+
+    #[test]
     fn writer_deny_raw_binary_to_stdout() {
         let mut ruleset_result = {
             let mut result = RulesetResult::new("Test".to_string());
@@ -269,7 +256,14 @@ mod tests {
     fn writer_no_module() {
         let mut ruleset_result = RulesetResult::new("Test".to_string());
 
+        // First run
         let result = ruleset_result.write("hex");
+        assert!(result.is_ok());
+        assert_eq!(result.expect("Should be Ok"), false);
+
+        // Second run
+        let result = ruleset_result.write("hex");
+        assert!(result.is_ok());
         assert_eq!(result.expect("Should be Ok"), false);
     }
 }
