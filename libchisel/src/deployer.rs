@@ -192,9 +192,9 @@ mod tests {
     #[test]
     fn zero_payload() {
         let payload = vec![];
-        let module = Deployer::with_preset("customsection", &payload)
+        let output = create_custom_deployer(&payload)
             .unwrap()
-            .create()
+            .to_bytes()
             .unwrap();
         let expected = FromHex::from_hex(
             "
@@ -209,16 +209,15 @@ mod tests {
         ",
         )
         .unwrap();
-        let output = module.to_bytes().unwrap();
         assert_eq!(output, expected);
     }
 
     #[test]
     fn nonzero_payload() {
         let payload = FromHex::from_hex("80ff007faa550011").unwrap();
-        let module = Deployer::with_preset("customsection", &payload)
+        let output = create_custom_deployer(&payload)
             .unwrap()
-            .create()
+            .to_bytes()
             .unwrap();
         let expected = FromHex::from_hex(
             "
@@ -233,17 +232,13 @@ mod tests {
         ",
         )
         .unwrap();
-        let output = module.to_bytes().unwrap();
         assert_eq!(output, expected);
     }
 
     #[test]
     fn big_payload() {
         let payload = [0; 632232];
-        let module = Deployer::with_preset("customsection", &payload)
-            .unwrap()
-            .create()
-            .unwrap();
+        let module = create_custom_deployer(&payload).unwrap();
         let memory_initial = module.memory_section().unwrap().entries()[0]
             .limits()
             .initial();
@@ -253,10 +248,7 @@ mod tests {
     #[test]
     fn memory_zero_payload() {
         let payload = vec![];
-        let module = Deployer::with_preset("memory", &payload)
-            .unwrap()
-            .create()
-            .unwrap();
+        let output = create_memory_deployer(&payload).to_bytes().unwrap();
         let expected = FromHex::from_hex(
             "
             0061736d0100000001090260027f7f0060000002130108657468657265756d0666
@@ -265,17 +257,13 @@ mod tests {
         ",
         )
         .unwrap();
-        let output = module.to_bytes().unwrap();
         assert_eq!(output, expected);
     }
 
     #[test]
     fn memory_nonzero_payload() {
         let payload = FromHex::from_hex("80ff007faa550011").unwrap();
-        let module = Deployer::with_preset("memory", &payload)
-            .unwrap()
-            .create()
-            .unwrap();
+        let output = create_memory_deployer(&payload).to_bytes().unwrap();
         let expected = FromHex::from_hex(
             "
             0061736d0100000001090260027f7f0060000002130108657468657265756d0666
@@ -285,20 +273,58 @@ mod tests {
         ",
         )
         .unwrap();
-        let output = module.to_bytes().unwrap();
         assert_eq!(output, expected);
     }
 
     #[test]
     fn memory_big_payload() {
         let payload = [0; 632232];
-        let module = Deployer::with_preset("memory", &payload)
-            .unwrap()
-            .create()
-            .unwrap();
+        let module = create_memory_deployer(&payload);
         let memory_initial = module.memory_section().unwrap().entries()[0]
             .limits()
             .initial();
         assert_eq!(memory_initial, 10);
+    }
+
+    #[test]
+    fn customsection_interface_test() {
+        let payload = Module::default().to_bytes().unwrap();
+        let module = Deployer::with_preset("customsection", &payload)
+            .unwrap()
+            .create()
+            .unwrap();
+        let expected = FromHex::from_hex(
+            "
+            0061736d010000000113046000017f60037f7f7f0060027f7f00600000023e0308
+            657468657265756d0b676574436f646553697a65000008657468657265756d0863
+            6f6465436f7079000108657468657265756d0666696e6973680002030201030503
+            010001071102066d656d6f72790200046d61696e00030a2c012a01037f10002100
+            4100410020001001200041046b2802002102200041046b20026b21012001200210
+            020b0015086465706c6f7965720061736d0100000008000000
+        ",
+        )
+        .unwrap();
+        let output = module.to_bytes().unwrap();
+        assert_eq!(output, expected);
+    }
+
+    #[test]
+    fn memory_interface_test() {
+        let payload = Module::default().to_bytes().unwrap();
+        let module = Deployer::with_preset("memory", &payload)
+            .unwrap()
+            .create()
+            .unwrap();
+        let expected = FromHex::from_hex(
+            "
+            0061736d0100000001090260027f7f0060000002130108657468657265756d0666
+            696e697368000003030200010503010001071102046d61696e0002066d656d6f72
+            7902000a0d0202000b08004100410810000b0b0e010041000b080061736d010000
+            00
+        ",
+        )
+        .unwrap();
+        let output = module.to_bytes().unwrap();
+        assert_eq!(output, expected);
     }
 }
