@@ -6,6 +6,7 @@ use parity_wasm::elements::{Module, Section};
 use super::{ChiselModule, ModuleConfig, ModuleError, ModuleKind, ModuleTranslator};
 
 /// Enum on which ModuleTranslator is implemented.
+#[derive(Debug)]
 pub enum DropSection {
     NamesSection,
     /// Name of the custom section.
@@ -44,20 +45,42 @@ impl ModuleConfig for DropSection {
     }
 
     fn with_config(config: &HashMap<String, String>) -> Result<Self, ModuleError> {
-        if let Some((key, val)) = config.iter().next() {
-            return match key.as_str() {
-                "names" => Ok(DropSection::NamesSection),
-                "custom_by_name" => Ok(DropSection::CustomSectionByName(val.clone())),
-                "custom_by_index" => {
-                    Ok(DropSection::CustomSectionByIndex(str::parse::<usize>(val)?))
+        // Query all possible modes
+        let modes: [(&'static str, Option<&String>); 4] = [
+            ("names", config.get("names".into())),
+            ("custom_by_name", config.get("custom_by_name".into())),
+            ("custom_by_index", config.get("custom_by_index".into())),
+            ("unknown_by_index", config.get("unknown_by_index".into())),
+        ];
+
+        // Filter out modes which were provided.
+        let mut matches: Vec<(&'static str, &String)> = modes
+            .iter()
+            .filter_map(|(k, v)| {
+                if let Some(v) = v {
+                    Some((*k, *v))
+                } else {
+                    None
                 }
-                "unknown_by_index" => Ok(DropSection::UnknownSectionByIndex(str::parse::<usize>(
-                    val,
-                )?)),
-                _ => Err(ModuleError::NotSupported),
-            };
-        } else {
-            Err(ModuleError::NotFound)
+            })
+            .collect();
+
+        // Reject multiple modes
+        if matches.len() != 1 {
+            return Err(ModuleError::Custom(
+                "Only one mode allowed at a time".to_string(),
+            ));
+        }
+
+        let (mode, val) = matches.pop().expect("Verified that one match is present");
+        match mode {
+            "names" => Ok(DropSection::NamesSection),
+            "custom_by_name" => Ok(DropSection::CustomSectionByName(val.clone())),
+            "custom_by_index" => Ok(DropSection::CustomSectionByIndex(str::parse::<usize>(val)?)),
+            "unknown_by_index" => Ok(DropSection::UnknownSectionByIndex(str::parse::<usize>(
+                val,
+            )?)),
+            _ => panic!("Only one of the above was present in the array"),
         }
     }
 }
@@ -290,5 +313,18 @@ mod tests {
 
         assert!(custom_section_index_for(&module, "name").is_none());
         assert!(custom_section_index_for(&module1, "name").is_none());
+    }
+
+    #[test]
+    fn with_config_multiple_modes() {
+        let mut conf = HashMap::new();
+        conf.insert("names".to_string(), "".to_string());
+        conf.insert("custom_by_name".to_string(), "name".to_string());
+
+        let module = DropSection::with_config(&conf);
+        assert_eq!(
+            module.unwrap_err(),
+            ModuleError::Custom("Only one mode allowed at a time".to_string())
+        );
     }
 }
