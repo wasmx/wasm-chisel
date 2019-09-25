@@ -1,7 +1,9 @@
+use std::collections::HashMap;
+
 use parity_wasm::builder;
 use parity_wasm::elements::Module;
 
-use super::{ChiselModule, ModuleError, ModuleKind, ModuleTranslator};
+use super::{ChiselModule, ModuleConfig, ModuleError, ModuleKind, ModuleTranslator};
 
 pub struct Repack;
 
@@ -24,6 +26,16 @@ impl<'a> ChiselModule<'a> for Repack {
 
     fn as_abstract(&'a self) -> Self::ObjectReference {
         self as Self::ObjectReference
+    }
+}
+
+impl ModuleConfig for Repack {
+    fn with_defaults() -> Result<Self, ModuleError> {
+        Ok(Repack::new())
+    }
+
+    fn with_config(_config: &HashMap<String, String>) -> Result<Self, ModuleError> {
+        Err(ModuleError::NotSupported)
     }
 }
 
