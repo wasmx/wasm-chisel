@@ -1,6 +1,8 @@
+use std::collections::HashMap;
+
 use parity_wasm::elements::Module;
 
-use super::{ChiselModule, ModuleError, ModuleKind, ModuleTranslator};
+use super::{ChiselModule, ModuleConfig, ModuleError, ModuleKind, ModuleTranslator};
 
 #[derive(Clone)]
 pub struct Snip(wasm_snip::Options);
@@ -29,6 +31,17 @@ impl<'a> ChiselModule<'a> for Snip {
 
     fn as_abstract(&'a self) -> Self::ObjectReference {
         self as Self::ObjectReference
+    }
+}
+
+impl ModuleConfig for Snip {
+    fn with_defaults() -> Result<Self, ModuleError> {
+        Ok(Snip::new())
+    }
+
+    fn with_config(_config: &HashMap<String, String>) -> Result<Self, ModuleError> {
+        // FIXME: expose the options
+        Err(ModuleError::NotSupported)
     }
 }
 
