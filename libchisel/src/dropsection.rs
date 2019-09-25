@@ -1,6 +1,9 @@
+use std::collections::HashMap;
+use std::error::Error;
+
 use parity_wasm::elements::{Module, Section};
 
-use super::{ChiselModule, ModuleError, ModuleKind, ModuleTranslator};
+use super::{ChiselModule, ModuleConfig, ModuleError, ModuleKind, ModuleTranslator};
 
 /// Enum on which ModuleTranslator is implemented.
 pub enum DropSection {
@@ -26,6 +29,36 @@ impl<'a> ChiselModule<'a> for DropSection {
 
     fn as_abstract(&'a self) -> Self::ObjectReference {
         self as Self::ObjectReference
+    }
+}
+
+impl From<std::num::ParseIntError> for ModuleError {
+    fn from(error: std::num::ParseIntError) -> Self {
+        ModuleError::Custom(error.description().to_string())
+    }
+}
+
+impl ModuleConfig for DropSection {
+    fn with_defaults() -> Result<Self, ModuleError> {
+        Err(ModuleError::NotSupported)
+    }
+
+    fn with_config(config: &HashMap<String, String>) -> Result<Self, ModuleError> {
+        if let Some((key, val)) = config.iter().next() {
+            return match key.as_str() {
+                "names" => Ok(DropSection::NamesSection),
+                "custom_by_name" => Ok(DropSection::CustomSectionByName(val.clone())),
+                "custom_by_index" => {
+                    Ok(DropSection::CustomSectionByIndex(str::parse::<usize>(val)?))
+                }
+                "unknown_by_index" => Ok(DropSection::UnknownSectionByIndex(str::parse::<usize>(
+                    val,
+                )?)),
+                _ => Err(ModuleError::NotSupported),
+            };
+        } else {
+            Err(ModuleError::NotFound)
+        }
     }
 }
 
