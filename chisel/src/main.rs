@@ -8,6 +8,7 @@ extern crate serde_yaml;
 #[macro_use]
 mod logger;
 mod config;
+mod result;
 
 use std::fs::{read, read_to_string, write};
 use std::process;

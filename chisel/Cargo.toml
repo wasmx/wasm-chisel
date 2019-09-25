@@ -11,8 +11,10 @@ keywords = ["webassembly", "wasm", "blockchain", "ethereum"]
 edition = "2018"
 
 [dependencies]
-libchisel = { path = "../libchisel", version = "0.5.0" }
+ansi_term = "0.12.1"
 clap = "2.32.0"
+hex = "0.4.0"
+libchisel = { path = "../libchisel", version = "0.5.0" }
 serde = "1.0.80"
 serde_derive = "1.0.80"
 serde_yaml = "0.8.7"

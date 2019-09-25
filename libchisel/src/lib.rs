@@ -2,6 +2,8 @@
 extern crate binaryen;
 extern crate parity_wasm;
 extern crate rustc_hex;
+#[cfg(feature = "wabt")]
+pub extern crate wabt;
 
 pub use parity_wasm::elements::Module;
 
@@ -35,7 +37,7 @@ pub enum ModuleKind {
     Validator,
 }
 
-#[derive(Eq, PartialEq, Debug)]
+#[derive(Eq, PartialEq, Debug, Clone)]
 pub enum ModuleError {
     NotSupported,
     NotFound,
