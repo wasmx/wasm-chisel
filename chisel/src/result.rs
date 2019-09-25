@@ -204,6 +204,27 @@ mod tests {
     use super::*;
 
     #[test]
+    fn writer_success_to_stdout() {
+        let mut ruleset_result = {
+            let mut result = RulesetResult::new("Test".to_string());
+            let module = Module::default();
+            result.set_output_module(module);
+            result.set_output_path(PathBuf::from("/dev/stdout"));
+            result
+        };
+
+        // First run
+        let result = ruleset_result.write("hex");
+        assert!(result.is_ok());
+        assert_eq!(result.unwrap(), true);
+
+        // Second run
+        let result = ruleset_result.write("hex");
+        assert!(result.is_ok());
+        assert_eq!(result.unwrap(), false);
+    }
+
+    #[test]
     fn writer_deny_raw_binary_to_stdout() {
         let mut ruleset_result = {
             let mut result = RulesetResult::new("Test".to_string());
@@ -235,7 +256,14 @@ mod tests {
     fn writer_no_module() {
         let mut ruleset_result = RulesetResult::new("Test".to_string());
 
+        // First run
         let result = ruleset_result.write("hex");
+        assert!(result.is_ok());
+        assert_eq!(result.expect("Should be Ok"), false);
+
+        // Second run
+        let result = ruleset_result.write("hex");
+        assert!(result.is_ok());
         assert_eq!(result.expect("Should be Ok"), false);
     }
 }
