@@ -26,11 +26,11 @@ impl<'a> ChiselModule<'a> for Deployer {
 }
 
 impl ModulePreset for Deployer {
-    fn with_preset(preset: &str) -> Result<Self, ()> {
+    fn with_preset(preset: &str) -> Result<Self, ModuleError> {
         match preset {
             "memory" => Ok(Deployer::Memory),
             "customsection" => Ok(Deployer::CustomSection),
-            _ => Err(()),
+            _ => Err(ModuleError::NotSupported),
         }
     }
 }

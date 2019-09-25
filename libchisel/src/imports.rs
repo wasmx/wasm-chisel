@@ -1,6 +1,6 @@
 use parity_wasm::elements::{FunctionType, ValueType};
 
-use super::ModulePreset;
+use super::{ModuleError, ModulePreset};
 
 pub struct ImportList<'a>(Vec<ImportType<'a>>);
 
@@ -81,7 +81,7 @@ impl<'a> ImportList<'a> {
 }
 
 impl<'a> ModulePreset for ImportList<'a> {
-    fn with_preset(preset: &str) -> Result<Self, ()>
+    fn with_preset(preset: &str) -> Result<Self, ModuleError>
     where
         Self: Sized,
     {
@@ -393,7 +393,7 @@ impl<'a> ModulePreset for ImportList<'a> {
                     ),
                 ),
             ])),
-            _ => Err(()),
+            _ => Err(ModuleError::NotSupported),
         }
     }
 }

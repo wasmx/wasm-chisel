@@ -40,7 +40,7 @@ impl<'a> ChiselModule<'a> for VerifyExports<'a> {
 }
 
 impl<'a> ModulePreset for VerifyExports<'a> {
-    fn with_preset(preset: &str) -> Result<Self, ()> {
+    fn with_preset(preset: &str) -> Result<Self, ModuleError> {
         match preset {
             "ewasm" => Ok(VerifyExports {
                 entries: vec![
@@ -49,7 +49,7 @@ impl<'a> ModulePreset for VerifyExports<'a> {
                 ],
                 allow_unlisted: false,
             }),
-            _ => Err(()),
+            _ => Err(ModuleError::NotSupported),
         }
     }
 }

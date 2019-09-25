@@ -75,7 +75,7 @@ pub trait ModuleValidator {
 }
 
 pub trait ModulePreset {
-    fn with_preset(preset: &str) -> Result<Self, ()>
+    fn with_preset(preset: &str) -> Result<Self, ModuleError>
     where
         Self: std::marker::Sized;
 }
