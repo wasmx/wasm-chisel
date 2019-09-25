@@ -8,6 +8,7 @@ extern crate serde_yaml;
 #[macro_use]
 mod logger;
 mod config;
+mod driver;
 mod options;
 mod result;
 
