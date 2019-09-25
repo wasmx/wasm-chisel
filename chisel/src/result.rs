@@ -11,7 +11,7 @@
 use std::error::Error;
 use std::fmt::{self, Display};
 use std::fs::write;
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 
 use ansi_term::Colour::{Green, Red, Yellow};
 

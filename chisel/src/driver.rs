@@ -414,7 +414,7 @@ impl ChiselDriver {
                     ));
                 }
             }
-            other => {
+            _ => {
                 return Err(DriverError::ModuleNotFound(name.clone()));
             }
         };
@@ -445,7 +445,6 @@ impl Display for DriverError {
 
 #[cfg(test)]
 mod tests {
-    use std::fs::{remove_file, write};
     use std::panic::catch_unwind;
 
     use super::*;
