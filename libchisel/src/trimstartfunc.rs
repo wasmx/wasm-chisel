@@ -32,10 +32,10 @@ impl<'a> ChiselModule<'a> for TrimStartFunc {
 }
 
 impl ModulePreset for TrimStartFunc {
-    fn with_preset(preset: &str) -> Result<Self, ()> {
+    fn with_preset(preset: &str) -> Result<Self, ModuleError> {
         match preset {
             "ewasm" => Ok(TrimStartFunc {}),
-            _ => Err(()),
+            _ => Err(ModuleError::NotSupported),
         }
     }
 }

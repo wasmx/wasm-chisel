@@ -35,7 +35,7 @@ fn cmp_internal_variant(a: &Internal, b: &Internal) -> bool {
 }
 
 impl ModulePreset for ExportWhitelist {
-    fn with_preset(preset: &str) -> Result<Self, ()> {
+    fn with_preset(preset: &str) -> Result<Self, ModuleError> {
         match preset {
             "ewasm" => Ok(ExportWhitelist {
                 entries: vec![
@@ -47,7 +47,7 @@ impl ModulePreset for ExportWhitelist {
             "pwasm" => Ok(ExportWhitelist {
                 entries: vec![ExportEntry::new("_call".to_string(), Internal::Function(0))],
             }),
-            _ => Err(()),
+            _ => Err(ModuleError::NotSupported),
         }
     }
 }

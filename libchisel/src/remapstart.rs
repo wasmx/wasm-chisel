@@ -5,11 +5,11 @@ use super::{ChiselModule, ModuleError, ModuleKind, ModulePreset, ModuleTranslato
 pub struct RemapStart;
 
 impl ModulePreset for RemapStart {
-    fn with_preset(preset: &str) -> Result<Self, ()> {
+    fn with_preset(preset: &str) -> Result<Self, ModuleError> {
         match preset {
             // TODO refactor this later
             "ewasm" => Ok(RemapStart {}),
-            _ => Err(()),
+            _ => Err(ModuleError::NotSupported),
         }
     }
 }

@@ -30,7 +30,7 @@ impl<'a> ChiselModule<'a> for BinaryenOptimiser {
 }
 
 impl ModulePreset for BinaryenOptimiser {
-    fn with_preset(preset: &str) -> Result<Self, ()> {
+    fn with_preset(preset: &str) -> Result<Self, ModuleError> {
         match preset {
             "O0" => Ok(BinaryenOptimiser::O0),
             "O1" => Ok(BinaryenOptimiser::O1),
@@ -39,7 +39,7 @@ impl ModulePreset for BinaryenOptimiser {
             "O4" => Ok(BinaryenOptimiser::O4),
             "Os" => Ok(BinaryenOptimiser::Os),
             "Oz" => Ok(BinaryenOptimiser::Oz),
-            _ => Err(()),
+            _ => Err(ModuleError::NotSupported),
         }
     }
 }

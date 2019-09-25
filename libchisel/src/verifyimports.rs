@@ -52,7 +52,7 @@ impl<'a> ChiselModule<'a> for VerifyImports<'a> {
 }
 
 impl<'a> ModulePreset for VerifyImports<'a> {
-    fn with_preset(preset: &str) -> Result<Self, ()> {
+    fn with_preset(preset: &str) -> Result<Self, ModuleError> {
         let mut import_set = ImportList::new();
         let presets: String = preset
             .chars()

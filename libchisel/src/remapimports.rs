@@ -30,7 +30,7 @@ impl<'a> ChiselModule<'a> for RemapImports<'a> {
 }
 
 impl<'a> ModulePreset for RemapImports<'a> {
-    fn with_preset(preset: &str) -> Result<Self, ()> {
+    fn with_preset(preset: &str) -> Result<Self, ModuleError> {
         let mut interface_set: Vec<ImportInterface> = Vec::new();
 
         // Accept a comma-separated list of presets.
@@ -56,7 +56,7 @@ impl<'a> ModulePreset for RemapImports<'a> {
                     ImportList::with_preset("bignum").expect("Missing bignum preset"),
                     Some("bignum_"),
                 )),
-                _ => return Err(()),
+                _ => return Err(ModuleError::NotSupported),
             }
         }
 
