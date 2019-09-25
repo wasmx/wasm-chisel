@@ -1,23 +1,23 @@
 use parity_wasm::builder;
 use parity_wasm::elements::{CustomSection, Module};
 
-use super::{ChiselModule, ModuleCreator, ModuleError, ModuleKind};
+use super::{ChiselModule, ModuleError, ModuleKind, ModulePreset, ModuleTranslator};
 
-/// Enum on which ModuleCreator is implemented.
-pub enum Deployer<'a> {
-    Memory(&'a [u8]),
-    CustomSection(&'a [u8]),
+/// Enum on which ModuleTranslator is implemented.
+pub enum Deployer {
+    Memory,
+    CustomSection,
 }
 
-impl<'a> ChiselModule<'a> for Deployer<'a> {
-    type ObjectReference = &'a dyn ModuleCreator;
+impl<'a> ChiselModule<'a> for Deployer {
+    type ObjectReference = &'a dyn ModuleTranslator;
 
     fn id(&'a self) -> String {
         "deployer".to_string()
     }
 
     fn kind(&'a self) -> ModuleKind {
-        ModuleKind::Creator
+        ModuleKind::Translator
     }
 
     fn as_abstract(&'a self) -> Self::ObjectReference {
@@ -25,13 +25,11 @@ impl<'a> ChiselModule<'a> for Deployer<'a> {
     }
 }
 
-// FIXME: Bring ModulePreset API in line with the other with_preset methods so a ModulePreset impl
-// can be written
-impl<'a> Deployer<'a> {
-    pub fn with_preset(preset: &str, payload: &'a [u8]) -> Result<Self, ()> {
+impl ModulePreset for Deployer {
+    fn with_preset(preset: &str) -> Result<Self, ()> {
         match preset {
-            "memory" => Ok(Deployer::Memory(payload)),
-            "customsection" => Ok(Deployer::CustomSection(payload)),
+            "memory" => Ok(Deployer::Memory),
+            "customsection" => Ok(Deployer::CustomSection),
             _ => Err(()),
         }
     }
@@ -172,14 +170,18 @@ fn create_memory_deployer(payload: &[u8]) -> Module {
         .build()
 }
 
-impl<'a> ModuleCreator for Deployer<'a> {
-    fn create(&self) -> Result<Module, ModuleError> {
-        let output = match self {
-            Deployer::Memory(payload) => create_memory_deployer(&payload),
-            Deployer::CustomSection(payload) => create_custom_deployer(&payload)?,
-        };
+impl ModuleTranslator for Deployer {
+    fn translate_inplace(&self, _module: &mut Module) -> Result<bool, ModuleError> {
+        Err(ModuleError::NotSupported)
+    }
 
-        Ok(output)
+    fn translate(&self, module: &Module) -> Result<Option<Module>, ModuleError> {
+        let payload = module.clone().to_bytes()?;
+        let output = match self {
+            Deployer::Memory => create_memory_deployer(&payload),
+            Deployer::CustomSection => create_custom_deployer(&payload)?,
+        };
+        Ok(Some(output))
     }
 }
 
@@ -288,10 +290,11 @@ mod tests {
 
     #[test]
     fn customsection_interface_test() {
-        let payload = Module::default().to_bytes().unwrap();
-        let module = Deployer::with_preset("customsection", &payload)
+        let payload = Module::default();
+        let module = Deployer::with_preset("customsection")
             .unwrap()
-            .create()
+            .translate(&payload)
+            .unwrap()
             .unwrap();
         let expected = FromHex::from_hex(
             "
@@ -310,10 +313,11 @@ mod tests {
 
     #[test]
     fn memory_interface_test() {
-        let payload = Module::default().to_bytes().unwrap();
-        let module = Deployer::with_preset("memory", &payload)
+        let payload = Module::default();
+        let module = Deployer::with_preset("memory")
             .unwrap()
-            .create()
+            .translate(&payload)
+            .unwrap()
             .unwrap();
         let expected = FromHex::from_hex(
             "

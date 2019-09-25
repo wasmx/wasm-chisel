@@ -163,12 +163,8 @@ fn execute_module(context: &ModuleContext, module: &mut Module) -> bool {
         }
         "deployer" => {
             is_translator = true;
-            let payload = module.clone().to_bytes().unwrap();
-
-            if let Ok(chisel) = Deployer::with_preset(&preset, &payload) {
-                let new_module = chisel.create().unwrap();
-                *module = new_module;
-                Ok(true)
+            if let Ok(chisel) = Deployer::with_preset(&preset) {
+                translate_module(module, &chisel)
             } else {
                 Err("deployer: Invalid preset")
             }
