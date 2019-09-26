@@ -11,6 +11,7 @@ pub mod checkfloat;
 pub mod checkstartfunc;
 pub mod deployer;
 pub mod dropsection;
+pub mod moduledelegate;
 pub mod remapimports;
 pub mod remapstart;
 pub mod repack;
@@ -19,7 +20,6 @@ pub mod trimexports;
 pub mod trimstartfunc;
 pub mod verifyexports;
 pub mod verifyimports;
-pub mod moduleserver;
 
 mod depgraph;
 
