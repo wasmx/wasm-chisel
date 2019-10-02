@@ -1,10 +1,3 @@
-#[cfg(feature = "binaryen")]
-extern crate binaryen;
-extern crate parity_wasm;
-extern crate rustc_hex;
-#[cfg(feature = "wabt")]
-pub extern crate wabt;
-
 pub use parity_wasm::elements::Module;
 
 use std::{error, fmt};
