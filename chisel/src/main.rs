@@ -1,10 +1,3 @@
-extern crate libchisel;
-#[macro_use]
-extern crate clap;
-extern crate serde;
-extern crate serde_derive;
-extern crate serde_yaml;
-
 #[macro_use]
 mod logger;
 mod config;
@@ -12,6 +5,7 @@ mod driver;
 mod options;
 mod result;
 
+use clap::{crate_description, crate_name, crate_version};
 use std::fs::{read, read_to_string, write};
 use std::process;
 
