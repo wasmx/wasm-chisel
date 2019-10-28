@@ -12,6 +12,7 @@ pub mod deployer;
 pub mod dropsection;
 #[cfg(feature = "wabt")]
 pub mod fromwat;
+pub mod instructionerrors;
 pub mod remapimports;
 pub mod remapstart;
 pub mod repack;
@@ -20,6 +21,11 @@ pub mod trimexports;
 pub mod trimstartfunc;
 pub mod verifyexports;
 pub mod verifyimports;
+pub mod verifyinstructions;
+
+use crate::instructionerrors::*;
+
+use parity_wasm::elements::*;
 
 mod depgraph;
 
@@ -65,6 +71,10 @@ pub trait ModuleTranslator {
 pub trait ModuleValidator {
     /// Validates module. Returns true if it is valid or false if invalid.
     fn validate(&self, module: &Module) -> Result<bool, ModuleError>;
+}
+
+pub trait InstructionValidator {
+    fn validate(&mut self, module: &Module) -> Result<bool, InstructionError>;
 }
 
 pub trait ModulePreset {
