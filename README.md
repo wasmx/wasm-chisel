@@ -80,11 +80,17 @@ Drops the NamesSection if present.
 
 ## CLI
 
-`chisel` is available as a command line tool.
+`chisel` is available as a command line tool. It supports two usage patterns, config-driven and unix-style, also known as `oneliner`.
 
 It uses features implemented in the library as well in [wasm-gc] and [wasm-utils]. It comes with a configuration file `chisel.yml`.
 
 `chisel run`: searches for `chisel.yml` in the current directory, if not specified otherwise using the flag `-c`. Runs the modules specified in the configuration, outputs a new file if any changes were made by translator or creator modules, and prints a brief report of each module's results.
+
+`chisel`: Invokes unix-style mode. It requires the flags `--modules` and `--config`.
+
+- `--modules` takes a comma-separated list of modules to be invoked. An example of a valid module list is: `--modules remapimports,verifyimports`
+
+- `--config` takes a comma separated list of key-value options for the modules to be invoked, in the form `module.option=value`. An example of a valid configuration is: `--config remapimports.preset=ewasm,verifyimports.preset=ewasm`
 
 ## Configuration file
 
