@@ -17,11 +17,11 @@ use libchisel::{
     checkfloat::CheckFloat, checkstartfunc::CheckStartFunc, deployer::Deployer,
     dropsection::DropSection, remapimports::RemapImports, remapstart::RemapStart, repack::Repack,
     snip::Snip, trimexports::TrimExports, trimstartfunc::TrimStartFunc,
-    verifyexports::VerifyExports, verifyimports::VerifyImports, Module, ModulePreset,
-    ModuleTranslator, ModuleValidator,
+    verifyexports::VerifyExports, verifyimports::VerifyImports, ChiselModule, Module, ModuleConfig,
+    ModuleError, ModuleKind, ModuleTranslator, ModuleValidator,
 };
 
-use crate::config::{ChiselConfig, ModuleConfig};
+use crate::config::ChiselConfig;
 use crate::result::{ChiselResult, ModuleResult, RulesetResult};
 
 /// State machine implementing the main chisel execution loop. Consumes ChiselConfig and returns
@@ -215,225 +215,57 @@ impl ChiselDriver {
     pub fn execute_module(
         &mut self,
         name: String,
-        module: ModuleConfig,
+        module: crate::config::ModuleConfig,
         wasm: &mut Module,
     ) -> Result<ModuleResult, DriverError> {
-        let result = match name.as_str() {
-            "checkfloat" => {
-                let checkfloat = CheckFloat::new();
-                let module_result = checkfloat.validate(wasm);
-                ModuleResult::Validator(name, module_result)
-            }
-            "checkstartfunc" => {
-                if let Some(require_start) = module.options().get("require_start") {
-                    let require_start = match require_start.as_str() {
-                        "true" => true,
-                        "false" => false,
-                        _ => {
-                            return Err(DriverError::InvalidField(
-                                name,
-                                "require_start".to_string(),
-                            ));
-                        }
-                    };
-                    let checkstartfunc = CheckStartFunc::new(require_start);
-                    let module_result = checkstartfunc.validate(wasm);
-                    ModuleResult::Validator(name, module_result)
-                } else {
-                    chisel_debug!(1, "checkstartfunc missing field 'require_start'");
-                    return Err(DriverError::MissingRequiredField(
-                        name,
-                        "require_start".to_string(),
-                    ));
-                }
-            }
-            "deployer" => {
-                if let Some(preset) = module.options().get("preset") {
-                    match Deployer::with_preset(preset.as_str()) {
-                        Ok(deployer) => match deployer.translate(wasm) {
-                            Ok(new_wasm) => {
-                                let did_mutate = if let Some(new_wasm) = new_wasm {
-                                    *wasm = new_wasm;
-                                    true
-                                } else {
-                                    false
-                                };
-
-                                ModuleResult::Translator(name, Ok(did_mutate))
-                            }
-                            Err(e) => ModuleResult::Translator(name, Err(e)),
-                        },
-                        Err(_) => {
-                            chisel_debug!(1, "deployer given invalid preset");
-                            return Err(DriverError::InvalidField(name, "preset".to_string()));
-                        }
-                    }
-                } else {
-                    chisel_debug!(1, "deployer missing field 'preset'");
-                    return Err(DriverError::MissingRequiredField(
-                        name,
-                        "preset".to_string(),
-                    ));
-                }
-            }
-            "dropnames" => {
-                let dropsection = DropSection::NamesSection;
-                ModuleResult::Translator(name, dropsection.translate_inplace(wasm))
-            }
-            "remapimports" => {
-                if let Some(preset) = module.options().get("preset") {
-                    let remapimports = RemapImports::with_preset(preset.as_str());
-                    if let Ok(remapimports) = remapimports {
-                        let module_result = remapimports.translate_inplace(wasm);
-                        ModuleResult::Translator(name, module_result)
-                    } else {
-                        chisel_debug!(1, "remapimports given invalid preset");
-                        return Err(DriverError::InvalidField(name, "preset".to_string()));
-                    }
-                } else {
-                    chisel_debug!(1, "remapimports missing field 'preset'");
-                    return Err(DriverError::MissingRequiredField(
-                        name,
-                        "preset".to_string(),
-                    ));
-                }
-            }
-            "remapstart" => {
-                // NOTE: preset "ewasm" maps to the default and only mode. Fixing
-                // later.
-                let remapstart = RemapStart::with_preset("ewasm").expect("Should not fail");
-                let module_result = remapstart.translate_inplace(wasm);
-                ModuleResult::Translator(name, module_result)
-            }
-            "repack" => {
-                let repack = Repack::new();
-                let module_result = repack.translate(wasm).expect("No failure cases");
-
-                let did_mutate = if let Some(new_wasm) = module_result {
-                    *wasm = new_wasm;
-                    true
-                } else {
-                    false
-                };
-
-                ModuleResult::Translator(name, Ok(did_mutate))
-            }
-            "snip" => {
-                let snip = Snip::new();
-                let module_result = match snip.translate(wasm) {
-                    Ok(result) => result,
-                    Err(e) => {
-                        return Err(DriverError::Internal(
-                            "snip".to_string(),
-                            "Chisel module failed".to_string(),
-                            e.into(),
-                        ))
-                    }
-                };
-
-                let did_mutate = if let Some(new_wasm) = module_result {
-                    *wasm = new_wasm;
-                    true
-                } else {
-                    false
-                };
-
-                ModuleResult::Translator(name, Ok(did_mutate))
-            }
-            "trimexports" => {
-                if let Some(preset) = module.options().get("preset") {
-                    let trimexports = TrimExports::with_preset(preset.as_str());
-                    if let Ok(trimexports) = trimexports {
-                        let module_result = trimexports.translate_inplace(wasm);
-                        ModuleResult::Translator(name, module_result)
-                    } else {
-                        chisel_debug!(1, "trimexports given invalid preset");
-                        return Err(DriverError::InvalidField(name, "preset".to_string()));
-                    }
-                } else {
-                    chisel_debug!(1, "remapimports missing field 'preset'");
-                    return Err(DriverError::MissingRequiredField(
-                        name,
-                        "preset".to_string(),
-                    ));
-                }
-            }
-            "trimstartfunc" => {
-                // NOTE: preset "ewasm" maps to the default and only mode. Fixing
-                // later.
-                let trimstartfunc = TrimStartFunc::with_preset("ewasm").expect("Should not fail");
-                let module_result = trimstartfunc.translate_inplace(wasm);
-                ModuleResult::Translator(name, module_result)
-            }
-            "verifyexports" => {
-                if let Some(preset) = module.options().get("preset") {
-                    let verifyexports = VerifyExports::with_preset(preset.as_str());
-                    if let Ok(verifyexports) = verifyexports {
-                        let module_result = verifyexports.validate(wasm);
-                        ModuleResult::Validator(name, module_result)
-                    } else {
-                        chisel_debug!(1, "verifyexports given invalid preset");
-                        return Err(DriverError::InvalidField(name, "preset".to_string()));
-                    }
-                } else {
-                    chisel_debug!(1, "verifyexports missing field 'preset'");
-                    return Err(DriverError::MissingRequiredField(
-                        name,
-                        "preset".to_string(),
-                    ));
-                }
-            }
-            "verifyimports" => {
-                if let Some(preset) = module.options().get("preset") {
-                    let verifyimports = VerifyImports::with_preset(preset.as_str());
-                    if let Ok(verifyimports) = verifyimports {
-                        let module_result = verifyimports.validate(&wasm);
-                        ModuleResult::Validator(name, module_result)
-                    } else {
-                        chisel_debug!(1, "verifyimports given invalid preset");
-                        return Err(DriverError::InvalidField(name, "preset".to_string()));
-                    }
-                } else {
-                    chisel_debug!(1, "verifyimports missing field 'preset'");
-                    return Err(DriverError::MissingRequiredField(
-                        name,
-                        "preset".to_string(),
-                    ));
-                }
-            }
+        let chisel_module: Result<dyn ChiselModule, ModuleError> = match name.as_str() {
+            "checkfloat" => CheckFloat::with_defaults(),
+            "checkstartfunc" => CheckStartFunc::with_config(module.options()),
+            "deployer" => Deployer::with_config(module.options()),
+            "dropnames" => Ok(DropSection::NamesSection),
+            "remapimports" => RemapImports::with_config(module.options()),
+            "remapstart" => RemapStart::with_config(module.options()),
+            "repack" => Repack::with_defaults(),
+            "snip" => Snip::with_config(module.options()),
+            "trimexports" => TrimExports::with_config(module.options()),
+            "trimstartfunc" => TrimStartFunc::with_config(module.options()),
+            "verifyexports" => VerifyExports::with_config(module.options()),
+            "verifyimports" => VerifyImports::with_config(module.options()),
             #[cfg(feature = "binaryen")]
-            "binaryenopt" => {
-                if let Some(preset) = module.options().get("preset") {
-                    let binaryenopt = BinaryenOptimiser::with_preset(preset.as_str());
-                    if let Ok(binaryenopt) = binaryenopt {
-                        match binaryenopt.translate(wasm) {
-                            Ok(new_wasm) => {
-                                let did_mutate = if let Some(new_wasm) = new_wasm {
-                                    *wasm = new_wasm;
-                                    true
-                                } else {
-                                    false
-                                };
-
-                                ModuleResult::Translator(name, Ok(did_mutate))
-                            }
-                            Err(e) => ModuleResult::Translator(name, Err(e)),
-                        }
-                    } else {
-                        chisel_debug!(1, "binaryenopt given invalid preset");
-                        return Err(DriverError::InvalidField(name, "preset".to_string()));
-                    }
-                } else {
-                    chisel_debug!(1, "binaryenopt missing field 'preset'");
-                    return Err(DriverError::MissingRequiredField(
-                        name,
-                        "preset".to_string(),
-                    ));
-                }
-            }
+            "binaryenopt" => BinaryenOptimiser::with_config(module.options()),
             _ => {
                 return Err(DriverError::ModuleNotFound(name.clone()));
             }
+        };
+        if chisel_module.is_err() {
+            // FIXME
+            panic!()
+        }
+        let chisel_module = chisel_module.unwrap();
+        let result = match chisel_module.kind() {
+            ModuleKind::Creator => unimplemented!(),
+            ModuleKind::Translator => {
+                let as_trait: &dyn ModuleTranslator = chisel_module.as_abstract();
+                // FIXME: can also optimize with translate_inplace
+                match as_trait.translate(wasm) {
+                    Ok(new_wasm) => {
+                        let did_mutate = if let Some(new_wasm) = new_wasm {
+                            *wasm = new_wasm;
+                            true
+                        } else {
+                            false
+                        };
+                        ModuleResult::Translator(name, Ok(did_mutate))
+                    }
+                    Err(e) => ModuleResult::Translator(name, Err(e)),
+                }
+            }
+            ModuleKind::Validator => {
+                let as_trait: &dyn ModuleValidator = chisel_module.as_abstract();
+                let result = as_trait.validate(wasm);
+                ModuleResult::Validator(name, result)
+            }
+            _ => unimplemented!(),
         };
         Ok(result)
     }
