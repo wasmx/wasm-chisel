@@ -1,8 +1,6 @@
 use std::collections::HashMap;
 
-use parity_wasm::elements::Module;
-
-use super::{ChiselModule, ModuleConfig, ModuleError, ModuleKind, ModuleValidator};
+use super::{ChiselModule, ModuleConfig, ModuleError, ModuleKind, ModuleValidator, WasmModule};
 
 /// Struct on which ModuleValidator is implemented.
 pub struct CheckStartFunc {
@@ -51,7 +49,7 @@ impl ModuleConfig for CheckStartFunc {
 }
 
 impl ModuleValidator for CheckStartFunc {
-    fn validate(&self, module: &Module) -> Result<bool, ModuleError> {
+    fn validate(&self, module: &WasmModule) -> Result<bool, ModuleError> {
         Ok(module.start_section().is_some() == self.start_required)
     }
 }
@@ -68,7 +66,7 @@ mod tests {
             0x08, 0x01, 0x00, 0x0a, 0x04, 0x01, 0x02, 0x00, 0x0b,
         ];
 
-        let module = Module::from_bytes(&wasm).unwrap();
+        let module = WasmModule::from_bytes(&wasm).unwrap();
         let checker = CheckStartFunc::new(true);
 
         let result = checker.validate(&module).unwrap();
@@ -83,7 +81,7 @@ mod tests {
             0x08, 0x01, 0x00, 0x0a, 0x04, 0x01, 0x02, 0x00, 0x0b,
         ];
 
-        let module = Module::from_bytes(&wasm).unwrap();
+        let module = WasmModule::from_bytes(&wasm).unwrap();
         let checker = CheckStartFunc::new(false);
 
         let result = checker.validate(&module).unwrap();
@@ -98,7 +96,7 @@ mod tests {
             0x0a, 0x04, 0x01, 0x02, 0x00, 0x0b,
         ];
 
-        let module = Module::from_bytes(&wasm).unwrap();
+        let module = WasmModule::from_bytes(&wasm).unwrap();
         let checker = CheckStartFunc::new(false);
 
         let result = checker.validate(&module).unwrap();
@@ -113,7 +111,7 @@ mod tests {
             0x0a, 0x04, 0x01, 0x02, 0x00, 0x0b,
         ];
 
-        let module = Module::from_bytes(&wasm).unwrap();
+        let module = WasmModule::from_bytes(&wasm).unwrap();
         let checker = CheckStartFunc::new(true);
 
         let result = checker.validate(&module).unwrap();
