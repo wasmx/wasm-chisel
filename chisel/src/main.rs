@@ -1,5 +1,6 @@
 #[macro_use]
 mod logger;
+mod cmd_oneliner;
 mod cmd_run;
 mod config;
 mod driver;
@@ -10,6 +11,7 @@ use std::process;
 
 use clap::{crate_description, crate_name, crate_version, App, Arg, SubCommand};
 
+use cmd_oneliner::chisel_oneliner;
 use cmd_run::chisel_run;
 use options::ChiselFlags;
 
@@ -35,6 +37,37 @@ pub fn main() {
                 .long("debug")
                 .help("Enables debug messages")
                 .global(true),
+        )
+        .arg(
+            Arg::with_name("MODULES")
+                .short("m")
+                .long("modules")
+                .takes_value(true)
+                .multiple(true)
+                .help("Selects modules to use"),
+        )
+        .arg(
+            Arg::with_name("MODULE_OPTIONS")
+                .short("c")
+                .long("config")
+                .takes_value(true)
+                .multiple(true)
+                .help("Module configuration in unix mode\nConfiguration items come in the form \"module.field=value\"\n\tExample: verifyimports.preset=ewasm"),
+        )
+        .arg(
+            Arg::with_name("OUTPUT_PATH")
+                .short("o")
+                .long("output")
+                .help("Sets the output file in unix mode")
+                .takes_value(true),
+        )
+        .arg(
+            Arg::with_name("OUTPUT_MODE")
+                .long("output-mode")
+                .takes_value(true)
+                .help("Selects the type of output")
+                .possible_values(&["bin", "wat", "hex"])
+                .global(true)
         )
         .arg(Arg::with_name("FILE").help("File to chisel"))
         .subcommand(
@@ -65,6 +98,10 @@ pub fn main() {
             }
 
             chisel_run(flags)
+        }
+        ("", None) => {
+            flags.apply(&cli_matches);
+            chisel_oneliner(flags)
         }
         (_, _) => fail(1, "invalid subcommand"),
     };
