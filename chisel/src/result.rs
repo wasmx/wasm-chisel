@@ -15,7 +15,7 @@ use std::path::PathBuf;
 
 use ansi_term::Colour::{Green, Red, Yellow};
 
-use libchisel::{Module, ModuleError};
+use libchisel::{WasmModule, ModuleError};
 
 #[derive(Clone)]
 /// Main result structure returned by ChiselDriver, containing a manifest of modules executed and
@@ -28,7 +28,7 @@ pub struct RulesetResult {
     ruleset_name: String,
     results: Vec<ModuleResult>,
     output_path: PathBuf,
-    output_module: Option<Module>,
+    output_module: Option<WasmModule>,
 }
 
 #[derive(Clone)]
@@ -76,7 +76,7 @@ impl RulesetResult {
         self.output_path = path;
     }
 
-    pub fn set_output_module(&mut self, module: Module) {
+    pub fn set_output_module(&mut self, module: WasmModule) {
         self.output_module = Some(module);
     }
 
@@ -204,7 +204,7 @@ mod tests {
     fn writer_success_to_stdout() {
         let mut ruleset_result = {
             let mut result = RulesetResult::new("Test".to_string());
-            let module = Module::default();
+            let module = WasmModule::default();
             result.set_output_module(module);
             result.set_output_path(PathBuf::from("/dev/stdout"));
             result
@@ -225,7 +225,7 @@ mod tests {
     fn writer_deny_raw_binary_to_stdout() {
         let mut ruleset_result = {
             let mut result = RulesetResult::new("Test".to_string());
-            let module = Module::default();
+            let module = WasmModule::default();
             result.set_output_module(module);
             result.set_output_path(PathBuf::from("/dev/stdout"));
             result
@@ -239,7 +239,7 @@ mod tests {
     fn writer_invalid_mode() {
         let mut ruleset_result = {
             let mut result = RulesetResult::new("Test".to_string());
-            let module = Module::default();
+            let module = WasmModule::default();
             result.set_output_module(module);
             result.set_output_path(PathBuf::from("/dev/stdout"));
             result
