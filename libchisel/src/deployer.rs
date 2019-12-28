@@ -1,9 +1,9 @@
 use std::collections::HashMap;
 
 use parity_wasm::builder;
-use parity_wasm::elements::{CustomSection, Module};
+use parity_wasm::elements::CustomSection;
 
-use super::{ChiselModule, ModuleConfig, ModuleError, ModuleKind, ModulePreset, ModuleTranslator};
+use super::{ChiselModule, ModuleConfig, ModuleError, ModuleKind, ModulePreset, ModuleTranslator, WasmModule};
 
 /// Enum on which ModuleTranslator is implemented.
 pub enum Deployer {
@@ -94,13 +94,13 @@ fn deployer_code() -> Vec<u8> {
 }
 
 /// Returns a module which contains the deployable bytecode as a custom section.
-fn create_custom_deployer(payload: &[u8]) -> Result<Module, ModuleError> {
+fn create_custom_deployer(payload: &[u8]) -> Result<WasmModule, ModuleError> {
     // The standard deployer code, which expects a 32 bit little endian as the trailing content
     // immediately following the payload, placed in a custom section.
     let code = deployer_code();
 
     // This is the pre-written deployer code.
-    let mut module = Module::from_bytes(&code)?;
+    let mut module = WasmModule::from_bytes(&code)?;
 
     // Re-write memory to pre-allocate enough for code size
     let memory_initial = (payload.len() as u32 / 65536) + 1;
@@ -129,7 +129,7 @@ fn create_custom_deployer(payload: &[u8]) -> Result<Module, ModuleError> {
 
 /// Returns a module which contains the deployable bytecode as a data segment.
 #[rustfmt::skip]
-fn create_memory_deployer(payload: &[u8]) -> Module {
+fn create_memory_deployer(payload: &[u8]) -> WasmModule {
     // Instructions calling finish(0, payload_len)
     let instructions = vec![
         parity_wasm::elements::Instruction::I32Const(0),
@@ -183,11 +183,11 @@ fn create_memory_deployer(payload: &[u8]) -> Module {
 }
 
 impl ModuleTranslator for Deployer {
-    fn translate_inplace(&self, _module: &mut Module) -> Result<bool, ModuleError> {
+    fn translate_inplace(&self, _module: &mut WasmModule) -> Result<bool, ModuleError> {
         Err(ModuleError::NotSupported)
     }
 
-    fn translate(&self, module: &Module) -> Result<Option<Module>, ModuleError> {
+    fn translate(&self, module: &WasmModule) -> Result<Option<WasmModule>, ModuleError> {
         let payload = module.clone().to_bytes()?;
         let output = match self {
             Deployer::Memory => create_memory_deployer(&payload),
@@ -302,7 +302,7 @@ mod tests {
 
     #[test]
     fn customsection_interface_test() {
-        let payload = Module::default();
+        let payload = WasmModule::default();
         let module = Deployer::with_preset("customsection")
             .unwrap()
             .translate(&payload)
@@ -325,7 +325,7 @@ mod tests {
 
     #[test]
     fn memory_interface_test() {
-        let payload = Module::default();
+        let payload = WasmModule::default();
         let module = Deployer::with_preset("memory")
             .unwrap()
             .translate(&payload)
