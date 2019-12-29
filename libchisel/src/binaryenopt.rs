@@ -45,7 +45,7 @@ impl ModulePreset for BinaryenOptimiser {
 }
 
 impl ModuleTranslator for BinaryenOptimiser {
-    fn translate_inplace(&self, module: &mut Module) -> Result<bool, ModuleError> {
+    fn translate_inplace(&self, _module: &mut Module) -> Result<bool, ModuleError> {
         Err(ModuleError::NotSupported)
     }
 

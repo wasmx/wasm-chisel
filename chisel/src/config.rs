@@ -141,7 +141,7 @@ impl FromArgs for Ruleset {
                 .filter_map(|option| {
                     // Split by dot here to isolate the module name.
                     let option_pair: Vec<&str> = option.split('.').collect();
-                    assert!(option_pair.len() >= 1);
+                    assert!(!option_pair.is_empty());
 
                     // If the module name is the same as the one we're getting options for, then
                     // yield the option.
@@ -217,8 +217,7 @@ impl FromYaml for ChiselConfig {
         // ruleset: "something"
         if rulesets
             .iter()
-            .find(|(key, val)| !key.is_string() || !val.is_mapping())
-            .is_some()
+            .any(|(key, val)| !key.is_string() || !val.is_mapping())
         {
             return Err(
                 "Malformed ruleset; expected all rulesets to be string-map pairs".to_string(),

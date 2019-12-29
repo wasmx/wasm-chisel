@@ -110,7 +110,7 @@ pub fn chisel_run(flags: ChiselFlags) -> i32 {
     eprintln!("{}", &results);
     results
         .rulesets_mut()
-        .into_iter()
+        .iter_mut()
         .map(|ruleset| {
             let ruleset_name = ruleset.name().to_string();
             let write_result = match flags.value_of("output.mode") {
