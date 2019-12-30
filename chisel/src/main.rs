@@ -44,6 +44,7 @@ pub fn main() {
                 .long("modules")
                 .takes_value(true)
                 .multiple(true)
+                .require_delimiter(true)
                 .help("Selects modules to use"),
         )
         .arg(
@@ -52,6 +53,7 @@ pub fn main() {
                 .long("config")
                 .takes_value(true)
                 .multiple(true)
+                .require_delimiter(true)
                 .help("Module configuration in unix mode\nConfiguration items come in the form \"module.field=value\"\n\tExample: verifyimports.preset=ewasm"),
         )
         .arg(
