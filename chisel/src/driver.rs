@@ -143,6 +143,23 @@ impl ChiselDriver {
                 }
             };
 
+            // Try parsing as Wasm text (Wat) first. Note: this function passes through binaries.
+            let wasm_raw = match wat::parse_bytes(&wasm_raw) {
+                Ok(ret) => ret,
+                Err(e) => {
+                    chisel_debug!(1, "Failed to parse input as text");
+                    self.state = DriverState::Error(
+                        DriverError::Internal(
+                            name.clone(),
+                            "Failed to parse input as text".to_string(),
+                            e.into(),
+                        ),
+                        results,
+                    );
+                    return &self.state;
+                }
+            };
+
             // Deserialize the Wasm binary and parse its names section.
             let mut wasm = match Module::from_bytes(wasm_raw) {
                 Ok(wasm) => {

@@ -20,6 +20,7 @@ serde = "1.0.80"
 serde_derive = "1.0.80"
 serde_yaml = "0.8.7"
 wasmprinter = "0.2.0"
+wat = "1.0.7"
 
 [features]
 default = []
