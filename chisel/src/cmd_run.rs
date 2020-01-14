@@ -115,12 +115,7 @@ pub fn chisel_run(flags: ChiselFlags) -> i32 {
             let ruleset_name = ruleset.name().to_string();
             let write_result = match flags.value_of("output.mode") {
                 Some("bin") => ruleset.write("bin"),
-                #[cfg(feature = "wabt")]
                 Some("wat") => ruleset.write("wat"),
-                #[cfg(not(feature = "wabt"))]
-                Some("wat") => Err("This build does not support wat-encoded output"
-                    .to_string()
-                    .into()),
                 Some("hex") => ruleset.write("hex"),
                 _ => panic!("CLI parser ensures value can only be one of the above"),
             };
