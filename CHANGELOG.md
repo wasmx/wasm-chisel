@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.6.0] - unreleased
+- Updated dependency: `pwasm` to 0.40.2.
+  [[#145](https://github.com/wasmx/wasm-chisel/pull/145),
+  [#157](https://github.com/wasmx/wasm-chisel/pull/157)]
+- Removed module: `fromwat`. [[#186](https://github.com/wasmx/wasm-chisel/pull/186)]
+- New module: `binaryenopt`. [[#61](https://github.com/wasmx/wasm-chisel/pull/61)]
+- Bubble up errors in `remapimports` and `verifyimports`.
+  [[#190](https://github.com/wasmx/wasm-chisel/pull/190)]
+- Rewritten CLI. It also supports UNIX-style commandline mode without a configuration file.
+
 ## [0.5.0] - 2019-07-25
 - New module: `remapstart`. [[#107](https://github.com/wasmx/wasm-chisel/pull/107)]
 - New module: `dropsection`. [[#72](https://github.com/wasmx/wasm-chisel/pull/72)]
