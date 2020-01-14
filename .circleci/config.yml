@@ -36,7 +36,6 @@ jobs:
              cargo build --release
              # Explicitly move into the libchisel directory to properly build with features
              # FIXME: make this work in workspace
-             cd libchisel && cargo build --release --features wabt && cd ..
              cd libchisel && cargo build --release --features binaryen && cd ..
       - run:
           name: Test
@@ -44,5 +43,4 @@ jobs:
              cargo test
              # Explicitly move into the libchisel directory to properly build with features
              # FIXME: make this work in workspace
-             cd libchisel && cargo test --features wabt && cd ..
              cd libchisel && cargo test --features binaryen && cd ..

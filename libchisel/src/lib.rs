@@ -10,8 +10,6 @@ pub mod checkfloat;
 pub mod checkstartfunc;
 pub mod deployer;
 pub mod dropsection;
-#[cfg(feature = "wabt")]
-pub mod fromwat;
 pub mod remapimports;
 pub mod remapstart;
 pub mod repack;
