@@ -15,8 +15,6 @@ use std::path::PathBuf;
 
 use ansi_term::Colour::{Green, Red, Yellow};
 
-#[cfg(feature = "wabt")]
-use libchisel::wabt;
 use libchisel::{Module, ModuleError};
 
 #[derive(Clone)]
@@ -104,10 +102,9 @@ impl RulesetResult {
                     let hex = hex::encode(&module);
                     write(path, hex)
                 }
-                #[cfg(feature = "wabt")]
                 "wat" => {
                     let module = module.to_bytes()?;
-                    let wat = wabt::wasm2wat(module)?;
+                    let wat = wasmprinter::print_bytes(&module)?;
                     write(path, wat)
                 }
                 _ => return Err("invalid mode".into()),

@@ -85,15 +85,10 @@ pub fn chisel_oneliner(flags: ChiselFlags) -> i32 {
                     let mut result = results.pop().expect("One ruleset was executed");
                     result.write("bin")
                 }
-                #[cfg(feature = "wabt")]
                 Some("wat") => {
                     let mut result = results.pop().expect("One ruleset was executed");
                     result.write("wat")
                 }
-                #[cfg(not(feature = "wabt"))]
-                Some("wat") => Err("This build does not support wat-encoded output"
-                    .to_string()
-                    .into()),
                 Some("hex") => {
                     let mut result = results.pop().expect("One ruleset was executed");
                     result.write("hex")
