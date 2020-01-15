@@ -31,12 +31,6 @@ impl<'a> ChiselModule<'a> for CheckFloat {
     }
 }
 
-impl CheckFloat {
-    pub fn new() -> Self {
-        CheckFloat {}
-    }
-}
-
 impl ModuleValidator for CheckFloat {
     // NOTE: this will not check for SIMD instructions.
     fn validate(&self, module: &Module) -> Result<bool, ModuleError> {
@@ -147,7 +141,7 @@ mod tests {
             0x00, 0x00, 0x0a, 0x09, 0x01, 0x07, 0x00, 0x20, 0x00, 0x20, 0x01, 0x6a, 0x0b,
         ];
         let module = Module::from_bytes(&wasm).unwrap();
-        let checker = CheckFloat::new();
+        let checker = CheckFloat::with_defaults().unwrap();
         let result = checker.validate(&module).unwrap();
         assert_eq!(true, result);
     }
@@ -167,7 +161,7 @@ mod tests {
             0x00, 0x00, 0x0a, 0x09, 0x01, 0x07, 0x00, 0x20, 0x00, 0x20, 0x01, 0x92, 0x0b,
         ];
         let module = Module::from_bytes(&wasm).unwrap();
-        let checker = CheckFloat::new();
+        let checker = CheckFloat::with_defaults().unwrap();
         let result = checker.validate(&module).unwrap();
         assert_eq!(false, result);
     }
@@ -187,7 +181,7 @@ mod tests {
             0x00, 0x00, 0x0a, 0x09, 0x01, 0x07, 0x00, 0x20, 0x00, 0x20, 0x01, 0xa0, 0x0b,
         ];
         let module = Module::from_bytes(&wasm).unwrap();
-        let checker = CheckFloat::new();
+        let checker = CheckFloat::with_defaults().unwrap();
         let result = checker.validate(&module).unwrap();
         assert_eq!(false, result);
     }
@@ -195,7 +189,7 @@ mod tests {
     #[test]
     fn no_code_section() {
         let module = builder::module().build();
-        let checker = CheckFloat::new();
+        let checker = CheckFloat::with_defaults().unwrap();
         let result = checker.validate(&module);
         assert_eq!(true, result.is_err());
         assert_eq!(result.err().unwrap(), ModuleError::NotFound)

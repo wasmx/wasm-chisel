@@ -17,7 +17,7 @@ use libchisel::{
     checkfloat::CheckFloat, checkstartfunc::CheckStartFunc, deployer::Deployer,
     dropsection::DropSection, remapimports::RemapImports, remapstart::RemapStart, repack::Repack,
     snip::Snip, trimexports::TrimExports, trimstartfunc::TrimStartFunc,
-    verifyexports::VerifyExports, verifyimports::VerifyImports, Module, ModulePreset,
+    verifyexports::VerifyExports, verifyimports::VerifyImports, ChiselModule, Module, ModulePreset,
     ModuleTranslator, ModuleValidator,
 };
 
@@ -220,7 +220,7 @@ impl ChiselDriver {
     ) -> Result<ModuleResult, DriverError> {
         let result = match name.as_str() {
             "checkfloat" => {
-                let checkfloat = CheckFloat::new();
+                let checkfloat = CheckFloat::with_defaults().expect("Should not fail");
                 let module_result = checkfloat.validate(wasm);
                 ModuleResult::Validator(name, module_result)
             }
@@ -306,7 +306,7 @@ impl ChiselDriver {
                 ModuleResult::Translator(name, module_result)
             }
             "repack" => {
-                let repack = Repack::new();
+                let repack = Repack::with_defaults().expect("Should not fail");
                 let module_result = repack.translate(wasm).expect("No failure cases");
 
                 let did_mutate = if let Some(new_wasm) = module_result {
@@ -319,7 +319,7 @@ impl ChiselDriver {
                 ModuleResult::Translator(name, Ok(did_mutate))
             }
             "snip" => {
-                let snip = Snip::new();
+                let snip = Snip::with_defaults().expect("Should not fail");
                 let module_result = match snip.translate(wasm) {
                     Ok(result) => result,
                     Err(e) => {
