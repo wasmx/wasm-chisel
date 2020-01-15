@@ -11,7 +11,7 @@ keywords = ["webassembly", "wasm", "blockchain", "ethereum"]
 edition = "2018"
 
 [dependencies]
-binaryen = { version = "0.8", optional = true }
+binaryen = { version = "0.9", optional = true }
 parity-wasm = "^0.40.2"
 failure = "0.1.5"
 wasm-snip = "0.2.0"
