@@ -103,10 +103,8 @@ fn binaryen_optimiser(
     config: &binaryen::CodegenConfig,
 ) -> Result<Vec<u8>, ModuleError> {
     match binaryen::Module::read(&input) {
-        Ok(module) => {
-            // NOTE: this is a global setting...
-            binaryen::set_global_codegen_config(&config);
-            module.optimize();
+        Ok(mut module) => {
+            module.optimize(&config);
             Ok(module.write())
         }
         Err(_) => Err(ModuleError::Custom(
