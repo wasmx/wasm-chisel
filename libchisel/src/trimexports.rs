@@ -80,20 +80,6 @@ impl TrimExports {
         }
     }
 
-    /// Takes a given preset string and constructs a context with the
-    /// corresponding whitelist.
-    pub fn with_preset(preset: &str) -> Result<Self, ()> {
-        match preset {
-            "ewasm" => Ok(TrimExports {
-                whitelist: ExportWhitelist::with_preset("ewasm").unwrap(),
-            }),
-            "pwasm" => Ok(TrimExports {
-                whitelist: ExportWhitelist::with_preset("pwasm").unwrap(),
-            }),
-            _ => Err(()),
-        }
-    }
-
     /// Iterates over the export section, if there is one, and removes
     /// unnecessary entries.
     fn trim_exports(&self, module: &mut Module) -> bool {
@@ -115,6 +101,22 @@ impl TrimExports {
             false
         } else {
             false
+        }
+    }
+}
+
+impl ModulePreset for TrimExports {
+    /// Takes a given preset string and constructs a context with the
+    /// corresponding whitelist.
+    fn with_preset(preset: &str) -> Result<Self, ModuleError> {
+        match preset {
+            "ewasm" => Ok(TrimExports {
+                whitelist: ExportWhitelist::with_preset("ewasm")?,
+            }),
+            "pwasm" => Ok(TrimExports {
+                whitelist: ExportWhitelist::with_preset("pwasm")?,
+            }),
+            _ => Err(ModuleError::NotSupported),
         }
     }
 }
