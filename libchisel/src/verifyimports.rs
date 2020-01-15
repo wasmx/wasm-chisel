@@ -60,7 +60,7 @@ impl<'a> ModulePreset for VerifyImports<'a> {
             .collect();
 
         for preset_individual in presets.split(',') {
-            let to_append = ImportList::with_preset(preset_individual).expect("Invalid preset");
+            let to_append = ImportList::with_preset(preset_individual)?;
             import_set.concatenate(to_append);
         }
 

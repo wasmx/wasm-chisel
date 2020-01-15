@@ -41,19 +41,19 @@ impl<'a> ModulePreset for RemapImports<'a> {
         for preset_individual in presets.split(',') {
             match preset_individual {
                 "ewasm" => interface_set.push(ImportInterface::new(
-                    ImportList::with_preset("ewasm").expect("Missing ewasm preset"),
+                    ImportList::with_preset("ewasm")?,
                     Some("ethereum_"),
                 )),
                 "eth2" => interface_set.push(ImportInterface::new(
-                    ImportList::with_preset("eth2").expect("Missing eth2 preset"),
+                    ImportList::with_preset("eth2")?,
                     Some("eth2_"),
                 )),
                 "debug" => interface_set.push(ImportInterface::new(
-                    ImportList::with_preset("debug").expect("Missing debug preset"),
+                    ImportList::with_preset("debug")?,
                     Some("debug_"),
                 )),
                 "bignum" => interface_set.push(ImportInterface::new(
-                    ImportList::with_preset("bignum").expect("Missing bignum preset"),
+                    ImportList::with_preset("bignum")?,
                     Some("bignum_"),
                 )),
                 _ => return Err(ModuleError::NotSupported),
