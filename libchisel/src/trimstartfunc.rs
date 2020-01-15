@@ -45,8 +45,13 @@ impl ModuleTranslator for TrimStartFunc {
         Ok(self.trim_startfunc(module))
     }
 
-    fn translate(&self, _module: &Module) -> Result<Option<Module>, ModuleError> {
-        Err(ModuleError::NotSupported)
+    fn translate(&self, module: &Module) -> Result<Option<Module>, ModuleError> {
+        let mut ret = module.clone();
+        let modified = self.trim_startfunc(&mut ret);
+        if modified {
+            return Ok(Some(ret));
+        }
+        Ok(None)
     }
 }
 
