@@ -1,8 +1,10 @@
+use std::collections::HashMap;
+
 use parity_wasm::elements::{External, FunctionType, ImportSection, Module, Type};
 
 use super::{
     imports::{ImportList, ImportType},
-    ChiselModule, ModuleError, ModuleKind, ModulePreset, ModuleValidator,
+    ChiselModule, ModuleConfig, ModuleError, ModuleKind, ModulePreset, ModuleValidator,
 };
 
 /// Enum representing the state of an import in a module.
@@ -48,6 +50,20 @@ impl<'a> ChiselModule<'a> for VerifyImports<'a> {
 
     fn as_abstract(&'a self) -> Self::ObjectReference {
         self as Self::ObjectReference
+    }
+}
+
+impl<'a> ModuleConfig for VerifyImports<'a> {
+    fn with_defaults() -> Result<Self, ModuleError> {
+        Err(ModuleError::NotSupported)
+    }
+
+    fn with_config(config: &HashMap<String, String>) -> Result<Self, ModuleError> {
+        if let Some(preset) = config.get("preset") {
+            VerifyImports::with_preset(preset)
+        } else {
+            Err(ModuleError::NotSupported)
+        }
     }
 }
 
