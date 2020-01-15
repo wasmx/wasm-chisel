@@ -1,7 +1,7 @@
 [package]
 name = "chisel"
 description = "Some useful utilities to transform WebAssembly binaries, most importantly for WebAssembly used in a deterministic / blockchain context"
-version = "0.5.0"
+version = "0.6.0"
 authors = ["Alex Beregszaszi <alex@rtfs.hu>", "Jake Lang <jak3lang@gmail.com>"]
 license = "Apache-2.0"
 repository = "https://github.com/wasmx/wasm-chisel"
@@ -15,7 +15,7 @@ edition = "2018"
 ansi_term = "0.12.1"
 clap = "2.32.0"
 hex = "0.4.0"
-libchisel = { path = "../libchisel", version = "0.5.0" }
+libchisel = { path = "../libchisel", version = "0.6.0" }
 serde = "1.0.80"
 serde_derive = "1.0.80"
 serde_yaml = "0.8.7"
