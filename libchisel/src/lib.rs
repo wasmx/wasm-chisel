@@ -33,6 +33,9 @@ pub enum ModuleKind {
 pub enum ModuleError {
     NotSupported,
     NotFound,
+    InvalidConfigKey(String),
+    InvalidConfigValue(String, String),
+    MissingConfigKey(String),
     Custom(String),
 }
 
@@ -110,9 +113,19 @@ impl fmt::Display for ModuleError {
             f,
             "{}",
             match self {
-                ModuleError::NotSupported => "Method unsupported",
-                ModuleError::NotFound => "Not found",
-                ModuleError::Custom(msg) => msg,
+                ModuleError::NotSupported => "Method unsupported".to_string(),
+                ModuleError::NotFound => "Not found".to_string(),
+                ModuleError::InvalidConfigKey(key) => {
+                    format!("Invalid configuration key supplied ({})", key)
+                }
+                ModuleError::InvalidConfigValue(key, value) => format!(
+                    "For the configuration key ({}) invalid value ({}) was supplied",
+                    key, value
+                ),
+                ModuleError::MissingConfigKey(key) => {
+                    format!("Missing required configuration key ({})", key)
+                }
+                ModuleError::Custom(msg) => msg.to_string(),
             }
         )
     }
@@ -123,6 +136,11 @@ impl error::Error for ModuleError {
         match self {
             ModuleError::NotSupported => "Method unsupported",
             ModuleError::NotFound => "Not found",
+            ModuleError::InvalidConfigKey(_) => "Invalid configuration key supplied",
+            ModuleError::InvalidConfigValue(_, _) => {
+                "Invalid value was supplied for the configuration key"
+            }
+            ModuleError::MissingConfigKey(_) => "Missing required configuration key",
             ModuleError::Custom(msg) => msg,
         }
     }
