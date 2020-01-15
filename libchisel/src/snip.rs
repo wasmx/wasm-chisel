@@ -34,14 +34,28 @@ impl<'a> ChiselModule<'a> for Snip {
     }
 }
 
+// TODO: consider making this a generic helper?
+fn check_bool_option(config: &HashMap<String, String>, option: &str, default: bool) -> bool {
+    if let Some(value) = config.get(option) {
+        value == "true"
+    } else {
+        default
+    }
+}
+
 impl ModuleConfig for Snip {
     fn with_defaults() -> Result<Self, ModuleError> {
         Ok(Snip::new())
     }
 
-    fn with_config(_config: &HashMap<String, String>) -> Result<Self, ModuleError> {
-        // FIXME: expose the options
-        Err(ModuleError::NotSupported)
+    fn with_config(config: &HashMap<String, String>) -> Result<Self, ModuleError> {
+        let mut options = wasm_snip::Options::default();
+        options.snip_rust_fmt_code = check_bool_option(&config, "snip_rust_fmt_code", true);
+        options.snip_rust_panicking_code =
+            check_bool_option(&config, "snip_rust_panicking_code", true);
+        options.skip_producers_section =
+            check_bool_option(&config, "skip_producers_section", true);
+        Ok(Snip { 0: options })
     }
 }
 
