@@ -2,7 +2,9 @@ use std::collections::HashMap;
 
 use parity_wasm::elements::Module;
 
-use super::{ChiselModule, ModuleConfig, ModuleError, ModuleKind, ModulePreset, ModuleTranslator, WasmModule};
+use super::{
+    ChiselModule, ModuleConfig, ModuleError, ModuleKind, ModulePreset, ModuleTranslator, WasmModule,
+};
 
 // FIXME: change level names
 pub enum BinaryenOptimiser {

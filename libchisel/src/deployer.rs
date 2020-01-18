@@ -3,7 +3,9 @@ use std::collections::HashMap;
 use parity_wasm::builder;
 use parity_wasm::elements::CustomSection;
 
-use super::{ChiselModule, ModuleConfig, ModuleError, ModuleKind, ModulePreset, ModuleTranslator, WasmModule};
+use super::{
+    ChiselModule, ModuleConfig, ModuleError, ModuleKind, ModulePreset, ModuleTranslator, WasmModule,
+};
 
 /// Enum on which ModuleTranslator is implemented.
 pub enum Deployer {
