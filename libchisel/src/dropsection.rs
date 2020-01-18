@@ -3,7 +3,13 @@ use std::error::Error;
 
 use parity_wasm::elements::{Module, Section};
 
-use super::{ChiselModule, ModuleConfig, ModuleError, ModuleKind, ModuleTranslator};
+use super::{ChiselModule, ModuleError, ModuleKind, ModuleTranslator};
+
+impl From<std::num::ParseIntError> for ModuleError {
+    fn from(error: std::num::ParseIntError) -> Self {
+        ModuleError::Custom(error.description().to_string())
+    }
+}
 
 /// Enum on which ModuleTranslator is implemented.
 #[derive(Debug)]
@@ -31,15 +37,7 @@ impl<'a> ChiselModule<'a> for DropSection {
     fn as_abstract(&'a self) -> Self::ObjectReference {
         self as Self::ObjectReference
     }
-}
 
-impl From<std::num::ParseIntError> for ModuleError {
-    fn from(error: std::num::ParseIntError) -> Self {
-        ModuleError::Custom(error.description().to_string())
-    }
-}
-
-impl ModuleConfig for DropSection {
     fn with_defaults() -> Result<Self, ModuleError> {
         Err(ModuleError::NotSupported)
     }

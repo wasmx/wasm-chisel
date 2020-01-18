@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use parity_wasm::elements::{ExportEntry, ExportSection, Internal, Module};
 
-use super::{ChiselModule, ModuleConfig, ModuleError, ModuleKind, ModulePreset, ModuleTranslator};
+use super::{ChiselModule, ModuleError, ModuleKind, ModulePreset, ModuleTranslator};
 
 /// Struct containing a list of valid exports.
 struct ExportWhitelist {
@@ -28,6 +28,18 @@ impl<'a> ChiselModule<'a> for TrimExports {
 
     fn as_abstract(&'a self) -> Self::ObjectReference {
         self as Self::ObjectReference
+    }
+
+    fn with_defaults() -> Result<Self, ModuleError> {
+        Ok(TrimExports::new())
+    }
+
+    fn with_config(config: &HashMap<String, String>) -> Result<Self, ModuleError> {
+        if let Some(preset) = config.get("preset") {
+            TrimExports::with_preset(preset)
+        } else {
+            Err(ModuleError::NotSupported)
+        }
     }
 }
 
@@ -103,20 +115,6 @@ impl TrimExports {
             false
         } else {
             false
-        }
-    }
-}
-
-impl ModuleConfig for TrimExports {
-    fn with_defaults() -> Result<Self, ModuleError> {
-        Ok(TrimExports::new())
-    }
-
-    fn with_config(config: &HashMap<String, String>) -> Result<Self, ModuleError> {
-        if let Some(preset) = config.get("preset") {
-            TrimExports::with_preset(preset)
-        } else {
-            Err(ModuleError::NotSupported)
         }
     }
 }

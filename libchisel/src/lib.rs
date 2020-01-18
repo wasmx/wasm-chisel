@@ -46,6 +46,16 @@ pub trait ChiselModule<'a> {
 
     /// Borrows the instance as a trait object.
     fn as_abstract(&'a self) -> Self::ObjectReference;
+
+    // Create instance with default settings.
+    fn with_defaults() -> Result<Self, ModuleError>
+    where
+        Self: Sized;
+
+    // Create instance with a specific configuration.
+    fn with_config(config: &HashMap<String, String>) -> Result<Self, ModuleError>
+    where
+        Self: Sized;
 }
 
 pub trait ModuleCreator {
@@ -66,19 +76,9 @@ pub trait ModuleValidator {
     fn validate(&self, module: &Module) -> Result<bool, ModuleError>;
 }
 
+// TODO: remove this
 pub trait ModulePreset {
     fn with_preset(preset: &str) -> Result<Self, ModuleError>
-    where
-        Self: std::marker::Sized;
-}
-
-// TODO: move this to be part of ChiselModule and retire ModulePreset
-pub trait ModuleConfig {
-    fn with_defaults() -> Result<Self, ModuleError>
-    where
-        Self: std::marker::Sized;
-
-    fn with_config(config: &HashMap<String, String>) -> Result<Self, ModuleError>
     where
         Self: std::marker::Sized;
 }
@@ -176,6 +176,14 @@ mod tests {
 
         fn as_abstract(&'a self) -> Self::ObjectReference {
             self as Self::ObjectReference
+        }
+
+        fn with_defaults() -> Result<Self, ModuleError> {
+            Err(ModuleError::NotSupported)
+        }
+
+        fn with_config(_config: &HashMap<String, String>) -> Result<Self, ModuleError> {
+            Err(ModuleError::NotSupported)
         }
     }
 

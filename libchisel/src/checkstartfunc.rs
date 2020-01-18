@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use parity_wasm::elements::Module;
 
-use super::{ChiselModule, ModuleConfig, ModuleError, ModuleKind, ModuleValidator};
+use super::{ChiselModule, ModuleError, ModuleKind, ModuleValidator};
 
 /// Struct on which ModuleValidator is implemented.
 pub struct CheckStartFunc {
@@ -31,9 +31,7 @@ impl<'a> ChiselModule<'a> for CheckStartFunc {
     fn as_abstract(&'a self) -> Self::ObjectReference {
         self as Self::ObjectReference
     }
-}
 
-impl ModuleConfig for CheckStartFunc {
     fn with_defaults() -> Result<Self, ModuleError> {
         Err(ModuleError::NotSupported)
     }
