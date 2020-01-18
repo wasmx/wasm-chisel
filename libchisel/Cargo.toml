@@ -12,8 +12,8 @@ edition = "2018"
 
 [dependencies]
 binaryen = { version = "0.9", optional = true }
-parity-wasm = "^0.40.2"
-failure = "0.1.5"
+parity-wasm = "^0.41.0"
+failure = "0.1.6"
 walrus = "0.12.0"
 wasm-snip = "0.4.0"
 
