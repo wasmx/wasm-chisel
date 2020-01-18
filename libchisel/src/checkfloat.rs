@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use parity_wasm::elements::{Instruction, Module};
 
-use super::{ChiselModule, ModuleConfig, ModuleError, ModuleKind, ModuleValidator};
+use super::{ChiselModule, ModuleConfig, ModuleError, ModuleKind, ModuleValidator, WasmModule};
 
 /// Struct on which ModuleValidator is implemented.
 pub struct CheckFloat {}
@@ -41,7 +41,7 @@ impl CheckFloat {
 
 impl ModuleValidator for CheckFloat {
     // NOTE: this will not check for SIMD instructions.
-    fn validate(&self, module: &Module) -> Result<bool, ModuleError> {
+    fn validate(&self, module: &WasmModule) -> Result<bool, ModuleError> {
         let code_section = module.code_section();
         if code_section.is_none() {
             return Err(ModuleError::NotFound);
@@ -148,7 +148,7 @@ mod tests {
             0x7f, 0x01, 0x7f, 0x03, 0x02, 0x01, 0x00, 0x07, 0x07, 0x01, 0x03, 0x61, 0x64, 0x64,
             0x00, 0x00, 0x0a, 0x09, 0x01, 0x07, 0x00, 0x20, 0x00, 0x20, 0x01, 0x6a, 0x0b,
         ];
-        let module = Module::from_bytes(&wasm).unwrap();
+        let module = WasmModule::from_bytes(&wasm).unwrap();
         let checker = CheckFloat::new();
         let result = checker.validate(&module).unwrap();
         assert_eq!(true, result);
@@ -168,7 +168,7 @@ mod tests {
             0x7d, 0x01, 0x7d, 0x03, 0x02, 0x01, 0x00, 0x07, 0x07, 0x01, 0x03, 0x61, 0x64, 0x64,
             0x00, 0x00, 0x0a, 0x09, 0x01, 0x07, 0x00, 0x20, 0x00, 0x20, 0x01, 0x92, 0x0b,
         ];
-        let module = Module::from_bytes(&wasm).unwrap();
+        let module = WasmModule::from_bytes(&wasm).unwrap();
         let checker = CheckFloat::new();
         let result = checker.validate(&module).unwrap();
         assert_eq!(false, result);
@@ -188,7 +188,7 @@ mod tests {
             0x7c, 0x01, 0x7c, 0x03, 0x02, 0x01, 0x00, 0x07, 0x07, 0x01, 0x03, 0x61, 0x64, 0x64,
             0x00, 0x00, 0x0a, 0x09, 0x01, 0x07, 0x00, 0x20, 0x00, 0x20, 0x01, 0xa0, 0x0b,
         ];
-        let module = Module::from_bytes(&wasm).unwrap();
+        let module = WasmModule::from_bytes(&wasm).unwrap();
         let checker = CheckFloat::new();
         let result = checker.validate(&module).unwrap();
         assert_eq!(false, result);

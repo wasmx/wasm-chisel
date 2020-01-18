@@ -17,7 +17,7 @@ use libchisel::{
     checkfloat::CheckFloat, checkstartfunc::CheckStartFunc, deployer::Deployer,
     dropsection::DropSection, remapimports::RemapImports, remapstart::RemapStart, repack::Repack,
     snip::Snip, trimexports::TrimExports, trimstartfunc::TrimStartFunc,
-    verifyexports::VerifyExports, verifyimports::VerifyImports, Module, ModulePreset,
+    verifyexports::VerifyExports, verifyimports::VerifyImports, WasmModule, ModulePreset,
     ModuleTranslator, ModuleValidator,
 };
 
@@ -161,7 +161,7 @@ impl ChiselDriver {
             };
 
             // Deserialize the Wasm binary and parse its names section.
-            let mut wasm = match Module::from_bytes(wasm_raw) {
+            let mut wasm = match WasmModule::from_bytes(wasm_raw) {
                 Ok(wasm) => {
                     chisel_debug!(1, "Successfully deserialized Wasm module");
                     // TODO: Make this error recoverable
@@ -216,7 +216,7 @@ impl ChiselDriver {
         &mut self,
         name: String,
         module: ModuleConfig,
-        wasm: &mut Module,
+        wasm: &mut WasmModule,
     ) -> Result<ModuleResult, DriverError> {
         let result = match name.as_str() {
             "checkfloat" => {

@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use parity_wasm::elements::Module;
 
-use super::{ChiselModule, ModuleConfig, ModuleError, ModuleKind, ModulePreset, ModuleTranslator};
+use super::{ChiselModule, ModuleConfig, ModuleError, ModuleKind, ModulePreset, ModuleTranslator, WasmModule};
 
 // FIXME: change level names
 pub enum BinaryenOptimiser {
@@ -61,11 +61,11 @@ impl ModulePreset for BinaryenOptimiser {
 }
 
 impl ModuleTranslator for BinaryenOptimiser {
-    fn translate_inplace(&self, _module: &mut Module) -> Result<bool, ModuleError> {
+    fn translate_inplace(&self, _module: &mut WasmModule) -> Result<bool, ModuleError> {
         Err(ModuleError::NotSupported)
     }
 
-    fn translate(&self, module: &Module) -> Result<Option<Module>, ModuleError> {
+    fn translate(&self, module: &WasmModule) -> Result<Option<WasmModule>, ModuleError> {
         let has_names_section = module.has_names_section();
 
         // FIXME: could just move this into `BinaryenOptimiser`
@@ -109,7 +109,7 @@ impl ModuleTranslator for BinaryenOptimiser {
 
         let serialized = module.clone().to_bytes()?;
         let output = binaryen_optimiser(&serialized, &config)?;
-        let output = Module::from_bytes(&output)?;
+        let output = WasmModule::from_bytes(&output)?;
         Ok(Some(output))
     }
 }
@@ -147,7 +147,7 @@ mod tests {
             0x0a, 0x05, 0x01, 0x03, 0x00, 0x01, 0x0b,
         ];
 
-        let module = Module::from_bytes(&input).unwrap();
+        let module = WasmModule::from_bytes(&input).unwrap();
         let translator = BinaryenOptimiser::with_preset("O0").unwrap();
         let result = translator.translate(&module).unwrap().unwrap();
         let serialized = result.to_bytes().unwrap();

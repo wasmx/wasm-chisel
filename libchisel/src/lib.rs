@@ -1,4 +1,4 @@
-pub use parity_wasm::elements::Module;
+pub use parity_wasm::elements::Module as WasmModule;
 
 use std::collections::HashMap;
 use std::{error, fmt};
@@ -50,20 +50,20 @@ pub trait ChiselModule<'a> {
 
 pub trait ModuleCreator {
     /// Returns new module.
-    fn create(&self) -> Result<Module, ModuleError>;
+    fn create(&self) -> Result<WasmModule, ModuleError>;
 }
 
 pub trait ModuleTranslator {
     /// Translates module. Returns new module or none if nothing was modified. Can fail with ModuleError::NotSupported.
-    fn translate(&self, module: &Module) -> Result<Option<Module>, ModuleError>;
+    fn translate(&self, module: &WasmModule) -> Result<Option<WasmModule>, ModuleError>;
 
     /// Translates module in-place. Returns true if the module was modified. Can fail with ModuleError::NotSupported.
-    fn translate_inplace(&self, module: &mut Module) -> Result<bool, ModuleError>;
+    fn translate_inplace(&self, module: &mut WasmModule) -> Result<bool, ModuleError>;
 }
 
 pub trait ModuleValidator {
     /// Validates module. Returns true if it is valid or false if invalid.
-    fn validate(&self, module: &Module) -> Result<bool, ModuleError>;
+    fn validate(&self, module: &WasmModule) -> Result<bool, ModuleError>;
 }
 
 pub trait ModulePreset {
@@ -141,22 +141,22 @@ mod tests {
     struct SampleModule {}
 
     impl ModuleCreator for SampleModule {
-        fn create(&self) -> Result<Module, ModuleError> {
-            Ok(Module::default())
+        fn create(&self) -> Result<WasmModule, ModuleError> {
+            Ok(WasmModule::default())
         }
     }
 
     impl ModuleTranslator for SampleModule {
-        fn translate(&self, _module: &Module) -> Result<Option<Module>, ModuleError> {
-            Ok(Some(Module::default()))
+        fn translate(&self, _module: &WasmModule) -> Result<Option<WasmModule>, ModuleError> {
+            Ok(Some(WasmModule::default()))
         }
-        fn translate_inplace(&self, _module: &mut Module) -> Result<bool, ModuleError> {
+        fn translate_inplace(&self, _module: &mut WasmModule) -> Result<bool, ModuleError> {
             Ok(true)
         }
     }
 
     impl ModuleValidator for SampleModule {
-        fn validate(&self, _module: &Module) -> Result<bool, ModuleError> {
+        fn validate(&self, _module: &WasmModule) -> Result<bool, ModuleError> {
             Ok(true)
         }
     }
@@ -189,21 +189,21 @@ mod tests {
     #[test]
     fn translator_succeeds() {
         let translator = SampleModule {};
-        let result = translator.translate(&Module::default());
+        let result = translator.translate(&WasmModule::default());
         assert!(result.is_ok());
     }
 
     #[test]
     fn translator_inplace_succeeds() {
         let translator = SampleModule {};
-        let result = translator.translate_inplace(&mut Module::default());
+        let result = translator.translate_inplace(&mut WasmModule::default());
         assert!(result.is_ok());
     }
 
     #[test]
     fn validator_succeeds() {
         let validator = SampleModule {};
-        let result = validator.validate(&Module::default());
+        let result = validator.validate(&WasmModule::default());
         assert!(result.is_ok());
     }
 
@@ -247,7 +247,7 @@ mod tests {
 
         let as_trait: &dyn ModuleValidator = opaque.as_abstract();
 
-        let result = as_trait.validate(&Module::default());
+        let result = as_trait.validate(&WasmModule::default());
         assert!(result.is_ok());
     }
 }
