@@ -155,17 +155,13 @@ fn create_memory_deployer(payload: &[u8]) -> Module {
         // Add default memory section
         .memory()
             .with_min(memory_initial)
+            .with_data(0, payload.to_vec())
             .build()
         // Export memory
         .export()
             .field("memory")
             .internal()
               .memory(0)
-            .build()
-        // Add data section with payload
-        .data()
-            .offset(parity_wasm::elements::Instruction::I32Const(0))
-            .value(payload.to_vec())
             .build()
         .build()
 }
