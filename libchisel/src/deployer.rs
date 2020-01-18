@@ -1,7 +1,9 @@
+use std::collections::HashMap;
+
 use parity_wasm::builder;
 use parity_wasm::elements::{CustomSection, Module};
 
-use super::{ChiselModule, ModuleError, ModuleKind, ModulePreset, ModuleTranslator};
+use super::{ChiselModule, ModuleConfig, ModuleError, ModuleKind, ModulePreset, ModuleTranslator};
 
 /// Enum on which ModuleTranslator is implemented.
 pub enum Deployer {
@@ -22,6 +24,20 @@ impl<'a> ChiselModule<'a> for Deployer {
 
     fn as_abstract(&'a self) -> Self::ObjectReference {
         self as Self::ObjectReference
+    }
+}
+
+impl ModuleConfig for Deployer {
+    fn with_defaults() -> Result<Self, ModuleError> {
+        Err(ModuleError::NotSupported)
+    }
+
+    fn with_config(config: &HashMap<String, String>) -> Result<Self, ModuleError> {
+        if let Some(preset) = config.get("preset") {
+            Deployer::with_preset(preset)
+        } else {
+            Err(ModuleError::NotSupported)
+        }
     }
 }
 
