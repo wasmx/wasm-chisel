@@ -46,11 +46,9 @@ impl ModuleTranslator for Snip {
     fn translate(&self, module: &Module) -> Result<Option<Module>, ModuleError> {
         let serialized = module.clone().to_bytes()?;
 
-        // TODO: improve wasm-snip API...
-        let mut options = self.0.clone();
-        options.input = wasm_snip::Input::Buffer(serialized);
-        let ret = wasm_snip::snip(options)?;
-        let output = ret.emit_wasm()?;
+        let mut input = walrus::Module::from_buffer(&serialized)?;
+        wasm_snip::snip(&mut input, self.0.clone())?;
+        let output = input.emit_wasm();
 
         let output = Module::from_bytes(&output[..])?;
         Ok(Some(output))

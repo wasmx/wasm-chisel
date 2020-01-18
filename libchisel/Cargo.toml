@@ -14,7 +14,8 @@ edition = "2018"
 binaryen = { version = "0.9", optional = true }
 parity-wasm = "^0.40.2"
 failure = "0.1.5"
-wasm-snip = "0.2.0"
+walrus = "0.12.0"
+wasm-snip = "0.4.0"
 
 [features]
 default = []
