@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use parity_wasm::elements::Module;
 
-use super::{ChiselModule, ModuleConfig, ModuleError, ModuleKind, ModulePreset, ModuleTranslator};
+use super::{ChiselModule, ModuleError, ModuleKind, ModulePreset, ModuleTranslator};
 
 pub struct TrimStartFunc;
 
@@ -31,9 +31,7 @@ impl<'a> ChiselModule<'a> for TrimStartFunc {
     fn as_abstract(&'a self) -> Self::ObjectReference {
         self as Self::ObjectReference
     }
-}
 
-impl ModuleConfig for TrimStartFunc {
     fn with_defaults() -> Result<Self, ModuleError> {
         Err(ModuleError::NotSupported)
     }

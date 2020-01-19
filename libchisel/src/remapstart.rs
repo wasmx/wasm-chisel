@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use parity_wasm::elements::{ExportEntry, ExportSection, Internal, Module, Section};
 
-use super::{ChiselModule, ModuleConfig, ModuleError, ModuleKind, ModulePreset, ModuleTranslator};
+use super::{ChiselModule, ModuleError, ModuleKind, ModulePreset, ModuleTranslator};
 
 pub struct RemapStart;
 
@@ -30,9 +30,7 @@ impl<'a> ChiselModule<'a> for RemapStart {
     fn as_abstract(&'a self) -> Self::ObjectReference {
         self as Self::ObjectReference
     }
-}
 
-impl ModuleConfig for RemapStart {
     fn with_defaults() -> Result<Self, ModuleError> {
         Ok(RemapStart {})
     }

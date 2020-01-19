@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use parity_wasm::elements::{Instruction, Module};
 
-use super::{ChiselModule, ModuleConfig, ModuleError, ModuleKind, ModuleValidator};
+use super::{ChiselModule, ModuleError, ModuleKind, ModuleValidator};
 
 /// Struct on which ModuleValidator is implemented.
 pub struct CheckFloat {}
@@ -21,9 +21,7 @@ impl<'a> ChiselModule<'a> for CheckFloat {
     fn as_abstract(&'a self) -> Self::ObjectReference {
         self as Self::ObjectReference
     }
-}
 
-impl ModuleConfig for CheckFloat {
     fn with_defaults() -> Result<Self, ModuleError> {
         Ok(CheckFloat {})
     }

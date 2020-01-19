@@ -4,7 +4,7 @@ use parity_wasm::elements::{
     ExportSection, External, FunctionSection, FunctionType, ImportSection, Internal, Module, Type,
 };
 
-use super::{ChiselModule, ModuleConfig, ModuleError, ModuleKind, ModulePreset, ModuleValidator};
+use super::{ChiselModule, ModuleError, ModuleKind, ModulePreset, ModuleValidator};
 
 /// Enum representing a type of export and any extra data to check.
 pub enum ExportType<'a> {
@@ -39,9 +39,7 @@ impl<'a> ChiselModule<'a> for VerifyExports<'a> {
     fn as_abstract(&'a self) -> Self::ObjectReference {
         self as Self::ObjectReference
     }
-}
 
-impl<'a> ModuleConfig for VerifyExports<'a> {
     fn with_defaults() -> Result<Self, ModuleError> {
         Err(ModuleError::NotSupported)
     }

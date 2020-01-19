@@ -2,7 +2,16 @@ use std::collections::HashMap;
 
 use parity_wasm::elements::Module;
 
-use super::{ChiselModule, ModuleConfig, ModuleError, ModuleKind, ModuleTranslator};
+use super::{ChiselModule, ModuleError, ModuleKind, ModuleTranslator};
+
+// TODO: consider making this a generic helper?
+fn check_bool_option(config: &HashMap<String, String>, option: &str, default: bool) -> bool {
+    if let Some(value) = config.get(option) {
+        value == "true"
+    } else {
+        default
+    }
+}
 
 #[derive(Clone)]
 pub struct Snip(wasm_snip::Options);
@@ -32,18 +41,7 @@ impl<'a> ChiselModule<'a> for Snip {
     fn as_abstract(&'a self) -> Self::ObjectReference {
         self as Self::ObjectReference
     }
-}
 
-// TODO: consider making this a generic helper?
-fn check_bool_option(config: &HashMap<String, String>, option: &str, default: bool) -> bool {
-    if let Some(value) = config.get(option) {
-        value == "true"
-    } else {
-        default
-    }
-}
-
-impl ModuleConfig for Snip {
     fn with_defaults() -> Result<Self, ModuleError> {
         Ok(Snip::new())
     }
