@@ -16,17 +16,6 @@ fn check_bool_option(config: &HashMap<String, String>, option: &str, default: bo
 #[derive(Clone)]
 pub struct Snip(wasm_snip::Options);
 
-impl Snip {
-    pub fn new() -> Self {
-        let mut options = wasm_snip::Options::default();
-        // TODO: expose these as options
-        options.snip_rust_fmt_code = true;
-        options.snip_rust_panicking_code = true;
-        options.skip_producers_section = true;
-        Snip { 0: options }
-    }
-}
-
 impl<'a> ChiselModule<'a> for Snip {
     type ObjectReference = &'a dyn ModuleTranslator;
 
@@ -43,7 +32,12 @@ impl<'a> ChiselModule<'a> for Snip {
     }
 
     fn with_defaults() -> Result<Self, ModuleError> {
-        Ok(Snip::new())
+        let mut options = wasm_snip::Options::default();
+        // TODO: expose these as options
+        options.snip_rust_fmt_code = true;
+        options.snip_rust_panicking_code = true;
+        options.skip_producers_section = true;
+        Ok(Snip { 0: options })
     }
 
     fn with_config(config: &HashMap<String, String>) -> Result<Self, ModuleError> {
@@ -112,7 +106,7 @@ mod tests {
         .unwrap();
 
         let module = Module::from_bytes(&wasm).unwrap();
-        let module = Snip::new().translate(&module);
+        let module = Snip::with_defaults().unwrap().translate(&module);
         let module = module
             .expect("translation to be succesful")
             .expect("new module to be returned");

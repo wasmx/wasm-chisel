@@ -31,7 +31,9 @@ impl<'a> ChiselModule<'a> for TrimExports {
     }
 
     fn with_defaults() -> Result<Self, ModuleError> {
-        Ok(TrimExports::new())
+        Ok(TrimExports {
+            whitelist: ExportWhitelist::new(),
+        })
     }
 
     fn with_config(config: &HashMap<String, String>) -> Result<Self, ModuleError> {
@@ -87,13 +89,6 @@ impl ExportWhitelist {
 }
 
 impl TrimExports {
-    /// Constructs an empty `trimexports` context.
-    pub fn new() -> Self {
-        TrimExports {
-            whitelist: ExportWhitelist::new(),
-        }
-    }
-
     /// Iterates over the export section, if there is one, and removes
     /// unnecessary entries.
     fn trim_exports(&self, module: &mut Module) -> bool {

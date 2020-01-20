@@ -7,12 +7,6 @@ use super::{ChiselModule, ModuleError, ModuleKind, ModuleTranslator};
 
 pub struct Repack;
 
-impl Repack {
-    pub fn new() -> Self {
-        Repack {}
-    }
-}
-
 impl<'a> ChiselModule<'a> for Repack {
     type ObjectReference = &'a dyn ModuleTranslator;
 
@@ -29,7 +23,7 @@ impl<'a> ChiselModule<'a> for Repack {
     }
 
     fn with_defaults() -> Result<Self, ModuleError> {
-        Ok(Repack::new())
+        Ok(Repack {})
     }
 
     fn with_config(_config: &HashMap<String, String>) -> Result<Self, ModuleError> {
@@ -62,7 +56,7 @@ mod tests {
     fn smoke_test() {
         let module = Module::default();
 
-        let repack = Repack::new();
+        let repack = Repack::with_defaults().unwrap();
         assert_eq!(module, repack.translate(&module).unwrap().unwrap());
     }
 
@@ -87,7 +81,7 @@ mod tests {
             .build()
             .build();
 
-        let repack = Repack::new();
+        let repack = Repack::with_defaults().unwrap();
         assert_eq!(module, repack.translate(&module).unwrap().unwrap());
     }
 
@@ -117,7 +111,7 @@ mod tests {
             .sections_mut()
             .push(parity_wasm::elements::Section::Custom(custom));
 
-        let repack = Repack::new();
+        let repack = Repack::with_defaults().unwrap();
         assert_ne!(module, repack.translate(&module).unwrap().unwrap());
     }
 
@@ -135,7 +129,7 @@ mod tests {
             .parse_names()
             .expect("parsing the names section failed");
         assert_eq!(module.names_section().is_some(), true);
-        let repack = Repack::new();
+        let repack = Repack::with_defaults().unwrap();
         // Repack drops names section too.
         let output = repack.translate(&module).unwrap().unwrap();
         assert_eq!(output.has_names_section(), false);
