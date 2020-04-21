@@ -70,6 +70,10 @@ impl<'a> ModulePreset for RemapImports<'a> {
                     ImportList::with_preset("bignum")?,
                     Some("bignum_"),
                 )),
+                "wasi" => interface_set.push(ImportInterface::new(
+                    ImportList::with_preset("wasi")?,
+                    Some("wasi_"),
+                )),
                 _ => return Err(ModuleError::NotSupported),
             }
         }
@@ -193,6 +197,7 @@ impl<'a> RemapImports<'a> {
 #[cfg(test)]
 mod tests {
     use rustc_hex::FromHex;
+    use wabt::wat2wasm;
 
     use super::*;
     use crate::verifyimports::*;
@@ -226,23 +231,17 @@ mod tests {
 
     #[test]
     fn remap_did_mutate() {
-        // wast:
-        // (module
-        //   (import "env" "ethereum_useGas" (func (param i64)))
-        //   (memory 1)
-        //   (export "main" (func $main))
-        //   (export "memory" (memory 0))
-        //
-        //   (func $main)
-        // )
-        let wasm: Vec<u8> = vec![
-            0x00, 0x61, 0x73, 0x6d, 0x01, 0x00, 0x00, 0x00, 0x01, 0x08, 0x02, 0x60, 0x01, 0x7e,
-            0x00, 0x60, 0x00, 0x00, 0x02, 0x17, 0x01, 0x03, 0x65, 0x6e, 0x76, 0x0f, 0x65, 0x74,
-            0x68, 0x65, 0x72, 0x65, 0x75, 0x6d, 0x5f, 0x75, 0x73, 0x65, 0x47, 0x61, 0x73, 0x00,
-            0x00, 0x03, 0x02, 0x01, 0x01, 0x05, 0x03, 0x01, 0x00, 0x01, 0x07, 0x11, 0x02, 0x04,
-            0x6d, 0x61, 0x69, 0x6e, 0x00, 0x01, 0x06, 0x6d, 0x65, 0x6d, 0x6f, 0x72, 0x79, 0x02,
-            0x00, 0x0a, 0x04, 0x01, 0x02, 0x00, 0x0b,
-        ];
+        let wasm = wat2wasm(
+            r#"
+            (module
+                (import "env" "ethereum_useGas" (func (param i64)))
+                (memory 1)
+                (export "main" (func $main))
+                (export "memory" (memory 0))
+                (func $main)
+            )"#,
+        )
+        .expect("unable to convert wat to wasm");
 
         let module = Module::from_bytes(&wasm).unwrap();
 
@@ -256,23 +255,17 @@ mod tests {
 
     #[test]
     fn remap_did_mutate_verify() {
-        // wast:
-        // (module
-        //   (import "env" "ethereum_useGas" (func (param i64)))
-        //   (memory 1)
-        //   (export "main" (func $main))
-        //   (export "memory" (memory 0))
-        //
-        //   (func $main)
-        // )
-        let wasm: Vec<u8> = vec![
-            0x00, 0x61, 0x73, 0x6d, 0x01, 0x00, 0x00, 0x00, 0x01, 0x08, 0x02, 0x60, 0x01, 0x7e,
-            0x00, 0x60, 0x00, 0x00, 0x02, 0x17, 0x01, 0x03, 0x65, 0x6e, 0x76, 0x0f, 0x65, 0x74,
-            0x68, 0x65, 0x72, 0x65, 0x75, 0x6d, 0x5f, 0x75, 0x73, 0x65, 0x47, 0x61, 0x73, 0x00,
-            0x00, 0x03, 0x02, 0x01, 0x01, 0x05, 0x03, 0x01, 0x00, 0x01, 0x07, 0x11, 0x02, 0x04,
-            0x6d, 0x61, 0x69, 0x6e, 0x00, 0x01, 0x06, 0x6d, 0x65, 0x6d, 0x6f, 0x72, 0x79, 0x02,
-            0x00, 0x0a, 0x04, 0x01, 0x02, 0x00, 0x0b,
-        ];
+        let wasm = wat2wasm(
+            r#"
+            (module
+                (import "env" "ethereum_useGas" (func (param i64)))
+                (memory 1)
+                (export "main" (func $main))
+                (export "memory" (memory 0))
+                (func $main)
+            )"#,
+        )
+        .expect("unable to convert wat to wasm");
 
         let module = Module::from_bytes(&wasm).unwrap();
 
@@ -293,24 +286,18 @@ mod tests {
 
     #[test]
     fn remap_did_mutate_verify_explicit_type_section() {
-        // wast:
-        // (module
-        //   (type (;0;) (func (result i64)))
-        //   (import "env" "ethereum_getGasLeft" (func (;0;) (type 0)))
-        //   (memory 1)
-        //   (func $main)
-        //   (export "main" (func $main))
-        //   (export "memory" (memory 0))
-        // )
-
-        let wasm: Vec<u8> = vec![
-            0x00, 0x61, 0x73, 0x6d, 0x01, 0x00, 0x00, 0x00, 0x01, 0x08, 0x02, 0x60, 0x00, 0x01,
-            0x7e, 0x60, 0x00, 0x00, 0x02, 0x1b, 0x01, 0x03, 0x65, 0x6e, 0x76, 0x13, 0x65, 0x74,
-            0x68, 0x65, 0x72, 0x65, 0x75, 0x6d, 0x5f, 0x67, 0x65, 0x74, 0x47, 0x61, 0x73, 0x4c,
-            0x65, 0x66, 0x74, 0x00, 0x00, 0x03, 0x02, 0x01, 0x01, 0x05, 0x03, 0x01, 0x00, 0x01,
-            0x07, 0x11, 0x02, 0x04, 0x6d, 0x61, 0x69, 0x6e, 0x00, 0x01, 0x06, 0x6d, 0x65, 0x6d,
-            0x6f, 0x72, 0x79, 0x02, 0x00, 0x0a, 0x04, 0x01, 0x02, 0x00, 0x0b,
-        ];
+        let wasm = wat2wasm(
+            r#"
+            (module
+                (type (;0;) (func (result i64)))
+                (import "env" "ethereum_getGasLeft" (func (;0;) (type 0)))
+                (memory 1)
+                (func $main)
+                (export "main" (func $main))
+                (export "memory" (memory 0))
+            )"#,
+        )
+        .expect("unable to convert wat to wasm");
 
         let module = Module::from_bytes(&wasm).unwrap();
 
@@ -331,42 +318,34 @@ mod tests {
 
     #[test]
     fn remap_mutated_multiple_interfaces() {
-        // wast:
-        // (module
-        //   (type (;0;) (func (result i64)))
-        //   (type (;1;) (func (param i32 i32 i32)))
-        //   (type (;2;) (func (param i32)))
-        //   (import "env" "ethereum_getGasLeft" (func (;0;) (type 0)))
-        //   (import "env" "bignum_mul256" (func (;1;) (type 1)))
-        //   (import "env" "debug_printStorage" (func (;2;) (type 2)))
-        //   (memory 1)
-        //   (func $main)
-        //   (export "main" (func $main))
-        //   (export "memory" (memory 0))
-        // )
-
-        let wasm: Vec<u8> = vec![
-            0x00, 0x61, 0x73, 0x6d, 0x01, 0x00, 0x00, 0x00, 0x01, 0x12, 0x04, 0x60, 0x00, 0x01,
-            0x7e, 0x60, 0x03, 0x7f, 0x7f, 0x7f, 0x00, 0x60, 0x01, 0x7f, 0x00, 0x60, 0x00, 0x00,
-            0x02, 0x48, 0x03, 0x03, 0x65, 0x6e, 0x76, 0x13, 0x65, 0x74, 0x68, 0x65, 0x72, 0x65,
-            0x75, 0x6d, 0x5f, 0x67, 0x65, 0x74, 0x47, 0x61, 0x73, 0x4c, 0x65, 0x66, 0x74, 0x00,
-            0x00, 0x03, 0x65, 0x6e, 0x76, 0x0d, 0x62, 0x69, 0x67, 0x6e, 0x75, 0x6d, 0x5f, 0x6d,
-            0x75, 0x6c, 0x32, 0x35, 0x36, 0x00, 0x01, 0x03, 0x65, 0x6e, 0x76, 0x12, 0x64, 0x65,
-            0x62, 0x75, 0x67, 0x5f, 0x70, 0x72, 0x69, 0x6e, 0x74, 0x53, 0x74, 0x6f, 0x72, 0x61,
-            0x67, 0x65, 0x00, 0x02, 0x03, 0x02, 0x01, 0x03, 0x05, 0x03, 0x01, 0x00, 0x01, 0x07,
-            0x11, 0x02, 0x04, 0x6d, 0x61, 0x69, 0x6e, 0x00, 0x03, 0x06, 0x6d, 0x65, 0x6d, 0x6f,
-            0x72, 0x79, 0x02, 0x00, 0x0a, 0x04, 0x01, 0x02, 0x00, 0x0b,
-        ];
+        let wasm = wat2wasm(
+            r#"
+            (module
+                (type (;0;) (func (result i64)))
+                (type (;1;) (func (param i32 i32 i32)))
+                (type (;2;) (func (param i32)))
+                (type (;3;) (func (param i32 i32) (result i32)))
+                (import "env" "ethereum_getGasLeft" (func (;0;) (type 0)))
+                (import "env" "bignum_mul256" (func (;1;) (type 1)))
+                (import "env" "debug_printStorage" (func (;2;) (type 2)))
+                (import "env" "wasi_args_get" (func (;3;) (type 3)))
+                (memory 1)
+                (func $main)
+                (export "main" (func $main))
+                (export "memory" (memory 0))
+            )"#,
+        )
+        .expect("unable to convert wat to wasm");
 
         let module = Module::from_bytes(&wasm).unwrap();
 
-        let new = RemapImports::with_preset("ewasm, bignum, debug")
+        let new = RemapImports::with_preset("ewasm, bignum, debug, wasi")
             .unwrap()
             .translate(&module)
             .expect("Module internal error")
             .expect("Module was not mutated");
 
-        let verifier = VerifyImports::with_preset("ewasm, bignum, debug").unwrap();
+        let verifier = VerifyImports::with_preset("ewasm, bignum, debug, wasi").unwrap();
 
         assert_eq!(verifier.validate(&new), Ok(true));
     }
