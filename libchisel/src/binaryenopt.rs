@@ -38,7 +38,7 @@ impl<'a> ChiselModule<'a> for BinaryenOptimiser {
         if let Some(preset) = config.get("preset") {
             BinaryenOptimiser::with_preset(preset)
         } else {
-            Err(ModuleError::NotSupported)
+            Err(ModuleError::MissingConfigKey("preset"))
         }
     }
 }
@@ -53,7 +53,7 @@ impl ModulePreset for BinaryenOptimiser {
             "O4" => Ok(BinaryenOptimiser::O4),
             "Os" => Ok(BinaryenOptimiser::Os),
             "Oz" => Ok(BinaryenOptimiser::Oz),
-            _ => Err(ModuleError::NotSupported),
+            _ => Err(ModuleError::InvalidConfigValue("preset", preset)),
         }
     }
 }

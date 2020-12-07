@@ -38,7 +38,7 @@ impl<'a> ChiselModule<'a> for RemapImports<'a> {
         if let Some(preset) = config.get("preset") {
             RemapImports::with_preset(preset)
         } else {
-            Err(ModuleError::NotSupported)
+            Err(ModuleError::MissingConfigKey("preset".to_string()))
         }
     }
 }
@@ -70,7 +70,12 @@ impl<'a> ModulePreset for RemapImports<'a> {
                     ImportList::with_preset("bignum")?,
                     Some("bignum_"),
                 )),
-                _ => return Err(ModuleError::NotSupported),
+                _ => {
+                    return Err(ModuleError::InvalidConfigValue(
+                        "preset".to_string(),
+                        preset_individual.to_string(),
+                    ))
+                }
             }
         }
 
